@@ -1,0 +1,26 @@
+# Binaries
+bin/
+*.exe
+
+# Docker data
+docker/mysql/
+docker/redis/
+docker/mysql/#ib_16384_0.dblwr
+docker/mysql/#ib_16384_1.dblwr
+docker/mysql/#innodb_redo/
+docker/mysql/#innodb_temp/
+
+# Generated code
+third_party/kitex_gen/
+docs/
+
+# IDE
+.vscode/
+.idea/
+
+# Environment
+.env
+*.local
+
+# OS
+.DS_Store

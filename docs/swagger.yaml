@@ -1,0 +1,148 @@
+definitions:
+  handler.ErrorResponse:
+    description: 错误响应
+    properties:
+      code:
+        type: integer
+      msg:
+        type: string
+    type: object
+  handler.LoginRequest:
+    description: 登录请求
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  handler.LoginResponse:
+    description: 登录响应
+    properties:
+      token:
+        type: string
+      user_id:
+        type: integer
+      username:
+        type: string
+    type: object
+  handler.RegisterRequest:
+    description: 注册请求
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  handler.RegisterResponse:
+    description: 注册响应
+    properties:
+      user_id:
+        type: integer
+      username:
+        type: string
+    type: object
+  handler.UserResponse:
+    description: 用户响应
+    properties:
+      created_at:
+        type: integer
+      email:
+        type: string
+      user_id:
+        type: integer
+      username:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /user/{id}:
+    get:
+      description: 根据用户ID获取用户信息
+      parameters:
+      - description: 用户ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.UserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: 获取用户信息
+      tags:
+      - user
+  /user/login:
+    post:
+      consumes:
+      - application/json
+      description: 用户登录获取Token
+      parameters:
+      - description: 登录信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: 用户登录
+      tags:
+      - user
+  /user/register:
+    post:
+      consumes:
+      - application/json
+      description: 创建新用户
+      parameters:
+      - description: 注册信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.RegisterResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: 用户注册
+      tags:
+      - user
+swagger: "2.0"
