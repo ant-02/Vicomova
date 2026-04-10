@@ -1,4 +1,4 @@
-package dao
+package mysql
 
 import (
 	"context"
@@ -8,17 +8,17 @@ import (
 	"gorm.io/gorm"
 )
 
-type UserDAO struct{}
+type UserRepository struct{}
 
-func NewUserDAO() *UserDAO {
-	return &UserDAO{}
+func NewUserRepository() *UserRepository {
+	return &UserRepository{}
 }
 
-func (d *UserDAO) Create(ctx context.Context, u *user.User) error {
+func (r *UserRepository) Create(ctx context.Context, u *user.User) error {
 	return mysql.GetDB().WithContext(ctx).Create(u).Error
 }
 
-func (d *UserDAO) GetByID(ctx context.Context, id int64) (*user.User, error) {
+func (r *UserRepository) GetByID(ctx context.Context, id int64) (*user.User, error) {
 	var u user.User
 	err := mysql.GetDB().WithContext(ctx).First(&u, id).Error
 	if err != nil {
@@ -30,7 +30,7 @@ func (d *UserDAO) GetByID(ctx context.Context, id int64) (*user.User, error) {
 	return &u, nil
 }
 
-func (d *UserDAO) GetByUsername(ctx context.Context, username string) (*user.User, error) {
+func (r *UserRepository) GetByUsername(ctx context.Context, username string) (*user.User, error) {
 	var u user.User
 	err := mysql.GetDB().WithContext(ctx).Where("username = ?", username).First(&u).Error
 	if err != nil {
@@ -42,10 +42,10 @@ func (d *UserDAO) GetByUsername(ctx context.Context, username string) (*user.Use
 	return &u, nil
 }
 
-func (d *UserDAO) Update(ctx context.Context, u *user.User) error {
+func (r *UserRepository) Update(ctx context.Context, u *user.User) error {
 	return mysql.GetDB().WithContext(ctx).Save(u).Error
 }
 
-func (d *UserDAO) Delete(ctx context.Context, id int64) error {
+func (r *UserRepository) Delete(ctx context.Context, id int64) error {
 	return mysql.GetDB().WithContext(ctx).Delete(&user.User{}, id).Error
 }

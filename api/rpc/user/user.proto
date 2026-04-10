@@ -8,6 +8,8 @@ service UserService {
   rpc Register(RegisterRequest) returns (RegisterResponse);
   rpc Login(LoginRequest) returns (LoginResponse);
   rpc GetUser(GetUserRequest) returns (GetUserResponse);
+  rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse);
+  rpc Logout(LogoutRequest) returns (LogoutResponse);
 }
 
 message RegisterRequest {
@@ -29,7 +31,9 @@ message LoginRequest {
 message LoginResponse {
   int64 user_id = 1;
   string username = 2;
-  string token = 3;
+  string access_token = 3;
+  string refresh_token = 4;
+  int64 expires_in = 5;
 }
 
 message GetUserRequest {
@@ -41,4 +45,22 @@ message GetUserResponse {
   string username = 2;
   string email = 3;
   int64 created_at = 4;
+}
+
+message RefreshTokenRequest {
+  string refresh_token = 1;
+}
+
+message RefreshTokenResponse {
+  string access_token = 1;
+  string refresh_token = 2;
+  int64 expires_in = 3;
+}
+
+message LogoutRequest {
+  string access_token = 1;
+}
+
+message LogoutResponse {
+  bool success = 1;
 }

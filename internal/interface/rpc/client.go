@@ -1,4 +1,4 @@
-package user
+package rpc
 
 import (
 	"context"
@@ -11,10 +11,8 @@ type UserClient struct {
 	cli userservice.Client
 }
 
-func NewUserClient(addr string) (*UserClient, error) {
-	cli, err := userservice.NewClient(
-		"user",
-	)
+func NewUserClient() (*UserClient, error) {
+	cli, err := userservice.NewClient("user")
 	if err != nil {
 		return nil, err
 	}
@@ -40,5 +38,17 @@ func (c *UserClient) Login(ctx context.Context, username, password string) (*use
 func (c *UserClient) GetUser(ctx context.Context, userID int64) (*user.GetUserResponse, error) {
 	return c.cli.GetUser(ctx, &user.GetUserRequest{
 		UserId: userID,
+	})
+}
+
+func (c *UserClient) RefreshToken(ctx context.Context, refreshToken string) (*user.RefreshTokenResponse, error) {
+	return c.cli.RefreshToken(ctx, &user.RefreshTokenRequest{
+		RefreshToken: refreshToken,
+	})
+}
+
+func (c *UserClient) Logout(ctx context.Context, accessToken string) (*user.LogoutResponse, error) {
+	return c.cli.Logout(ctx, &user.LogoutRequest{
+		AccessToken: accessToken,
 	})
 }

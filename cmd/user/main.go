@@ -7,11 +7,9 @@ import (
 	"syscall"
 
 	"vicomova/internal/data/mysql"
-	redisClient "vicomova/internal/data/redis"
+	domainUser "vicomova/internal/domain/user"
 	"vicomova/internal/pkg/log"
-	"vicomova/internal/repository"
-	"vicomova/internal/rpc/user"
-	"vicomova/internal/service"
+	"vicomova/internal/wire"
 	"vicomova/pkg/config"
 
 	userService "vicomova/third_party/kitex_gen/user/userservice"
@@ -41,29 +39,19 @@ func main() {
 		log.Error.Fatalf("Failed to load config: %v", err)
 	}
 
-	// 初始化数据库
-	if err := mysql.Init(&cfg.Database); err != nil {
-		log.Error.Fatalf("Failed to init mysql: %v", err)
+	// 初始化依赖
+	p, err := wire.NewProvider(cfg)
+	if err != nil {
+		log.Error.Fatalf("Failed to init provider: %v", err)
 	}
-	defer mysql.Close()
 
-	// 初始化 Redis
-	if err := redisClient.Init(&cfg.Redis); err != nil {
-		log.Error.Fatalf("Failed to init redis: %v", err)
-	}
-	defer redisClient.Close()
+//
 
-	// 初始化 Repository
-	userRepo := repository.NewUserRepository()
-
-	// 初始化 Service
-	userSvc := service.NewUserService(userRepo, "your-secret-key")
-
-	// 初始化 Handler
-	userHandler := user.NewUserHandler(userSvc)
+	// 自动迁移
+	mysql.GetDB().AutoMigrate(&domainUser.User{})
 
 	// 创建 Kitex Server
-	svr := userService.NewServer(userHandler)
+	svr := userService.NewServer(p.UserHandler)
 
 	// 优雅关闭
 	go func() {

@@ -5,14 +5,14 @@ import (
 
 	"github.com/cloudwego/hertz/pkg/app"
 	hertz "vicomova/pkg/hertz"
-	"vicomova/internal/rpc/user"
+	"vicomova/internal/interface/rpc"
 )
 
 type UserHandler struct {
-	userClient *user.UserClient
+	userClient *rpc.UserClient
 }
 
-func NewUserHandler(userClient *user.UserClient) *UserHandler {
+func NewUserHandler(userClient *rpc.UserClient) *UserHandler {
 	return &UserHandler{userClient: userClient}
 }
 
@@ -71,9 +71,11 @@ func (h *UserHandler) Login(ctx context.Context, c *app.RequestContext) {
 	}
 
 	c.JSON(200, hertz.Success(map[string]interface{}{
-		"user_id":  resp.UserId,
-		"username": resp.Username,
-		"token":    resp.Token,
+		"user_id":       resp.UserId,
+		"username":      resp.Username,
+		"access_token":  resp.AccessToken,
+		"refresh_token": resp.RefreshToken,
+		"expires_in":    resp.ExpiresIn,
 	}))
 }
 
@@ -100,10 +102,70 @@ func (h *UserHandler) GetUser(ctx context.Context, c *app.RequestContext) {
 	}
 
 	c.JSON(200, hertz.Success(map[string]interface{}{
-		"user_id":   resp.UserId,
-		"username":  resp.Username,
-		"email":     resp.Email,
+		"user_id":    resp.UserId,
+		"username":   resp.Username,
+		"email":      resp.Email,
 		"created_at": resp.CreatedAt,
+	}))
+}
+
+// @Summary 刷新Token
+// @Description 使用refresh_token获取新的access_token
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param request body RefreshTokenRequest true "刷新Token请求"
+// @Success 200 {object} RefreshTokenResponse
+// @Failure 400 {object} ErrorResponse
+// @Failure 401 {object} ErrorResponse
+// @Router /user/refresh [post]
+func (h *UserHandler) RefreshToken(ctx context.Context, c *app.RequestContext) {
+	var req RefreshTokenRequest
+
+	if err := c.Bind(&req); err != nil {
+		c.JSON(400, hertz.Fail(400, "Invalid request body"))
+		return
+	}
+
+	resp, err := h.userClient.RefreshToken(ctx, req.RefreshToken)
+	if err != nil {
+		c.JSON(401, hertz.Fail(401, "Refresh token failed"))
+		return
+	}
+
+	c.JSON(200, hertz.Success(map[string]interface{}{
+		"access_token":  resp.AccessToken,
+		"refresh_token": resp.RefreshToken,
+		"expires_in":    resp.ExpiresIn,
+	}))
+}
+
+// @Summary 用户登出
+// @Description 登出并使refresh_token失效
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param request body LogoutRequest true "登出请求"
+// @Success 200 {object} LogoutResponse
+// @Failure 400 {object} ErrorResponse
+// @Failure 401 {object} ErrorResponse
+// @Router /user/logout [post]
+func (h *UserHandler) Logout(ctx context.Context, c *app.RequestContext) {
+	var req LogoutRequest
+
+	if err := c.Bind(&req); err != nil {
+		c.JSON(400, hertz.Fail(400, "Invalid request body"))
+		return
+	}
+
+	resp, err := h.userClient.Logout(ctx, req.AccessToken)
+	if err != nil {
+		c.JSON(401, hertz.Fail(401, "Logout failed"))
+		return
+	}
+
+	c.JSON(200, hertz.Success(map[string]interface{}{
+		"success": resp.Success,
 	}))
 }
 
@@ -128,9 +190,33 @@ type LoginRequest struct {
 
 // @Description 登录响应
 type LoginResponse struct {
-	UserID   int64  `json:"user_id"`
-	Username string `json:"username"`
-	Token    string `json:"token"`
+	UserID       int64  `json:"user_id"`
+	Username     string `json:"username"`
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+	ExpiresIn    int64  `json:"expires_in"`
+}
+
+// @Description 刷新Token请求
+type RefreshTokenRequest struct {
+	RefreshToken string `json:"refresh_token"`
+}
+
+// @Description 刷新Token响应
+type RefreshTokenResponse struct {
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+	ExpiresIn    int64  `json:"expires_in"`
+}
+
+// @Description 登出请求
+type LogoutRequest struct {
+	AccessToken string `json:"access_token"`
+}
+
+// @Description 登出响应
+type LogoutResponse struct {
+	Success bool `json:"success"`
 }
 
 // @Description 用户响应

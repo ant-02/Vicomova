@@ -8,10 +8,15 @@ import (
 )
 
 type Config struct {
-	Server ServerConfig `mapstructure:"server"`
+	Server   ServerConfig   `mapstructure:"server"`
 	Database DatabaseConfig `mapstructure:"database"`
-	Redis RedisConfig `mapstructure:"redis"`
-	Kafka KafkaConfig `mapstructure:"kafka"`
+	Redis    RedisConfig    `mapstructure:"redis"`
+	Kafka    KafkaConfig    `mapstructure:"kafka"`
+	JWT      JWTConfig      `mapstructure:"jwt"`
+}
+
+type JWTConfig struct {
+	Secret string `mapstructure:"secret"`
 }
 
 type ServerConfig struct {

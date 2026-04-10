@@ -24,4 +24,6 @@ var (
 	ErrUserExists      = NewBizError(409, "User already exists")
 	ErrPasswordWrong   = NewBizError(401, "Password is incorrect")
 	ErrInternalServer  = NewBizError(500, "Internal server error")
+	ErrInvalidToken    = NewBizError(401, "Invalid token")
+	ErrTokenExpired    = NewBizError(401, "Token expired")
 )
