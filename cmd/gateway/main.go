@@ -7,10 +7,10 @@ import (
 	"os/signal"
 	"syscall"
 
-	"vicomova/internal/interface/gateway/handler"
-	"vicomova/internal/interface/gateway/router"
-	"vicomova/internal/interface/rpc"
-	"vicomova/internal/pkg/log"
+	"vicomova/internal/user/interfaces/http/handler"
+	"vicomova/internal/user/interfaces/http/router"
+	rpc "vicomova/internal/user/interfaces/grpc"
+	"vicomova/internal/shared/pkg/log"
 	"vicomova/pkg/config"
 	hertz "vicomova/pkg/hertz"
 )
@@ -37,7 +37,7 @@ func main() {
 	}
 
 	// 初始化 User RPC Client
-	userClient, err := rpc.NewUserClient()
+	userClient, err := rpc.NewUserClient("user", userAddr)
 	if err != nil {
 		log.Error.Fatalf("Failed to create user client: %v", err)
 	}

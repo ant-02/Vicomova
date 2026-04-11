@@ -8,15 +8,23 @@ import (
 )
 
 type Config struct {
-	Server   ServerConfig   `mapstructure:"server"`
-	Database DatabaseConfig `mapstructure:"database"`
-	Redis    RedisConfig    `mapstructure:"redis"`
-	Kafka    KafkaConfig    `mapstructure:"kafka"`
-	JWT      JWTConfig      `mapstructure:"jwt"`
+	Server   ServerConfig     `mapstructure:"server"`
+	Database DatabaseConfig  `mapstructure:"database"`
+	Redis    RedisConfig     `mapstructure:"redis"`
+	Kafka    KafkaConfig     `mapstructure:"kafka"`
+	JWT      JWTConfig       `mapstructure:"jwt"`
+	Email    AliyunEmailConfig `mapstructure:"email"`
 }
 
 type JWTConfig struct {
 	Secret string `mapstructure:"secret"`
+}
+
+type AliyunEmailConfig struct {
+	AccessKey    string `mapstructure:"access_key"`
+	AccessSecret string `mapstructure:"access_secret"`
+	AccountName  string `mapstructure:"account_name"`
+	Region       string `mapstructure:"region"`
 }
 
 type ServerConfig struct {

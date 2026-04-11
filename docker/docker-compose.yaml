@@ -17,6 +17,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - vicomova
 
   redis:
     image: docker.io/library/redis:7-alpine
@@ -31,3 +33,9 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - vicomova
+
+networks:
+  vicomova:
+    driver: bridge

@@ -2,10 +2,10 @@
 
 # 开发阶段运行
 run-user:
-	go run ./cmd/user -config config/base.yaml -port 8888
+	go run ./cmd/user -config config/local.yaml -port 8888
 
 run-gateway:
-	go run ./cmd/gateway -config config/base.yaml -port 8080 -user_addr 127.0.0.1:8888
+	go run ./cmd/gateway -config config/local.yaml -port 8080 -user_addr 127.0.0.1:8888
 
 # Proto 代码生成
 proto:

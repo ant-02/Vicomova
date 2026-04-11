@@ -21,6 +21,7 @@ docs/
 # Environment
 .env
 *.local
+config/local.yaml
 
 # OS
 .DS_Store

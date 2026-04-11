@@ -21,3 +21,9 @@ kafka:
   brokers:
     - "127.0.0.1:9092"
   topic: "vicomova"
+
+email:
+  access_key: ""
+  access_secret: ""
+  account_name: ""
+  region: ""

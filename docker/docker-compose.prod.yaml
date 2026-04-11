@@ -43,6 +43,8 @@ services:
       - "8888:8888"
     volumes:
       - ./config:/app/config:ro
+    networks:
+      - vicomova
 
   gateway:
     image: vicomova-gateway:latest
@@ -55,3 +57,9 @@ services:
       - "8080:8080"
     volumes:
       - ./config:/app/config:ro
+    networks:
+      - vicomova
+
+networks:
+  vicomova:
+    driver: bridge

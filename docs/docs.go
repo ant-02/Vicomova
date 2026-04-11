@@ -61,9 +61,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/user/register": {
+        "/user/logout": {
             "post": {
-                "description": "创建新用户",
+                "description": "登出并使refresh_token失效",
                 "consumes": [
                     "application/json"
                 ],
@@ -73,15 +73,147 @@ const docTemplate = `{
                 "tags": [
                     "user"
                 ],
-                "summary": "用户注册",
+                "summary": "用户登出",
                 "parameters": [
                     {
-                        "description": "注册信息",
+                        "description": "登出请求",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.RegisterRequest"
+                            "$ref": "#/definitions/handler.LogoutRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.LogoutResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/refresh": {
+            "post": {
+                "description": "使用refresh_token获取新的access_token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "刷新Token",
+                "parameters": [
+                    {
+                        "description": "刷新Token请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.RefreshTokenRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.RefreshTokenResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/register/send": {
+            "post": {
+                "description": "发送注册验证码到用户邮箱",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "发送邮箱验证码",
+                "parameters": [
+                    {
+                        "description": "发送验证码请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.SendCodeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.SendCodeResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/register/verify": {
+            "post": {
+                "description": "使用邮箱验证码完成用户注册",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "验证邮箱并完成注册",
+                "parameters": [
+                    {
+                        "description": "验证注册请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.VerifyCodeRequest"
                         }
                     }
                 ],
@@ -94,12 +226,6 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    },
-                    "409": {
-                        "description": "Conflict",
                         "schema": {
                             "$ref": "#/definitions/handler.ErrorResponse"
                         }
@@ -178,7 +304,13 @@ const docTemplate = `{
             "description": "登录响应",
             "type": "object",
             "properties": {
-                "token": {
+                "access_token": {
+                    "type": "string"
+                },
+                "expires_in": {
+                    "type": "integer"
+                },
+                "refresh_token": {
                     "type": "string"
                 },
                 "user_id": {
@@ -189,17 +321,44 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.RegisterRequest": {
-            "description": "注册请求",
+        "handler.LogoutRequest": {
+            "description": "登出请求",
             "type": "object",
             "properties": {
-                "email": {
+                "access_token": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.LogoutResponse": {
+            "description": "登出响应",
+            "type": "object",
+            "properties": {
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "handler.RefreshTokenRequest": {
+            "description": "刷新Token请求",
+            "type": "object",
+            "properties": {
+                "refresh_token": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.RefreshTokenResponse": {
+            "description": "刷新Token响应",
+            "type": "object",
+            "properties": {
+                "access_token": {
                     "type": "string"
                 },
-                "password": {
-                    "type": "string"
+                "expires_in": {
+                    "type": "integer"
                 },
-                "username": {
+                "refresh_token": {
                     "type": "string"
                 }
             }
@@ -216,6 +375,33 @@ const docTemplate = `{
                 }
             }
         },
+        "handler.SendCodeRequest": {
+            "description": "发送验证码请求",
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.SendCodeResponse": {
+            "description": "发送验证码响应",
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        },
         "handler.UserResponse": {
             "description": "用户响应",
             "type": "object",
@@ -228,6 +414,24 @@ const docTemplate = `{
                 },
                 "user_id": {
                     "type": "integer"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.VerifyCodeRequest": {
+            "description": "验证注册请求",
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
                 },
                 "username": {
                     "type": "string"

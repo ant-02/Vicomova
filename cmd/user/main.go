@@ -6,9 +6,9 @@ import (
 	"os/signal"
 	"syscall"
 
-	"vicomova/internal/data/mysql"
-	domainUser "vicomova/internal/domain/user"
-	"vicomova/internal/pkg/log"
+	"vicomova/internal/shared/infrastructure/data/mysql"
+	userEntity "vicomova/internal/user/domain/entity"
+	"vicomova/internal/shared/pkg/log"
 	"vicomova/internal/wire"
 	"vicomova/pkg/config"
 
@@ -45,10 +45,8 @@ func main() {
 		log.Error.Fatalf("Failed to init provider: %v", err)
 	}
 
-//
-
 	// 自动迁移
-	mysql.GetDB().AutoMigrate(&domainUser.User{})
+	mysql.GetDB().AutoMigrate(&userEntity.User{})
 
 	// 创建 Kitex Server
 	svr := userService.NewServer(p.UserHandler)

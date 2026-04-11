@@ -1,13 +1,15 @@
 package wire
 
 import (
-	"vicomova/internal/application/user"
-	infraMysql "vicomova/internal/infrastructure/persistence/mysql"
-	infraRedis "vicomova/internal/infrastructure/persistence/redis"
-	domainUser "vicomova/internal/domain/user"
-	"vicomova/internal/interface/rpc"
-	"vicomova/internal/data/mysql"
-	redisClient "vicomova/internal/data/redis"
+	appCommand "vicomova/internal/user/application/command"
+	appQuery "vicomova/internal/user/application/query"
+	infraEmail "vicomova/internal/user/infrastructure/external/email"
+	infraMysql "vicomova/internal/user/infrastructure/persistence/mysql"
+	infraRedis "vicomova/internal/user/infrastructure/persistence/redis"
+	svc "vicomova/internal/user/domain/service"
+	rpc "vicomova/internal/user/interfaces/grpc"
+	"vicomova/internal/shared/infrastructure/data/mysql"
+	redisClient "vicomova/internal/shared/infrastructure/data/redis"
 	"vicomova/pkg/config"
 )
 
@@ -29,13 +31,24 @@ func NewProvider(cfg *config.Config) (*Provider, error) {
 	// 初始化 Repository
 	userRepo := infraMysql.NewUserRepository()
 	refreshTokenRepo := infraRedis.NewRefreshTokenRepository()
+	emailCodeRepo := infraRedis.NewEmailCodeRepository()
+
+	// 初始化 Email Service
+	var emailService infraEmail.EmailService
+	if cfg.Email.AccessKey != "" && cfg.Email.AccountName != "" && cfg.Email.Region != "" {
+		var err error
+		emailService, err = infraEmail.NewAliyunEmailService(&cfg.Email)
+		if err != nil {
+			return nil, err
+		}
+	}
 
 	// 初始化 Domain Service
-	tokenSvc := domainUser.NewTokenService(cfg.JWT.Secret)
+	tokenSvc := svc.NewTokenService(cfg.JWT.Secret)
 
 	// 初始化 Application Service
-	cmdSvc := user.NewUserCommandService(userRepo, refreshTokenRepo, tokenSvc)
-	querySvc := user.NewUserQueryService(userRepo)
+	cmdSvc := appCommand.NewUserCommandService(userRepo, refreshTokenRepo, emailCodeRepo, emailService, tokenSvc)
+	querySvc := appQuery.NewUserQueryService(userRepo)
 
 	// 初始化 Handler
 	userHandler := rpc.NewUserHandler(cmdSvc, querySvc)

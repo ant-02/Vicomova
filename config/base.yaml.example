@@ -1,0 +1,32 @@
+server:
+  host: "0.0.0.0"
+  port: 8080
+
+database:
+  host: "localhost"
+  port: 3306
+  user: "root"
+  password: "example_password"
+  dbname: "vicomova"
+  max_open_conns: 100
+  max_idle_conns: 10
+
+redis:
+  host: "localhost"
+  port: 6379
+  password: "example_redis_password"
+  db: 0
+
+kafka:
+  brokers:
+    - "localhost:9092"
+  topic: "vicomova"
+
+jwt:
+  secret: "replace-with-your-secret-key"
+
+email:
+  access_key: "replace-with-your-access-key"
+  access_secret: "replace-with-your-access-secret"
+  account_name: "noreply@example.com"
+  region: "cn-hangzhou"
