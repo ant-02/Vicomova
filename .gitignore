@@ -5,10 +5,18 @@ bin/
 # Docker data
 docker/mysql/
 docker/redis/
+docker/etcd/
 docker/mysql/#ib_16384_0.dblwr
 docker/mysql/#ib_16384_1.dblwr
 docker/mysql/#innodb_redo/
 docker/mysql/#innodb_temp/
+docker/mysql/binlog.*
+docker/mysql/ib_*
+docker/mysql/undo_*
+
+# Config with secrets
+config/base.yaml
+docker/config/base.yaml
 
 # Generated code
 third_party/kitex_gen/

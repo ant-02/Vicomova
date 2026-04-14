@@ -6,7 +6,7 @@ database:
   host: "localhost"
   port: 3306
   user: "root"
-  password: "example_password"
+  password: "password"
   dbname: "vicomova"
   max_open_conns: 100
   max_idle_conns: 10
@@ -14,19 +14,31 @@ database:
 redis:
   host: "localhost"
   port: 6379
-  password: "example_redis_password"
+  password: ""
   db: 0
 
 kafka:
   brokers:
-    - "localhost:9092"
+    - "127.0.0.1:9092"
   topic: "vicomova"
 
 jwt:
-  secret: "replace-with-your-secret-key"
+  secret: "your-secret-key-change-in-production"
 
 email:
-  access_key: "replace-with-your-access-key"
-  access_secret: "replace-with-your-access-secret"
-  account_name: "noreply@example.com"
+  access_key: ""  # 从环境变量 ALIBABA_CLOUD_ACCESS_KEY_ID 读取
+  access_secret: ""  # 从环境变量 ALIBABA_CLOUD_ACCESS_KEY_SECRET 读取
+  account_name: "noreply@mail.xhhx.xyz"
   region: "cn-hangzhou"
+  api_url: "https://dm.aliyuncs.com/"
+
+etcd:
+  endpoints:
+    - "127.0.0.1:2379"
+  username: ""
+  password: ""
+  namespace: "vicomova"
+
+services:
+  user:
+    addr: "127.0.0.1:8888"
