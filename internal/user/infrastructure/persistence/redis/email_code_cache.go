@@ -8,6 +8,8 @@ import (
 	userRepo "vicomova/internal/user/domain/repository"
 	sharedRedis "vicomova/internal/shared/infrastructure/data/redis"
 	"vicomova/internal/shared/pkg/log"
+
+	"github.com/redis/go-redis/v9"
 )
 
 const emailCodePrefix = "email_code:"
@@ -21,12 +23,16 @@ func NewEmailCodeRepository() userRepo.EmailCodeRepository {
 }
 
 func (r *EmailCodeRepository) Store(ctx context.Context, email, code string, ttl time.Duration) error {
+	if code == "" {
+		log.Error.Printf("EmailCodeRepository.Store: code is empty for %s", email)
+		return errors.New("code cannot be empty")
+	}
 	key := emailCodePrefix + email
 	if err := sharedRedis.GetClient().Set(ctx, key, code, ttl).Err(); err != nil {
 		log.Error.Printf("EmailCodeRepository.Store: failed for %s: %v", email, err)
 		return err
 	}
-	log.Info.Printf("EmailCodeRepository.Store: stored code for %s, ttl=%v", email, ttl)
+	log.Info.Printf("EmailCodeRepository.Store: stored code=%s for %s, ttl=%v", code, email, ttl)
 	return nil
 }
 
@@ -34,13 +40,14 @@ func (r *EmailCodeRepository) Verify(ctx context.Context, email, code string) (b
 	key := emailCodePrefix + email
 	storedCode, err := sharedRedis.GetClient().Get(ctx, key).Result()
 	if err != nil {
-		if err.Error() == "redis: nil" {
+		if errors.Is(err, redis.Nil) {
 			log.Warn.Printf("EmailCodeRepository.Verify: code not found for %s", email)
 			return false, nil
 		}
 		log.Error.Printf("EmailCodeRepository.Verify: failed for %s: %v", email, err)
 		return false, err
 	}
+	log.Info.Printf("EmailCodeRepository.Verify: stored=%s, input=%s for %s", storedCode, code, email)
 	match := storedCode == code
 	if !match {
 		log.Warn.Printf("EmailCodeRepository.Verify: code mismatch for %s", email)

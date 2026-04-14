@@ -110,15 +110,9 @@ definitions:
 info:
   contact: {}
 paths:
-  /user/{id}:
+  /user:
     get:
-      description: 根据用户ID获取用户信息
-      parameters:
-      - description: 用户ID
-        in: path
-        name: id
-        required: true
-        type: integer
+      description: 获取当前登录用户的信息
       produces:
       - application/json
       responses:
@@ -126,14 +120,16 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/handler.UserResponse'
-        "400":
-          description: Bad Request
+        "401":
+          description: Unauthorized
           schema:
             $ref: '#/definitions/handler.ErrorResponse'
         "404":
           description: Not Found
           schema:
             $ref: '#/definitions/handler.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: 获取用户信息
       tags:
       - user

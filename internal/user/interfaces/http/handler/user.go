@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"strings"
 
 	rpc "vicomova/internal/user/interfaces/grpc"
 	hertz "vicomova/pkg/hertz"
@@ -55,19 +56,19 @@ func (h *UserHandler) Login(ctx context.Context, c *app.RequestContext) {
 }
 
 // @Summary 获取用户信息
-// @Description 根据用户ID获取用户信息
+// @Description 获取当前登录用户的信息
 // @Tags user
 // @Produce json
-// @Param id path int true "用户ID"
+// @Security BearerAuth
 // @Success 200 {object} UserResponse
-// @Failure 400 {object} ErrorResponse
+// @Failure 401 {object} ErrorResponse
 // @Failure 404 {object} ErrorResponse
-// @Router /user/{id} [get]
+// @Router /user [get]
 func (h *UserHandler) GetUser(ctx context.Context, c *app.RequestContext) {
-	userID := c.GetInt64("id")
+	userID := c.GetInt64("user_id")
 	if userID == 0 {
-		hlog.Error("GetUser: missing user_id")
-		c.JSON(400, hertz.Fail(400, "Missing user_id"))
+		hlog.Error("GetUser: missing user_id from token")
+		c.JSON(401, hertz.Fail(401, "Unauthorized"))
 		return
 	}
 
@@ -176,6 +177,10 @@ func (h *UserHandler) SendVerificationCode(ctx context.Context, c *app.RequestCo
 	}
 	hlog.Infof("SendVerificationCode: username=%s email=%s success=%v", req.Username, req.Email, resp.Success)
 
+	if !resp.Success {
+		c.JSON(409, hertz.Fail(409, resp.Message))
+		return
+	}
 	c.JSON(200, hertz.Success(map[string]interface{}{
 		"success": resp.Success,
 		"message": resp.Message,
@@ -203,7 +208,20 @@ func (h *UserHandler) VerifyAndRegister(ctx context.Context, c *app.RequestConte
 	resp, err := h.userClient.VerifyAndRegister(ctx, req.Username, req.Password, req.Email, req.Code)
 	if err != nil {
 		hlog.Errorf("VerifyAndRegister: username=%s email=%s failed: %v", req.Username, req.Email, err)
-		c.JSON(500, hertz.Fail(500, "Verify and register failed"))
+		// Parse error code from BizError format: "code: 401, msg: Invalid token"
+		errMsg := err.Error()
+		var code int32 = 500
+		switch {
+		case strings.Contains(errMsg, "code: 400"):
+			code = 400
+		case strings.Contains(errMsg, "code: 401"):
+			code = 401
+		case strings.Contains(errMsg, "code: 404"):
+			code = 404
+		case strings.Contains(errMsg, "code: 409"):
+			code = 409
+		}
+		c.JSON(int(code), hertz.Fail(code, errMsg))
 		return
 	}
 	hlog.Infof("VerifyAndRegister: username=%s success, userID=%d", req.Username, resp.UserId)

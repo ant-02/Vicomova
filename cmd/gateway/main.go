@@ -14,6 +14,7 @@ import (
 	"vicomova/internal/shared/pkg/log"
 	"vicomova/pkg/config"
 	hertz "vicomova/pkg/hertz"
+	"vicomova/internal/user/domain/service"
 )
 
 var (
@@ -61,8 +62,9 @@ func main() {
 	}
 
 	// 创建 handler 并注册路由
+	tokenSvc := service.NewTokenService(cfg.JWT.Secret)
 	userHandler := handler.NewUserHandler(userClient)
-	router.RegisterRoutes(h, userHandler)
+	router.RegisterRoutes(h, userHandler, tokenSvc)
 
 	// 初始化 etcd 路由管理器（用于热更新路由配置）
 	if bs.Client() != nil {
