@@ -4,84 +4,13 @@ import (
 	"context"
 
 	userEntity "vicomova/internal/user/domain/entity"
-	userRepo "vicomova/internal/user/domain/repository"
-	"vicomova/internal/user/domain/service"
 	userVO "vicomova/internal/user/domain/valueobject"
-	infraEmail "vicomova/internal/user/infrastructure/external/email"
+	constants "vicomova/internal/shared/pkg/constants"
 	errorsPkg "vicomova/internal/shared/pkg/errors"
 	"vicomova/internal/shared/pkg/log"
 
 	"github.com/google/uuid"
 )
-
-type LoginCommand struct {
-	Username string
-	Password string
-}
-
-type RefreshTokenCommand struct {
-	RefreshToken string
-}
-
-type LogoutCommand struct {
-	AccessToken string
-}
-
-type SendVerificationCodeCommand struct {
-	Username string
-	Password string
-	Email    string
-}
-
-type VerifyAndRegisterCommand struct {
-	Username string
-	Password string
-	Email    string
-	Code     string
-}
-
-type TokenResult struct {
-	UserID       int64
-	Username     string
-	AccessToken  string
-	RefreshToken string
-	ExpiresIn    int64
-}
-
-type UserResult struct {
-	UserID   int64
-	Username string
-	Email    string
-}
-
-type SendCodeResult struct {
-	Success bool
-	Message string
-}
-
-type UserCommandService struct {
-	userRepo         userRepo.UserRepository
-	refreshTokenRepo userRepo.RefreshTokenRepository
-	emailCodeRepo    userRepo.EmailCodeRepository
-	emailService     infraEmail.EmailService
-	tokenService     *service.TokenService
-}
-
-func NewUserCommandService(
-	userRepo userRepo.UserRepository,
-	refreshTokenRepo userRepo.RefreshTokenRepository,
-	emailCodeRepo userRepo.EmailCodeRepository,
-	emailService infraEmail.EmailService,
-	tokenService *service.TokenService,
-) *UserCommandService {
-	return &UserCommandService{
-		userRepo:         userRepo,
-		refreshTokenRepo: refreshTokenRepo,
-		emailCodeRepo:    emailCodeRepo,
-		emailService:     emailService,
-		tokenService:     tokenService,
-	}
-}
 
 func (s *UserCommandService) SendVerificationCode(ctx context.Context, cmd *SendVerificationCodeCommand) (*SendCodeResult, error) {
 	// 检查用户是否已存在
@@ -102,7 +31,7 @@ func (s *UserCommandService) SendVerificationCode(ctx context.Context, cmd *Send
 	code := userVO.GenerateEmailCode(cmd.Email)
 
 	// 存储验证码到 Redis
-	if err := s.emailCodeRepo.Store(ctx, cmd.Email, code.Code, userVO.EmailCodeTTL); err != nil {
+	if err := s.emailCodeRepo.Store(ctx, cmd.Email, code.Code, constants.EmailCodeTTL); err != nil {
 		log.Error.Printf("SendVerificationCode: Redis Store failed for %s: %v", cmd.Email, err)
 		return nil, errorsPkg.ErrInternalServer
 	}
@@ -127,7 +56,7 @@ func (s *UserCommandService) SendVerificationCode(ctx context.Context, cmd *Send
 
 	return &SendCodeResult{
 		Success: true,
-		Message: "verification code sent",
+ 		Message: "verification code sent",
 	}, nil
 }
 
@@ -237,7 +166,7 @@ func (s *UserCommandService) generateTokenPair(ctx context.Context, userID int64
 
 	refreshToken := uuid.New().String()
 
-	rt := userVO.NewRefreshToken(userID, refreshToken, service.RefreshTokenExpiry)
+	rt := userVO.NewRefreshToken(userID, refreshToken, s.tokenService.GetRefreshTokenExpiry())
 
 	if err := s.refreshTokenRepo.Create(ctx, rt); err != nil {
 		return nil, errorsPkg.ErrInternalServer

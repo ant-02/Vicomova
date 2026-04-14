@@ -1,7 +1,9 @@
 package main
 
 import (
+	"context"
 	"flag"
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -11,6 +13,7 @@ import (
 	"vicomova/internal/shared/pkg/log"
 	"vicomova/internal/wire"
 	"vicomova/pkg/config"
+	"vicomova/pkg/etcd"
 
 	userService "vicomova/third_party/kitex_gen/user/userservice"
 
@@ -51,17 +54,47 @@ func main() {
 	// 创建 Kitex Server
 	svr := userService.NewServer(p.UserHandler)
 
+	// 启动 RPC server 获取实际地址
+	addr := fmt.Sprintf("127.0.0.1:%d", port)
+	log.Info.Printf("User RPC server starting on %s", addr)
+
+	// 注册到 etcd
+	var registry *etcd.Registry
+	var configWatcher *config.ConfigWatcher
+	if len(cfg.Etcd.Endpoints) > 0 {
+		etcdClient, err := etcd.NewClient(&cfg.Etcd)
+		if err != nil {
+			log.Error.Fatalf("Failed to create etcd client: %v", err)
+		}
+		defer etcdClient.Close()
+
+		registry = etcd.NewRegistry(etcdClient, "user", addr)
+		if err := registry.Register(); err != nil {
+			log.Error.Fatalf("Failed to register to etcd: %v", err)
+		}
+		defer registry.Unregister()
+
+		// 初始化配置热更新
+		configWatcher = config.NewConfigWatcher(etcdClient, cfg)
+		configWatcher.Watch("jwt.secret", func(oldVal, newVal interface{}) {
+			log.Info.Printf("JWT secret changed: %v -> %v", oldVal, newVal)
+		})
+		configWatcher.Start(context.Background())
+		config.InitDefaultConfig(context.Background(), etcdClient, cfg)
+	}
+
 	// 优雅关闭
 	go func() {
 		sig := make(chan os.Signal, 1)
 		signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
 		<-sig
 		klog.Info("Shutting down server...")
+		if registry != nil {
+			registry.Unregister()
+		}
 		svr.Stop()
 	}()
 
-	addr := config.DefaultAddr("user", port)
-	log.Info.Printf("User RPC server starting on %s", addr)
 	if err := svr.Run(); err != nil {
 		log.Error.Fatalf("Server error: %v", err)
 	}

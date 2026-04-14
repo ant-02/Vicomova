@@ -26,4 +26,19 @@ email:
   access_key: ""
   access_secret: ""
   account_name: ""
-  region: ""
+  region: "cn-hangzhou"
+  api_url: "https://dm.aliyuncs.com/"
+
+jwt:
+  secret: "your-secret-key-change-in-production"
+
+etcd:
+  endpoints:
+    - "etcd:2379"
+  username: ""
+  password: ""
+  namespace: "vicomova"
+
+services:
+  user:
+    addr: "user:8888"

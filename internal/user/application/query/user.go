@@ -3,23 +3,10 @@ package query
 import (
 	"context"
 
-	userRepo "vicomova/internal/user/domain/repository"
 	"vicomova/internal/user/application/command"
 	errorsPkg "vicomova/internal/shared/pkg/errors"
 	"vicomova/internal/shared/pkg/log"
 )
-
-type GetUserQuery struct {
-	UserID int64
-}
-
-type UserQueryService struct {
-	userRepo userRepo.UserRepository
-}
-
-func NewUserQueryService(userRepo userRepo.UserRepository) *UserQueryService {
-	return &UserQueryService{userRepo: userRepo}
-}
 
 func (s *UserQueryService) GetUser(ctx context.Context, query *GetUserQuery) (*command.UserResult, error) {
 	u, err := s.userRepo.GetByID(ctx, query.UserID)

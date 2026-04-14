@@ -3,14 +3,10 @@ package service
 import (
 	"time"
 
+	"vicomova/internal/shared/pkg/constants"
 	userdomain "vicomova/internal/user/domain"
 
 	"github.com/golang-jwt/jwt/v5"
-)
-
-const (
-	AccessTokenExpiry  = 30 * time.Minute
-	RefreshTokenExpiry = 7 * 24 * time.Hour
 )
 
 type TokenService struct {
@@ -30,7 +26,7 @@ func (s *TokenService) GenerateAccessToken(userID int64, username string) (strin
 	claims := jwt.MapClaims{
 		"user_id":  userID,
 		"username": username,
-		"exp":     time.Now().Add(AccessTokenExpiry).Unix(),
+		"exp":     time.Now().Add(constants.AccessTokenExpiry).Unix(),
 		"iat":     time.Now().Unix(),
 	}
 
@@ -58,9 +54,9 @@ func (s *TokenService) ParseAccessToken(tokenString string) (jwt.MapClaims, erro
 }
 
 func (s *TokenService) GetAccessTokenExpiry() time.Duration {
-	return AccessTokenExpiry
+	return constants.AccessTokenExpiry
 }
 
 func (s *TokenService) GetRefreshTokenExpiry() time.Duration {
-	return RefreshTokenExpiry
+	return constants.RefreshTokenExpiry
 }

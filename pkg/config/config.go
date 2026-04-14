@@ -4,16 +4,24 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"vicomova/pkg/etcd"
+
 	"github.com/spf13/viper"
 )
 
 type Config struct {
-	Server   ServerConfig     `mapstructure:"server"`
-	Database DatabaseConfig  `mapstructure:"database"`
-	Redis    RedisConfig     `mapstructure:"redis"`
-	Kafka    KafkaConfig     `mapstructure:"kafka"`
-	JWT      JWTConfig       `mapstructure:"jwt"`
+	Server   ServerConfig       `mapstructure:"server"`
+	Database DatabaseConfig    `mapstructure:"database"`
+	Redis    RedisConfig       `mapstructure:"redis"`
+	Kafka    KafkaConfig       `mapstructure:"kafka"`
+	JWT      JWTConfig         `mapstructure:"jwt"`
 	Email    AliyunEmailConfig `mapstructure:"email"`
+	Etcd     etcd.EtcdConfig   `mapstructure:"etcd"`
+	Services map[string]ServiceConfig `mapstructure:"services"`
+}
+
+type ServiceConfig struct {
+	Addr string `mapstructure:"addr"`
 }
 
 type JWTConfig struct {
@@ -25,6 +33,7 @@ type AliyunEmailConfig struct {
 	AccessSecret string `mapstructure:"access_secret"`
 	AccountName  string `mapstructure:"account_name"`
 	Region       string `mapstructure:"region"`
+	APIURL       string `mapstructure:"api_url"`
 }
 
 type ServerConfig struct {

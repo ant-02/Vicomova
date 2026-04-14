@@ -5,11 +5,8 @@ import (
 	"fmt"
 	"math/big"
 	"time"
-)
 
-const (
-	EmailCodeTTL = 10 * time.Minute
-	EmailCodeLength = 6
+	"vicomova/internal/shared/pkg/constants"
 )
 
 type EmailCode struct {
@@ -23,12 +20,12 @@ func GenerateEmailCode(email string) *EmailCode {
 	return &EmailCode{
 		Email:     email,
 		Code:      code,
-		ExpiresAt: time.Now().Add(EmailCodeTTL),
+		ExpiresAt: time.Now().Add(constants.EmailCodeTTL),
 	}
 }
 
 func generateRandomCode() string {
-	code := make([]byte, EmailCodeLength)
+	code := make([]byte, constants.EmailCodeLength)
 	for i := range code {
 		n, _ := rand.Int(rand.Reader, big.NewInt(10))
 		code[i] = byte('0' + n.Int64())
