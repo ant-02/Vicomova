@@ -3,18 +3,16 @@
 CONFIG_FILE = config/base.yaml
 SESSION_NAME = vicomova
 
-# tmux 开发模式：2 面板，左边最近访问窗口，右边主终端
+# tmux 开发模式：3 个窗口
 dev:
 	@if tmux has-session -t $(SESSION_NAME) 2>/dev/null; then \
 		tmux kill-session -t $(SESSION_NAME); \
 	fi
 	@echo "Starting Vicomova services..."
 	@tmux new-session -d -s $(SESSION_NAME) -n main
-	@tmux split-window -h -t $(SESSION_NAME):main
 	@tmux new-window -t $(SESSION_NAME) -n user
 	@tmux new-window -t $(SESSION_NAME) -n gateway
-	@tmux send-keys -t $(SESSION_NAME):main.0 "echo 'User window: Ctrl+B , then 1'" C-m
-	@tmux send-keys -t $(SESSION_NAME):main.1 "echo '=== TERMINAL ===' && echo 'Main operational window'" C-m
+	@tmux send-keys -t $(SESSION_NAME):main "echo 'Vicomova dev session'" C-m
 	@tmux send-keys -t $(SESSION_NAME):user "make run-user" C-m
 	@tmux send-keys -t $(SESSION_NAME):gateway "make run-gateway" C-m
 	@tmux attach-session -t $(SESSION_NAME)
