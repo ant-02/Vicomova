@@ -1,6 +1,6 @@
 # Vicomova
 
-基于 Go + Hertz + Kitex 的微服务后端项目，采用 DDD（Domain-Driven Design）架构设计，支持服务注册发现和配置热更新。
+基于 Go + Hertz + Kitex 的微服务后端项目，采用 DDD（领域驱动设计）架构，支持服务注册发现和配置热更新。
 
 ## 架构
 
@@ -16,37 +16,29 @@ Client → HTTP Gateway (Hertz:8080) → User RPC (Kitex:8888)
 - **配置热更新**: 配置文件变更实时推送到各服务
 - **双 Token 认证**: Access Token + Refresh Token 旋转方案
 - **邮件服务**: 阿里云 DirectMail SDK
+- **视频服务**: 投稿、播放、分类、热度算法（Wilson 区间）
+- **互动服务**: 点赞、评论、收藏（可复用）
+- **存储策略**: local / 七牛 / 阿里云 OSS / AWS S3
 
 ## 项目结构
 
 ```
 ├── cmd/                      # 服务入口
 │   ├── gateway/             # HTTP 网关 (Hertz)
-│   └── user/                # User RPC 服务 (Kitex)
+│   ├── user/                # User RPC 服务 (Kitex)
+│   ├── video/               # Video RPC 服务 (Kitex)
+│   └── interaction/         # Interaction RPC 服务 (Kitex)
 │
-├── api/rpc/user/            # Protobuf IDL 定义
-│   └── user.proto           # RPC 接口定义
+├── api/rpc/                 # Protobuf IDL 定义
+│   ├── user/user.proto
+│   ├── video/video.proto
+│   └── interaction/interaction.proto
 │
 ├── internal/                 # 业务代码 (DDD)
-│   ├── user/               # 用户服务（完整 DDD）
-│   │   ├── domain/         # 领域层
-│   │   │   ├── entity/    # 实体
-│   │   │   ├── repository/ # 仓储接口
-│   │   │   ├── service/    # 领域服务
-│   │   │   └── valueobject/ # 值对象
-│   │   ├── application/    # 应用层
-│   │   │   ├── command/   # 写操作（注册/登录等）
-│   │   │   └── query/     # 读操作
-│   │   ├── infrastructure/ # 基础设施层
-│   │   │   ├── persistence/mysql/ # MySQL 实现
-│   │   │   ├── persistence/redis/ # Redis 实现
-│   │   │   └── external/email/    # 邮件服务
-│   │   └── interfaces/    # 接口层
-│   │       ├── http/      # HTTP Handler + Router
-│   │       └── grpc/      # RPC Handler + Client
+│   ├── user/               # 用户服务
+│   ├── video/              # 视频服务
+│   ├── interaction/        # 互动服务
 │   ├── shared/             # 跨服务共享
-│   │   ├── infrastructure/data/ # MySQL/Redis/Kafka 连接
-│   │   └── pkg/           # errors/log/constants
 │   └── gateway/            # HTTP 网关
 │
 ├── pkg/                     # 公共工具
@@ -57,7 +49,6 @@ Client → HTTP Gateway (Hertz:8080) → User RPC (Kitex:8888)
 │
 ├── docker/                  # Docker 配置
 ├── config/                  # 配置文件（gitignore）
-│   └── base.yaml.example   # 配置模板
 ├── third_party/kitex_gen/   # 生成的 RPC 代码
 └── Makefile
 ```
@@ -79,18 +70,21 @@ cp config/base.yaml.example config/base.yaml
 # 启动 MySQL + Redis + Etcd
 make docker-up
 
-# tmux 开发模式（三个窗口）
+# tmux 开发模式（五个窗口）
 make dev
 ```
 
 ### 3. 直接运行
 
 ```bash
-# 终端 1: User RPC 服务
-make run-user
+# 编译所有服务到 bin/
+make build
 
-# 终端 2: Gateway
-make run-gateway
+# 各服务独立运行
+./bin/user -config config/base.yaml -port 8888
+./bin/video -config config/base.yaml -port 8889
+./bin/interaction -config config/base.yaml -port 8890
+./bin/gateway -config config/base.yaml -port 8080
 ```
 
 ### 4. Docker 部署
@@ -109,7 +103,10 @@ make docker-up-prod
 |------|------|
 | `make dev` | tmux 开发模式 |
 | `make dev-stop` | 停止 tmux |
+| `make build` | 编译所有服务到 bin/ |
 | `make run-user` | 运行 User RPC |
+| `make run-video` | 运行 Video RPC |
+| `make run-interaction` | 运行 Interaction RPC |
 | `make run-gateway` | 运行 Gateway |
 | `make docker-up` | 启动开发环境 |
 | `make docker-up-prod` | 启动生产环境 |
@@ -135,12 +132,33 @@ make docker-up-prod
 4. **刷新**: Refresh Token 有效 → 旋转更新 → 返回新 Token
 5. **登出**: 使 Redis 中的 Refresh Token 失效
 
-## 新增服务
+## 核心设计
 
-新增服务（如 order）时，在 `internal/` 下创建独立的服务目录：
+### 存储策略模式
+
+视频存储支持多种后端切换：
+
+| 类型 | 说明 |
+|------|------|
+| `local` | 本地磁盘 |
+| `qiniu` | 七牛云存储 |
+| `aliyun` | 阿里云 OSS |
+| `aws` | AWS S3 |
+
+### 热度算法（Wilson 区间）
+
+视频热度采用 Wilson 置信区间算法，避免头部效应：
 
 ```
-internal/order/
+score = (p + z²/2n - z*√((p(1-p)+z²/4n)/n)) / (1+z²/n)
+```
+
+## 新增服务
+
+新增服务时，在 `internal/` 下创建独立的服务目录：
+
+```
+internal/{service}/
 ├── domain/
 │   ├── entity/
 │   ├── repository/
@@ -173,7 +191,7 @@ internal/order/
 GitHub Actions 自动构建：
 
 - **dev 分支 push**: 运行 lint + build
-- **PR to main**: 运行 lint + build + Docker 构建
+- **PR to main**: 运行 lint + build + 测试 + Docker 构建
 
 ## 依赖框架
 

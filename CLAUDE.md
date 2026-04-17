@@ -26,7 +26,7 @@ Client → HTTP Gateway (Hertz:8080) → User RPC (Kitex:8888)
 
 ### tmux 开发模式
 ```bash
-make dev      # 启动 tmux 会话（main/user/gateway 三个窗口）
+make dev      # 启动 tmux 会话（main/user/video/interaction/gateway 五个窗口）
 make dev-stop # 停止 tmux 会话
 ```
 
@@ -37,10 +37,13 @@ make docker-down    # 停止服务
 make docker-clean   # 清理数据卷
 ```
 
-### 直接运行
+### 编译运行
 ```bash
-make run-user     # 运行 User RPC 服务
-make run-gateway  # 运行 Gateway
+make build          # 编译所有服务到 bin/
+make run-user       # 运行 User RPC 服务
+make run-video      # 运行 Video RPC 服务
+make run-interaction # 运行 Interaction RPC 服务
+make run-gateway    # 运行 Gateway
 ```
 
 ### 代码生成
@@ -56,49 +59,104 @@ make swagger # 生成 Swagger 文档
 ```
 cmd/                    # 服务入口
   ├── gateway/         # HTTP 网关 (Hertz)
-  └── user/            # User RPC 服务 (Kitex)
+  ├── user/            # User RPC 服务 (Kitex)
+  ├── video/           # Video RPC 服务 (Kitex)
+  └── interaction/    # Interaction RPC 服务 (Kitex)
 
-api/rpc/user/          # Protobuf IDL 定义
-  └── user.proto       # RPC 接口定义
+api/rpc/               # Protobuf IDL 定义
+  ├── user/user.proto
+  ├── video/video.proto
+  └── interaction/interaction.proto
 
 internal/              # 内部业务代码
   ├── user/            # 用户服务（完整 DDD）
-  │   ├── domain/      # 领域层
-  │   │   ├── entity/ # 实体
-  │   │   ├── repository/ # 仓储接口
-  │   │   ├── service/  # 领域服务
-  │   │   └── valueobject/ # 值对象
-  │   ├── application/ # 应用层
-  │   │   ├── command/ # 写操作
-  │   │   └── query/   # 读操作
-  │   ├── infrastructure/ # 基础设施层
-  │   │   ├── persistence/mysql/  # MySQL 实现
-  │   │   ├── persistence/redis/   # Redis 实现
-  │   │   └── external/email/      # 邮件服务（阿里云 DirectMail）
-  │   └── interfaces/  # 接口层
-  │       ├── http/   # HTTP Handler + Router
-  │       └── grpc/   # RPC Handler + Client
+  │   ├── domain/
+  │   │   ├── entity/
+  │   │   ├── repository/
+  │   │   ├── service/
+  │   │   └── valueobject/
+  │   ├── application/
+  │   │   ├── command/
+  │   │   └── query/
+  │   ├── infrastructure/
+  │   │   ├── persistence/mysql/
+  │   │   ├── persistence/redis/
+  │   │   └── external/email/
+  │   └── interfaces/
+  │       ├── http/
+  │       └── grpc/
+  ├── video/           # 视频服务（完整 DDD）
+  │   ├── domain/
+  │   │   ├── entity/  # Video, Category
+  │   │   ├── repository/
+  │   │   └── service/ # HotAlgorithm
+  │   ├── application/
+  │   │   ├── command/ # PublishVideo
+  │   │   └── query/   # GetVideo, ListByCategory, ListHot
+  │   ├── infrastructure/
+  │   │   ├── persistence/mysql/
+  │   │   ├── storage/ # VideoStorage (策略模式: local/qiniu/aliyun/aws)
+  │   │   └── service/ # WilsonHotAlgorithm
+  │   └── interfaces/
+  ├── interaction/     # 互动服务（完整 DDD）
+  │   ├── domain/
+  │   │   ├── entity/  # Like, Comment, Favorite
+  │   │   └── repository/
+  │   ├── application/
+  │   │   ├── command/ # Like, Comment, Favorite
+  │   │   └── query/
+  │   ├── infrastructure/
+  │   │   └── persistence/mysql/
+  │   └── interfaces/
   ├── shared/          # 跨服务共享
-  │   ├── infrastructure/data/ # MySQL/Redis/Kafka 连接
-  │   └── pkg/        # errors/log/constants
-  └── gateway/         # HTTP 网关
-      ├── bootstrap.go # 启动初始化
-      └── dynamic_router.go # 动态路由
+  │   ├── infrastructure/data/
+  │   └── pkg/
+  └── gateway/
 
 pkg/                   # 公共工具
-  ├── config/         # 配置加载 (Viper) + 热更新
-  ├── etcd/           # Etcd 客户端封装
-  │   ├── client.go   # Etcd 连接
-  │   ├── registry.go # 服务注册（带租约）
-  │   ├── discovery.go # 服务发现
-  │   └── config.go   # 配置
+  ├── config/
+  ├── etcd/
   └── ...
 
 docker/                # Docker 配置
 config/                # 配置文件（已 gitignore）
-  └── base.yaml.example # 配置模板
 third_party/kitex_gen/ # 生成的 RPC 代码
 ```
+
+---
+
+## 核心设计
+
+### 存储策略模式
+
+视频存储支持多种后端切换，通过配置文件 `storage.type` 指定：
+
+| 类型 | 说明 |
+|------|------|
+| `local` | 本地磁盘 |
+| `qiniu` | 七牛云存储 |
+| `aliyun` | 阿里云 OSS |
+| `aws` | AWS S3 |
+
+```go
+type VideoStorage interface {
+    Upload(ctx context.Context, key string, r io.Reader) (string, error)
+    Delete(ctx context.Context, key string) error
+    GetURL(ctx context.Context, key string) (string, error)
+}
+```
+
+### 热度算法（Wilson 区间）
+
+视频热度采用 Wilson 置信区间算法，避免头部效应：
+
+```
+score = (p + z²/2n - z*√((p(1-p)+z²/4n)/n)) / (1+z²/n)
+```
+
+- `p`: 点赞率（likes / views）
+- `n`: 总浏览量
+- `z`: 置信度参数（默认 1.96）
 
 ---
 
@@ -113,17 +171,18 @@ third_party/kitex_gen/ # 生成的 RPC 代码
 
 | 配置 | 说明 |
 |------|------|
-| `email.access_key` | 阿里云 AccessKey ID（建议使用环境变量） |
-| `email.access_secret` | 阿里云 AccessKey Secret（建议使用环境变量） |
-| `email.account_name` | 发件地址，如 `noreply@mail.xhhx.xyz` |
-| `jwt.secret` | JWT 密钥（生产环境必须修改） |
-
-配置通过 **Viper** 加载，支持命令行 flag 覆盖。
+| `email.access_key` | 阿里云 AccessKey ID |
+| `email.access_secret` | 阿里云 AccessKey Secret |
+| `email.account_name` | 发件地址 |
+| `jwt.secret` | JWT 密钥 |
+| `storage.type` | 存储类型（local/qiniu/aliyun/aws） |
 
 ### 启动参数
 ```bash
-./user -config config/base.yaml -port 8888
-./gateway -config config/base.yaml -port 8080
+./bin/user -config config/base.yaml -port 8888
+./bin/video -config config/base.yaml -port 8889
+./bin/interaction -config config/base.yaml -port 8890
+./bin/gateway -config config/base.yaml -port 8080
 ```
 
 ---
@@ -143,7 +202,7 @@ third_party/kitex_gen/ # 生成的 RPC 代码
 
 ## Proto 代码生成
 
-修改 `api/rpc/user/user.proto` 后运行:
+修改 `api/rpc/*.proto` 后运行:
 ```bash
 make proto
 ```

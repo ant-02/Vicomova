@@ -1,9 +1,9 @@
-.PHONY: dev dev-stop dev-logs run-user run-gateway docker-build docker-up docker-up-prod docker-down docker-clean proto swagger
+.PHONY: dev dev-stop dev-logs run-user run-gateway run-video run-interaction docker-build docker-up docker-up-prod docker-down docker-clean proto swagger
 
 CONFIG_FILE = config/base.yaml
 SESSION_NAME = vicomova
 
-# tmux 开发模式：3 个窗口
+# tmux 开发模式：5 个窗口
 dev:
 	@if tmux has-session -t $(SESSION_NAME) 2>/dev/null; then \
 		tmux kill-session -t $(SESSION_NAME); \
@@ -11,9 +11,13 @@ dev:
 	@echo "Starting Vicomova services..."
 	@tmux new-session -d -s $(SESSION_NAME) -n main
 	@tmux new-window -t $(SESSION_NAME) -n user
+	@tmux new-window -t $(SESSION_NAME) -n video
+	@tmux new-window -t $(SESSION_NAME) -n interaction
 	@tmux new-window -t $(SESSION_NAME) -n gateway
 	@tmux send-keys -t $(SESSION_NAME):main "echo 'Vicomova dev session'" C-m
 	@tmux send-keys -t $(SESSION_NAME):user "make run-user" C-m
+	@tmux send-keys -t $(SESSION_NAME):video "make run-video" C-m
+	@tmux send-keys -t $(SESSION_NAME):interaction "make run-interaction" C-m
 	@tmux send-keys -t $(SESSION_NAME):gateway "make run-gateway" C-m
 	@tmux attach-session -t $(SESSION_NAME)
 
@@ -29,14 +33,30 @@ dev-stop:
 # 查看服务日志
 dev-logs:
 	@echo "=== USER LOGS ===" && tmux capture-pane -t $(SESSION_NAME):user -p | tail -30
+	@echo "=== VIDEO LOGS ===" && tmux capture-pane -t $(SESSION_NAME):video -p | tail -30
+	@echo "=== INTERACTION LOGS ===" && tmux capture-pane -t $(SESSION_NAME):interaction -p | tail -30
 	@echo "=== GATEWAY LOGS ===" && tmux capture-pane -t $(SESSION_NAME):gateway -p | tail -30
 
-# 直接运行
-run-user:
-	go run ./cmd/user -config $(CONFIG_FILE) -port 8888
+# 编译输出到 bin/
+build:
+	mkdir -p bin
+	go build -o bin/user ./cmd/user
+	go build -o bin/video ./cmd/video
+	go build -o bin/interaction ./cmd/interaction
+	go build -o bin/gateway ./cmd/gateway
 
-run-gateway:
-	go run ./cmd/gateway -config $(CONFIG_FILE) -port 8080
+# 直接运行（编译后执行）
+run-user: build
+	./bin/user -config $(CONFIG_FILE) -port 8888
+
+run-video: build
+	./bin/video -config $(CONFIG_FILE) -port 8889
+
+run-interaction: build
+	./bin/interaction -config $(CONFIG_FILE) -port 8890
+
+run-gateway: build
+	./bin/gateway -config $(CONFIG_FILE) -port 8080
 
 # Proto 代码生成
 proto:
