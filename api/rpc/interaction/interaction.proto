@@ -1,0 +1,131 @@
+syntax = "proto3";
+
+package interaction;
+
+option go_package = "vicomova/third_party/kitex_gen/interaction";
+
+service InteractionService {
+    rpc LikeVideo(LikeVideoRequest) returns (LikeVideoResponse);
+    rpc UnlikeVideo(UnlikeVideoRequest) returns (UnlikeVideoResponse);
+    rpc ListLikes(ListLikesRequest) returns (ListLikesResponse);
+    rpc AddFavorite(AddFavoriteRequest) returns (AddFavoriteResponse);
+    rpc RemoveFavorite(RemoveFavoriteRequest) returns (RemoveFavoriteResponse);
+    rpc ListFavorites(ListFavoritesRequest) returns (ListFavoritesResponse);
+    rpc Comment(CommentRequest) returns (CommentResponse);
+    rpc DeleteComment(DeleteCommentRequest) returns (DeleteCommentResponse);
+    rpc ListComments(ListCommentsRequest) returns (ListCommentsResponse);
+    rpc LikeComment(LikeCommentRequest) returns (LikeCommentResponse);
+}
+
+message LikeVideoRequest {
+    int64 user_id = 1;
+    int64 video_id = 2;
+}
+
+message LikeVideoResponse {}
+
+message UnlikeVideoRequest {
+    int64 user_id = 1;
+    int64 video_id = 2;
+}
+
+message UnlikeVideoResponse {}
+
+message ListLikesRequest {
+    int64 user_id = 1;
+    string target_type = 2; // "video" or "comment"
+    int32 page = 3;
+    int32 size = 4;
+}
+
+message ListLikesResponse {
+    repeated Like likes = 1;
+    int64 total = 2;
+}
+
+message AddFavoriteRequest {
+    int64 user_id = 1;
+    int64 video_id = 2;
+}
+
+message AddFavoriteResponse {}
+
+message RemoveFavoriteRequest {
+    int64 user_id = 1;
+    int64 video_id = 2;
+}
+
+message RemoveFavoriteResponse {}
+
+message ListFavoritesRequest {
+    int64 user_id = 1;
+    int32 page = 2;
+    int32 size = 3;
+}
+
+message ListFavoritesResponse {
+    repeated Favorite favorites = 1;
+    int64 total = 2;
+}
+
+message CommentRequest {
+    int64 user_id = 1;
+    int64 video_id = 2;
+    int64 parent_id = 3; // 0 for root comment
+    string content = 4;
+}
+
+message CommentResponse {
+    int64 comment_id = 1;
+}
+
+message DeleteCommentRequest {
+    int64 user_id = 1;
+    int64 comment_id = 2;
+}
+
+message DeleteCommentResponse {}
+
+message ListCommentsRequest {
+    int64 video_id = 1;
+    int64 parent_id = 2; // 0 for root comments
+    int32 page = 3;
+    int32 size = 4;
+}
+
+message ListCommentsResponse {
+    repeated Comment comments = 1;
+    int64 total = 2;
+}
+
+message LikeCommentRequest {
+    int64 user_id = 1;
+    int64 comment_id = 2;
+}
+
+message LikeCommentResponse {}
+
+message Like {
+    int64 id = 1;
+    int64 user_id = 2;
+    string target_type = 3;
+    int64 target_id = 4;
+    int64 created_at = 5;
+}
+
+message Comment {
+    int64 id = 1;
+    int64 user_id = 2;
+    int64 video_id = 3;
+    int64 parent_id = 4;
+    string content = 5;
+    int64 like_count = 6;
+    int64 created_at = 7;
+}
+
+message Favorite {
+    int64 id = 1;
+    int64 user_id = 2;
+    int64 video_id = 3;
+    int64 created_at = 4;
+}

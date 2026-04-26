@@ -1,0 +1,141 @@
+package grpc
+
+import (
+    "context"
+
+    video "vicomova/third_party/kitex_gen/video"
+    "vicomova/internal/video/application/command"
+    "vicomova/internal/video/application/query"
+    "vicomova/internal/video/domain/entity"
+)
+
+type VideoHandler struct {
+    cmdSvc *command.VideoCommandService
+    qrySvc *query.VideoQueryService
+}
+
+func NewVideoHandler(cmdSvc *command.VideoCommandService, qrySvc *query.VideoQueryService) *VideoHandler {
+    return &VideoHandler{
+        cmdSvc: cmdSvc,
+        qrySvc: qrySvc,
+    }
+}
+
+func (h *VideoHandler) PublishVideo(ctx context.Context, req *video.PublishVideoRequest) (*video.PublishVideoResponse, error) {
+    cmd := &command.PublishVideoCommand{
+        UserID:      req.UserId,
+        Title:       req.Title,
+        Description: req.Description,
+        CategoryID:  int(req.CategoryId),
+        CoverURL:    req.CoverUrl,
+        VideoURL:    req.VideoUrl,
+        Duration:    int(req.Duration),
+    }
+
+    result, err := h.cmdSvc.Publish(ctx, cmd)
+    if err != nil {
+        return nil, err
+    }
+
+    return &video.PublishVideoResponse{VideoId: result.VideoID}, nil
+}
+
+func (h *VideoHandler) GetVideoStream(ctx context.Context, req *video.GetVideoStreamRequest) (*video.GetVideoStreamResponse, error) {
+    v, err := h.qrySvc.GetVideoStream(ctx, req.VideoId)
+    if err != nil {
+        return nil, err
+    }
+    if v == nil {
+        return nil, nil
+    }
+
+    return &video.GetVideoStreamResponse{
+        VideoUrl: v.VideoURL,
+        Title:    v.Title,
+    }, nil
+}
+
+func (h *VideoHandler) ListByCategory(ctx context.Context, req *video.ListByCategoryRequest) (*video.ListByCategoryResponse, error) {
+    result, err := h.qrySvc.ListByCategory(ctx, int(req.CategoryId), int(req.Page), int(req.Size))
+    if err != nil {
+        return nil, err
+    }
+
+    videos := make([]*video.Video, len(result.Videos))
+    for i, v := range result.Videos {
+        videos[i] = toProtoVideo(v)
+    }
+
+    return &video.ListByCategoryResponse{
+        Videos: videos,
+        Total:  result.Total,
+    }, nil
+}
+
+func (h *VideoHandler) ListHotVideos(ctx context.Context, req *video.ListHotVideosRequest) (*video.ListHotVideosResponse, error) {
+    videos, err := h.qrySvc.ListHot(ctx, int(req.Limit))
+    if err != nil {
+        return nil, err
+    }
+
+    protoVideos := make([]*video.Video, len(videos))
+    for i, v := range videos {
+        protoVideos[i] = toProtoVideo(v)
+    }
+
+    return &video.ListHotVideosResponse{Videos: protoVideos}, nil
+}
+
+func (h *VideoHandler) GetVideoCover(ctx context.Context, req *video.GetVideoCoverRequest) (*video.GetVideoCoverResponse, error) {
+    result, err := h.qrySvc.GetVideo(ctx, req.VideoId)
+    if err != nil {
+        return nil, err
+    }
+    if result == nil || result.Video == nil {
+        return nil, nil
+    }
+
+    return &video.GetVideoCoverResponse{CoverUrl: result.Video.CoverURL}, nil
+}
+
+func (h *VideoHandler) GetPublishedList(ctx context.Context, req *video.GetPublishedListRequest) (*video.GetPublishedListResponse, error) {
+    result, err := h.qrySvc.ListByUser(ctx, req.UserId, int(req.Page), int(req.Size))
+    if err != nil {
+        return nil, err
+    }
+
+    videos := make([]*video.Video, len(result.Videos))
+    for i, v := range result.Videos {
+        videos[i] = toProtoVideo(v)
+    }
+
+    return &video.GetPublishedListResponse{
+        Videos: videos,
+        Total:  result.Total,
+    }, nil
+}
+
+func (h *VideoHandler) IncrementView(ctx context.Context, req *video.IncrementViewRequest) (*video.IncrementViewResponse, error) {
+    err := h.qrySvc.IncrementView(ctx, req.VideoId)
+    if err != nil {
+        return nil, err
+    }
+    return &video.IncrementViewResponse{}, nil
+}
+
+func toProtoVideo(v *entity.Video) *video.Video {
+    return &video.Video{
+        Id:           v.ID,
+        UserId:       v.UserID,
+        Title:        v.Title,
+        Description:  v.Description,
+        CoverUrl:     v.CoverURL,
+        VideoUrl:     v.VideoURL,
+        CategoryId:   int32(v.CategoryID),
+        ViewCount:    v.ViewCount,
+        LikeCount:    v.LikeCount,
+        CommentCount: v.CommentCount,
+        Duration:     int32(v.Duration),
+        CreatedAt:    v.CreatedAt.Unix(),
+    }
+}

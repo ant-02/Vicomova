@@ -1,0 +1,97 @@
+syntax = "proto3";
+
+package video;
+
+option go_package = "vicomova/third_party/kitex_gen/video";
+
+service VideoService {
+    rpc PublishVideo(PublishVideoRequest) returns (PublishVideoResponse);
+    rpc GetVideoStream(GetVideoStreamRequest) returns (GetVideoStreamResponse);
+    rpc ListByCategory(ListByCategoryRequest) returns (ListByCategoryResponse);
+    rpc ListHotVideos(ListHotVideosRequest) returns (ListHotVideosResponse);
+    rpc GetVideoCover(GetVideoCoverRequest) returns (GetVideoCoverResponse);
+    rpc GetPublishedList(GetPublishedListRequest) returns (GetPublishedListResponse);
+    rpc IncrementView(IncrementViewRequest) returns (IncrementViewResponse);
+}
+
+message PublishVideoRequest {
+    int64 user_id = 1;
+    string title = 2;
+    string description = 3;
+    int32 category_id = 4;
+    string cover_url = 5;
+    string video_url = 6;
+    int32 duration = 7;
+}
+
+message PublishVideoResponse {
+    int64 video_id = 1;
+}
+
+message GetVideoStreamRequest {
+    int64 video_id = 1;
+}
+
+message GetVideoStreamResponse {
+    string video_url = 1;
+    string title = 2;
+}
+
+message ListByCategoryRequest {
+    int32 category_id = 1;
+    int32 page = 2;
+    int32 size = 3;
+}
+
+message ListByCategoryResponse {
+    repeated Video videos = 1;
+    int64 total = 2;
+}
+
+message ListHotVideosRequest {
+    int32 limit = 1;
+}
+
+message ListHotVideosResponse {
+    repeated Video videos = 1;
+}
+
+message GetVideoCoverRequest {
+    int64 video_id = 1;
+}
+
+message GetVideoCoverResponse {
+    string cover_url = 1;
+}
+
+message GetPublishedListRequest {
+    int64 user_id = 1;
+    int32 page = 2;
+    int32 size = 3;
+}
+
+message GetPublishedListResponse {
+    repeated Video videos = 1;
+    int64 total = 2;
+}
+
+message IncrementViewRequest {
+    int64 video_id = 1;
+}
+
+message IncrementViewResponse {}
+
+message Video {
+    int64 id = 1;
+    int64 user_id = 2;
+    string title = 3;
+    string description = 4;
+    string cover_url = 5;
+    string video_url = 6;
+    int32 category_id = 7;
+    int64 view_count = 8;
+    int64 like_count = 9;
+    int64 comment_count = 10;
+    int32 duration = 11;
+    int64 created_at = 12;
+}

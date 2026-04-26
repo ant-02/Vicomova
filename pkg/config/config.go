@@ -16,8 +16,47 @@ type Config struct {
 	Kafka    KafkaConfig       `mapstructure:"kafka"`
 	JWT      JWTConfig         `mapstructure:"jwt"`
 	Email    AliyunEmailConfig `mapstructure:"email"`
+	Video    VideoConfig       `mapstructure:"video"`
 	Etcd     etcd.EtcdConfig   `mapstructure:"etcd"`
 	Services map[string]ServiceConfig `mapstructure:"services"`
+}
+
+type VideoConfig struct {
+	Storage VideoStorageConfig `mapstructure:"storage"`
+}
+
+type VideoStorageConfig struct {
+	Type   string              `mapstructure:"type"` // local/qiniu/aliyun/aws
+	Local  LocalStorageConfig  `mapstructure:"local"`
+	Qiniu  QiniuStorageConfig  `mapstructure:"qiniu"`
+	Aliyun AliyunOSSConfig    `mapstructure:"aliyun"`
+	AWS    AWSStorageConfig    `mapstructure:"aws"`
+}
+
+type LocalStorageConfig struct {
+	BasePath string `mapstructure:"base_path"`
+	BaseURL  string `mapstructure:"base_url"`
+}
+
+type QiniuStorageConfig struct {
+	AccessKey string `mapstructure:"access_key"`
+	SecretKey string `mapstructure:"secret_key"`
+	Bucket   string `mapstructure:"bucket"`
+	Domain   string `mapstructure:"domain"`
+}
+
+type AliyunOSSConfig struct {
+	AccessKey string `mapstructure:"access_key"`
+	SecretKey string `mapstructure:"secret_key"`
+	Bucket    string `mapstructure:"bucket"`
+	Endpoint  string `mapstructure:"endpoint"`
+}
+
+type AWSStorageConfig struct {
+	AccessKey string `mapstructure:"access_key"`
+	SecretKey string `mapstructure:"secret_key"`
+	Bucket    string `mapstructure:"bucket"`
+	Region    string `mapstructure:"region"`
 }
 
 type ServiceConfig struct {
