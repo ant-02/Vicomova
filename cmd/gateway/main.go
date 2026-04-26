@@ -8,9 +8,12 @@ import (
 	"syscall"
 
 	"vicomova/internal/gateway"
+	"vicomova/internal/gateway/handlers"
 	"vicomova/internal/user/interfaces/http/handler"
 	"vicomova/internal/user/interfaces/http/router"
 	rpc "vicomova/internal/user/interfaces/grpc"
+	videoRpc "vicomova/internal/video/interfaces/grpc"
+	interactionRpc "vicomova/internal/interaction/interfaces/grpc"
 	"vicomova/internal/shared/pkg/log"
 	"vicomova/pkg/config"
 	hertz "vicomova/pkg/hertz"
@@ -65,6 +68,31 @@ func main() {
 	tokenSvc := service.NewTokenService(cfg.JWT.Secret)
 	userHandler := handler.NewUserHandler(userClient)
 	router.RegisterRoutes(h, userHandler, tokenSvc)
+
+	// 初始化 Video RPC Client
+	videoAddr := bs.GetServiceAddr("video")
+	if videoAddr == "" {
+		log.Error.Fatalf("No address found for video service")
+	}
+	videoClient, err := videoRpc.NewVideoClient("video", videoAddr)
+	if err != nil {
+		log.Error.Fatalf("Failed to create video client: %v", err)
+	}
+
+	// 初始化 Interaction RPC Client
+	interactionAddr := bs.GetServiceAddr("interaction")
+	if interactionAddr == "" {
+		log.Error.Fatalf("No address found for interaction service")
+	}
+	interactionClient, err := interactionRpc.NewInteractionClient("interaction", interactionAddr)
+	if err != nil {
+		log.Error.Fatalf("Failed to create interaction client: %v", err)
+	}
+
+	// 创建 video/interaction handlers 并注册路由
+	videoHandler := handlers.NewVideoHandler(videoClient)
+	interactionHandler := handlers.NewInteractionHandler(interactionClient)
+	gateway.RegisterVideoAndInteractionRoutes(h, videoHandler, interactionHandler, tokenSvc)
 
 	// 初始化 etcd 路由管理器（用于热更新路由配置）
 	if bs.Client() != nil {
