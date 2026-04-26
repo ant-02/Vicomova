@@ -40,26 +40,18 @@ func main() {
 		log.Error.Fatalf("Failed to load config: %v", err)
 	}
 
-	// Bootstrap - 初始化 etcd 连接（可选，无 etcd 时使用默认地址）
+	// Bootstrap - 初始化 etcd 连接
 	bs, err := gateway.NewBootstrap(cfg)
 	if err != nil {
 		log.Error.Fatalf("Failed to bootstrap: %v", err)
 	}
 	defer bs.Close()
 
-	// 监听配置变更
-	bs.WatchConfig("jwt.secret", func(oldVal, newVal interface{}) {
-		log.Info.Printf("JWT secret changed: %v -> %v", oldVal, newVal)
-	})
-
 	// 创建 Hertz 服务器
 	h := hertz.NewServer(port)
 
 	// 初始化 User RPC Client（通过 bootstrap 发现地址）
 	userAddr := bs.GetServiceAddr("user")
-	if userAddr == "" {
-		log.Error.Fatalf("No address found for user service")
-	}
 	userClient, err := rpc.NewUserClient("user", userAddr)
 	if err != nil {
 		log.Error.Fatalf("Failed to create user client: %v", err)
@@ -72,9 +64,6 @@ func main() {
 
 	// 初始化 Video RPC Client
 	videoAddr := bs.GetServiceAddr("video")
-	if videoAddr == "" {
-		log.Error.Fatalf("No address found for video service")
-	}
 	videoClient, err := videoRpc.NewVideoClient("video", videoAddr)
 	if err != nil {
 		log.Error.Fatalf("Failed to create video client: %v", err)
@@ -82,9 +71,6 @@ func main() {
 
 	// 初始化 Interaction RPC Client
 	interactionAddr := bs.GetServiceAddr("interaction")
-	if interactionAddr == "" {
-		log.Error.Fatalf("No address found for interaction service")
-	}
 	interactionClient, err := interactionRpc.NewInteractionClient("interaction", interactionAddr)
 	if err != nil {
 		log.Error.Fatalf("Failed to create interaction client: %v", err)
@@ -95,13 +81,6 @@ func main() {
 	ih := interactionHandler.NewInteractionHandler(interactionClient)
 	gateway.RegisterVideoRoutes(h, vh, tokenSvc)
 	gateway.RegisterInteractionRoutes(h, ih)
-
-	// 初始化 etcd 路由管理器（用于热更新路由配置）
-	if bs.Client() != nil {
-		routeMgr := gateway.NewDynamicRouter(bs.Client(), h)
-		routeMgr.LoadRoutes(context.Background())
-		routeMgr.WatchRoutes(context.Background())
-	}
 
 	// 优雅关闭
 	go func() {
