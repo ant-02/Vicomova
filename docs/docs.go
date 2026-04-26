@@ -30,7 +30,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "comment-like"
+                    "interaction"
                 ],
                 "summary": "点赞评论",
                 "parameters": [
@@ -342,7 +342,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "video-comment"
+                    "interaction"
                 ],
                 "summary": "评论视频",
                 "parameters": [
@@ -398,7 +398,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "video-comment"
+                    "interaction"
                 ],
                 "summary": "删除评论",
                 "parameters": [
@@ -447,7 +447,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "video-comment"
+                    "interaction"
                 ],
                 "summary": "获取评论列表",
                 "parameters": [
@@ -563,7 +563,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "video-favorite"
+                    "interaction"
                 ],
                 "summary": "收藏视频",
                 "parameters": [
@@ -618,7 +618,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "video-favorite"
+                    "interaction"
                 ],
                 "summary": "取消收藏视频",
                 "parameters": [
@@ -672,7 +672,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "video-favorite"
+                    "interaction"
                 ],
                 "summary": "获取收藏列表",
                 "parameters": [
@@ -766,7 +766,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "video-like"
+                    "interaction"
                 ],
                 "summary": "点赞视频",
                 "parameters": [
@@ -821,7 +821,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "video-like"
+                    "interaction"
                 ],
                 "summary": "取消点赞视频",
                 "parameters": [
@@ -875,7 +875,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "video-like"
+                    "interaction"
                 ],
                 "summary": "获取点赞列表",
                 "parameters": [

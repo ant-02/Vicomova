@@ -336,7 +336,7 @@ paths:
       - BearerAuth: []
       summary: 点赞评论
       tags:
-      - comment-like
+      - interaction
   /user:
     get:
       description: 获取当前登录用户的信息
@@ -537,7 +537,7 @@ paths:
       - BearerAuth: []
       summary: 删除评论
       tags:
-      - video-comment
+      - interaction
     post:
       consumes:
       - application/json
@@ -573,7 +573,7 @@ paths:
       - BearerAuth: []
       summary: 评论视频
       tags:
-      - video-comment
+      - interaction
   /video/comment/list:
     get:
       description: 获取视频的评论列表
@@ -619,7 +619,7 @@ paths:
             $ref: '#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse'
       summary: 获取评论列表
       tags:
-      - video-comment
+      - interaction
   /video/cover:
     get:
       description: 获取视频封面地址
@@ -683,7 +683,7 @@ paths:
       - BearerAuth: []
       summary: 取消收藏视频
       tags:
-      - video-favorite
+      - interaction
     post:
       consumes:
       - application/json
@@ -718,7 +718,7 @@ paths:
       - BearerAuth: []
       summary: 收藏视频
       tags:
-      - video-favorite
+      - interaction
   /video/favorite/list:
     get:
       description: 获取用户收藏的视频列表（需要认证）
@@ -754,7 +754,7 @@ paths:
       - BearerAuth: []
       summary: 获取收藏列表
       tags:
-      - video-favorite
+      - interaction
   /video/hot:
     get:
       description: 获取热门视频列表（基于热度算法）
@@ -814,7 +814,7 @@ paths:
       - BearerAuth: []
       summary: 取消点赞视频
       tags:
-      - video-like
+      - interaction
     post:
       consumes:
       - application/json
@@ -849,7 +849,7 @@ paths:
       - BearerAuth: []
       summary: 点赞视频
       tags:
-      - video-like
+      - interaction
   /video/like/list:
     get:
       description: 获取用户点赞列表（需要认证）
@@ -890,7 +890,7 @@ paths:
       - BearerAuth: []
       summary: 获取点赞列表
       tags:
-      - video-like
+      - interaction
   /video/list:
     get:
       description: 分页获取指定类别的视频列表

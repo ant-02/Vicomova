@@ -21,7 +21,7 @@ func NewInteractionHandler(interactionClient *interactionRpc.InteractionClient) 
 
 // @Summary 点赞视频
 // @Description 点赞视频（需要认证）
-// @Tags video-like
+// @Tags interaction
 // @Accept json
 // @Produce json
 // @Security BearerAuth
@@ -57,7 +57,7 @@ func (h *InteractionHandler) LikeVideo(ctx context.Context, c *app.RequestContex
 
 // @Summary 取消点赞视频
 // @Description 取消点赞视频（需要认证）
-// @Tags video-like
+// @Tags interaction
 // @Accept json
 // @Produce json
 // @Security BearerAuth
@@ -93,7 +93,7 @@ func (h *InteractionHandler) UnlikeVideo(ctx context.Context, c *app.RequestCont
 
 // @Summary 获取点赞列表
 // @Description 获取用户点赞列表（需要认证）
-// @Tags video-like
+// @Tags interaction
 // @Produce json
 // @Security BearerAuth
 // @Param target_type query string false "目标类型 (video/comment)" default(video)
@@ -140,7 +140,7 @@ func (h *InteractionHandler) ListLikes(ctx context.Context, c *app.RequestContex
 
 // @Summary 收藏视频
 // @Description 添加视频到收藏夹（需要认证）
-// @Tags video-favorite
+// @Tags interaction
 // @Accept json
 // @Produce json
 // @Security BearerAuth
@@ -176,7 +176,7 @@ func (h *InteractionHandler) AddFavorite(ctx context.Context, c *app.RequestCont
 
 // @Summary 取消收藏视频
 // @Description 从收藏夹移除视频（需要认证）
-// @Tags video-favorite
+// @Tags interaction
 // @Accept json
 // @Produce json
 // @Security BearerAuth
@@ -212,7 +212,7 @@ func (h *InteractionHandler) RemoveFavorite(ctx context.Context, c *app.RequestC
 
 // @Summary 获取收藏列表
 // @Description 获取用户收藏的视频列表（需要认证）
-// @Tags video-favorite
+// @Tags interaction
 // @Produce json
 // @Security BearerAuth
 // @Param page query int32 false "页码" default(1)
@@ -256,7 +256,7 @@ func (h *InteractionHandler) ListFavorites(ctx context.Context, c *app.RequestCo
 
 // @Summary 评论视频
 // @Description 对视频进行评论（需要认证）
-// @Tags video-comment
+// @Tags interaction
 // @Accept json
 // @Produce json
 // @Security BearerAuth
@@ -295,7 +295,7 @@ func (h *InteractionHandler) Comment(ctx context.Context, c *app.RequestContext)
 
 // @Summary 删除评论
 // @Description 删除自己的评论（需要认证）
-// @Tags video-comment
+// @Tags interaction
 // @Accept json
 // @Produce json
 // @Security BearerAuth
@@ -331,7 +331,7 @@ func (h *InteractionHandler) DeleteComment(ctx context.Context, c *app.RequestCo
 
 // @Summary 获取评论列表
 // @Description 获取视频的评论列表
-// @Tags video-comment
+// @Tags interaction
 // @Produce json
 // @Param video_id query int64 true "视频ID"
 // @Param parent_id query int64 false "父评论ID (0表示根评论)" default(0)
@@ -380,7 +380,7 @@ func (h *InteractionHandler) ListComments(ctx context.Context, c *app.RequestCon
 
 // @Summary 点赞评论
 // @Description 点赞评论（需要认证）
-// @Tags comment-like
+// @Tags interaction
 // @Accept json
 // @Produce json
 // @Security BearerAuth
