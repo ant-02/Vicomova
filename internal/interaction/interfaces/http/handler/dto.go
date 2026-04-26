@@ -1,53 +1,9 @@
-package handlers
-
-// ========== Common Types ==========
+package handler
 
 type ErrorResponse struct {
 	Code int32  `json:"code"`
 	Msg  string `json:"msg"`
 }
-
-// ========== Video Types ==========
-
-type PublishVideoRequest struct {
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	CategoryId  int32  `json:"category_id"`
-	CoverUrl    string `json:"cover_url"`
-	VideoUrl    string `json:"video_url"`
-	Duration    int32  `json:"duration"`
-}
-
-type VideoStreamResponse struct {
-	VideoURL string `json:"video_url"`
-	Title    string `json:"title"`
-}
-
-type VideoItem struct {
-	ID           int64  `json:"id"`
-	UserID       int64  `json:"user_id"`
-	Title        string `json:"title"`
-	Description  string `json:"description"`
-	CoverURL     string `json:"cover_url"`
-	VideoURL     string `json:"video_url"`
-	CategoryID   int32  `json:"category_id"`
-	ViewCount    int64  `json:"view_count"`
-	LikeCount    int64  `json:"like_count"`
-	CommentCount int64  `json:"comment_count"`
-	Duration     int32  `json:"duration"`
-	CreatedAt    int64  `json:"created_at"`
-}
-
-type VideoListResponse struct {
-	Videos []*VideoItem `json:"videos"`
-	Total  int64         `json:"total"`
-}
-
-type CoverResponse struct {
-	CoverURL string `json:"cover_url"`
-}
-
-// ========== Interaction Types ==========
 
 type LikeRequest struct {
 	VideoID int64 `json:"video_id"`
@@ -93,11 +49,10 @@ type LikeListResponse struct {
 }
 
 type FavoriteItem struct {
-	ID        int64  `json:"id"`
-	UserID    int64  `json:"user_id"`
-	VideoID   int64  `json:"video_id"`
-	CreatedAt int64  `json:"created_at"`
-	Video     *VideoItem `json:"video,omitempty"`
+	ID        int64 `json:"id"`
+	UserID    int64 `json:"user_id"`
+	VideoID   int64 `json:"video_id"`
+	CreatedAt int64 `json:"created_at"`
 }
 
 type FavoriteListResponse struct {
@@ -112,7 +67,7 @@ type CommentItem struct {
 	ParentID  int64  `json:"parent_id"`
 	Content   string `json:"content"`
 	LikeCount int64  `json:"like_count"`
-	CreatedAt int64 `json:"created_at"`
+	CreatedAt int64  `json:"created_at"`
 }
 
 type CommentListResponse struct {

@@ -40,7 +40,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.LikeCommentRequest"
+                            "$ref": "#/definitions/handler.LikeCommentRequest"
                         }
                     }
                 ],
@@ -48,25 +48,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handlers.SuccessResponse"
+                            "$ref": "#/definitions/handler.SuccessResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse"
                         }
                     }
                 }
@@ -97,13 +97,13 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
+                            "$ref": "#/definitions/internal_user_interfaces_http_handler.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
+                            "$ref": "#/definitions/internal_user_interfaces_http_handler.ErrorResponse"
                         }
                     }
                 }
@@ -143,13 +143,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
+                            "$ref": "#/definitions/internal_user_interfaces_http_handler.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
+                            "$ref": "#/definitions/internal_user_interfaces_http_handler.ErrorResponse"
                         }
                     }
                 }
@@ -189,13 +189,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
+                            "$ref": "#/definitions/internal_user_interfaces_http_handler.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
+                            "$ref": "#/definitions/internal_user_interfaces_http_handler.ErrorResponse"
                         }
                     }
                 }
@@ -235,13 +235,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
+                            "$ref": "#/definitions/internal_user_interfaces_http_handler.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
+                            "$ref": "#/definitions/internal_user_interfaces_http_handler.ErrorResponse"
                         }
                     }
                 }
@@ -281,7 +281,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
+                            "$ref": "#/definitions/internal_user_interfaces_http_handler.ErrorResponse"
                         }
                     }
                 }
@@ -321,7 +321,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
+                            "$ref": "#/definitions/internal_user_interfaces_http_handler.ErrorResponse"
                         }
                     }
                 }
@@ -352,7 +352,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.CommentRequest"
+                            "$ref": "#/definitions/handler.CommentRequest"
                         }
                     }
                 ],
@@ -367,19 +367,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse"
                         }
                     }
                 }
@@ -408,7 +408,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.DeleteCommentRequest"
+                            "$ref": "#/definitions/handler.DeleteCommentRequest"
                         }
                     }
                 ],
@@ -416,25 +416,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handlers.SuccessResponse"
+                            "$ref": "#/definitions/handler.SuccessResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse"
                         }
                     }
                 }
@@ -488,19 +488,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handlers.CommentListResponse"
+                            "$ref": "#/definitions/handler.CommentListResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse"
                         }
                     }
                 }
@@ -530,19 +530,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handlers.CoverResponse"
+                            "$ref": "#/definitions/handler.CoverResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/internal_video_interfaces_http_handler.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/internal_video_interfaces_http_handler.ErrorResponse"
                         }
                     }
                 }
@@ -573,7 +573,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.FavoriteRequest"
+                            "$ref": "#/definitions/handler.FavoriteRequest"
                         }
                     }
                 ],
@@ -581,25 +581,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handlers.SuccessResponse"
+                            "$ref": "#/definitions/handler.SuccessResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse"
                         }
                     }
                 }
@@ -628,7 +628,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.UnfavoriteRequest"
+                            "$ref": "#/definitions/handler.UnfavoriteRequest"
                         }
                     }
                 ],
@@ -636,25 +636,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handlers.SuccessResponse"
+                            "$ref": "#/definitions/handler.SuccessResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse"
                         }
                     }
                 }
@@ -697,19 +697,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handlers.FavoriteListResponse"
+                            "$ref": "#/definitions/handler.FavoriteListResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse"
                         }
                     }
                 }
@@ -739,13 +739,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handlers.VideoListResponse"
+                            "$ref": "#/definitions/handler.VideoListResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/internal_video_interfaces_http_handler.ErrorResponse"
                         }
                     }
                 }
@@ -776,7 +776,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.LikeRequest"
+                            "$ref": "#/definitions/handler.LikeRequest"
                         }
                     }
                 ],
@@ -784,25 +784,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handlers.SuccessResponse"
+                            "$ref": "#/definitions/handler.SuccessResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse"
                         }
                     }
                 }
@@ -831,7 +831,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.UnlikeRequest"
+                            "$ref": "#/definitions/handler.UnlikeRequest"
                         }
                     }
                 ],
@@ -839,25 +839,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handlers.SuccessResponse"
+                            "$ref": "#/definitions/handler.SuccessResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse"
                         }
                     }
                 }
@@ -907,19 +907,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handlers.LikeListResponse"
+                            "$ref": "#/definitions/handler.LikeListResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse"
                         }
                     }
                 }
@@ -965,19 +965,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handlers.VideoListResponse"
+                            "$ref": "#/definitions/handler.VideoListResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/internal_video_interfaces_http_handler.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/internal_video_interfaces_http_handler.ErrorResponse"
                         }
                     }
                 }
@@ -1020,19 +1020,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handlers.VideoListResponse"
+                            "$ref": "#/definitions/handler.VideoListResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/internal_video_interfaces_http_handler.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/internal_video_interfaces_http_handler.ErrorResponse"
                         }
                     }
                 }
@@ -1063,7 +1063,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.PublishVideoRequest"
+                            "$ref": "#/definitions/handler.PublishVideoRequest"
                         }
                     }
                 ],
@@ -1078,19 +1078,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/internal_video_interfaces_http_handler.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/internal_video_interfaces_http_handler.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/internal_video_interfaces_http_handler.ErrorResponse"
                         }
                     }
                 }
@@ -1120,19 +1120,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handlers.VideoStreamResponse"
+                            "$ref": "#/definitions/handler.VideoStreamResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/internal_video_interfaces_http_handler.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
+                            "$ref": "#/definitions/internal_video_interfaces_http_handler.ErrorResponse"
                         }
                     }
                 }
@@ -1140,15 +1140,162 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "handler.ErrorResponse": {
-            "description": "错误响应",
+        "handler.CommentItem": {
             "type": "object",
             "properties": {
-                "code": {
+                "content": {
+                    "type": "string"
+                },
+                "created_at": {
                     "type": "integer"
                 },
-                "msg": {
+                "id": {
+                    "type": "integer"
+                },
+                "like_count": {
+                    "type": "integer"
+                },
+                "parent_id": {
+                    "type": "integer"
+                },
+                "user_id": {
+                    "type": "integer"
+                },
+                "video_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handler.CommentListResponse": {
+            "type": "object",
+            "properties": {
+                "comments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handler.CommentItem"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handler.CommentRequest": {
+            "type": "object",
+            "properties": {
+                "content": {
                     "type": "string"
+                },
+                "parent_id": {
+                    "type": "integer"
+                },
+                "video_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handler.CoverResponse": {
+            "type": "object",
+            "properties": {
+                "cover_url": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.DeleteCommentRequest": {
+            "type": "object",
+            "properties": {
+                "comment_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handler.FavoriteItem": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "user_id": {
+                    "type": "integer"
+                },
+                "video_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handler.FavoriteListResponse": {
+            "type": "object",
+            "properties": {
+                "favorites": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handler.FavoriteItem"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handler.FavoriteRequest": {
+            "type": "object",
+            "properties": {
+                "video_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handler.LikeCommentRequest": {
+            "type": "object",
+            "properties": {
+                "comment_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handler.LikeItem": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "target_id": {
+                    "type": "integer"
+                },
+                "target_type": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handler.LikeListResponse": {
+            "type": "object",
+            "properties": {
+                "likes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handler.LikeItem"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handler.LikeRequest": {
+            "type": "object",
+            "properties": {
+                "video_id": {
+                    "type": "integer"
                 }
             }
         },
@@ -1200,6 +1347,29 @@ const docTemplate = `{
             "properties": {
                 "success": {
                     "type": "boolean"
+                }
+            }
+        },
+        "handler.PublishVideoRequest": {
+            "type": "object",
+            "properties": {
+                "category_id": {
+                    "type": "integer"
+                },
+                "cover_url": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "duration": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "video_url": {
+                    "type": "string"
                 }
             }
         },
@@ -1266,6 +1436,33 @@ const docTemplate = `{
                 }
             }
         },
+        "handler.SuccessResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "handler.UnfavoriteRequest": {
+            "type": "object",
+            "properties": {
+                "video_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handler.UnlikeRequest": {
+            "type": "object",
+            "properties": {
+                "video_id": {
+                    "type": "integer"
+                }
+            }
+        },
         "handler.UserResponse": {
             "description": "用户响应",
             "type": "object",
@@ -1302,230 +1499,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handlers.CommentItem": {
-            "type": "object",
-            "properties": {
-                "content": {
-                    "type": "string"
-                },
-                "created_at": {
-                    "type": "integer"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "like_count": {
-                    "type": "integer"
-                },
-                "parent_id": {
-                    "type": "integer"
-                },
-                "user_id": {
-                    "type": "integer"
-                },
-                "video_id": {
-                    "type": "integer"
-                }
-            }
-        },
-        "handlers.CommentListResponse": {
-            "type": "object",
-            "properties": {
-                "comments": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/handlers.CommentItem"
-                    }
-                },
-                "total": {
-                    "type": "integer"
-                }
-            }
-        },
-        "handlers.CommentRequest": {
-            "type": "object",
-            "properties": {
-                "content": {
-                    "type": "string"
-                },
-                "parent_id": {
-                    "type": "integer"
-                },
-                "video_id": {
-                    "type": "integer"
-                }
-            }
-        },
-        "handlers.CoverResponse": {
-            "type": "object",
-            "properties": {
-                "cover_url": {
-                    "type": "string"
-                }
-            }
-        },
-        "handlers.DeleteCommentRequest": {
-            "type": "object",
-            "properties": {
-                "comment_id": {
-                    "type": "integer"
-                }
-            }
-        },
-        "handlers.ErrorResponse": {
-            "type": "object",
-            "properties": {
-                "code": {
-                    "type": "integer"
-                },
-                "msg": {
-                    "type": "string"
-                }
-            }
-        },
-        "handlers.FavoriteItem": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "integer"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "user_id": {
-                    "type": "integer"
-                },
-                "video": {
-                    "$ref": "#/definitions/handlers.VideoItem"
-                },
-                "video_id": {
-                    "type": "integer"
-                }
-            }
-        },
-        "handlers.FavoriteListResponse": {
-            "type": "object",
-            "properties": {
-                "favorites": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/handlers.FavoriteItem"
-                    }
-                },
-                "total": {
-                    "type": "integer"
-                }
-            }
-        },
-        "handlers.FavoriteRequest": {
-            "type": "object",
-            "properties": {
-                "video_id": {
-                    "type": "integer"
-                }
-            }
-        },
-        "handlers.LikeCommentRequest": {
-            "type": "object",
-            "properties": {
-                "comment_id": {
-                    "type": "integer"
-                }
-            }
-        },
-        "handlers.LikeItem": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "integer"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "target_id": {
-                    "type": "integer"
-                },
-                "target_type": {
-                    "type": "string"
-                },
-                "user_id": {
-                    "type": "integer"
-                }
-            }
-        },
-        "handlers.LikeListResponse": {
-            "type": "object",
-            "properties": {
-                "likes": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/handlers.LikeItem"
-                    }
-                },
-                "total": {
-                    "type": "integer"
-                }
-            }
-        },
-        "handlers.LikeRequest": {
-            "type": "object",
-            "properties": {
-                "video_id": {
-                    "type": "integer"
-                }
-            }
-        },
-        "handlers.PublishVideoRequest": {
-            "type": "object",
-            "properties": {
-                "category_id": {
-                    "type": "integer"
-                },
-                "cover_url": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "duration": {
-                    "type": "integer"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "video_url": {
-                    "type": "string"
-                }
-            }
-        },
-        "handlers.SuccessResponse": {
-            "type": "object",
-            "properties": {
-                "message": {
-                    "type": "string"
-                },
-                "success": {
-                    "type": "boolean"
-                }
-            }
-        },
-        "handlers.UnfavoriteRequest": {
-            "type": "object",
-            "properties": {
-                "video_id": {
-                    "type": "integer"
-                }
-            }
-        },
-        "handlers.UnlikeRequest": {
-            "type": "object",
-            "properties": {
-                "video_id": {
-                    "type": "integer"
-                }
-            }
-        },
-        "handlers.VideoItem": {
+        "handler.VideoItem": {
             "type": "object",
             "properties": {
                 "category_id": {
@@ -1566,7 +1540,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handlers.VideoListResponse": {
+        "handler.VideoListResponse": {
             "type": "object",
             "properties": {
                 "total": {
@@ -1575,18 +1549,52 @@ const docTemplate = `{
                 "videos": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/handlers.VideoItem"
+                        "$ref": "#/definitions/handler.VideoItem"
                     }
                 }
             }
         },
-        "handlers.VideoStreamResponse": {
+        "handler.VideoStreamResponse": {
             "type": "object",
             "properties": {
                 "title": {
                     "type": "string"
                 },
                 "video_url": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_interaction_interfaces_http_handler.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "msg": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_user_interfaces_http_handler.ErrorResponse": {
+            "description": "错误响应",
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "msg": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_video_interfaces_http_handler.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "msg": {
                     "type": "string"
                 }
             }

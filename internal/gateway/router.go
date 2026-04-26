@@ -1,52 +1,19 @@
 package gateway
 
 import (
-	"vicomova/internal/gateway/handlers"
-	"vicomova/internal/shared/pkg/middleware"
+	interactionHdl "vicomova/internal/interaction/interfaces/http/handler"
+	interactionRtr "vicomova/internal/interaction/interfaces/http/router"
+	videoHdl "vicomova/internal/video/interfaces/http/handler"
+	videoRtr "vicomova/internal/video/interfaces/http/router"
 	"vicomova/internal/user/domain/service"
 
 	"github.com/cloudwego/hertz/pkg/app/server"
 )
 
-func RegisterVideoAndInteractionRoutes(
-	h *server.Hertz,
-	videoHandler *handlers.VideoHandler,
-	interactionHandler *handlers.InteractionHandler,
-	tokenSvc *service.TokenService,
-) {
-	g := h.Group("/")
+func RegisterVideoRoutes(h *server.Hertz, vh *videoHdl.VideoHandler, tokenSvc *service.TokenService) {
+	videoRtr.RegisterRoutes(h, vh, tokenSvc)
+}
 
-	// ========== Video Routes ==========
-	video := g.Group("/video")
-
-	// Public video routes (no auth required)
-	video.GET("/stream", videoHandler.GetVideoStream)
-	video.GET("/list", videoHandler.ListByCategory)
-	video.GET("/hot", videoHandler.ListHotVideos)
-	video.GET("/cover", videoHandler.GetVideoCover)
-
-	// Protected video routes (auth required)
-	videoAuth := video.Group("/", middleware.Auth(tokenSvc))
-	videoAuth.POST("/publish", videoHandler.PublishVideo)
-	videoAuth.GET("/list/published", videoHandler.GetPublishedList)
-
-	// ========== Video Interaction Routes ==========
-	// Like routes
-	video.POST("/like", interactionHandler.LikeVideo)
-	video.DELETE("/like", interactionHandler.UnlikeVideo)
-	video.GET("/like/list", interactionHandler.ListLikes)
-
-	// Favorite routes
-	video.POST("/favorite", interactionHandler.AddFavorite)
-	video.DELETE("/favorite", interactionHandler.RemoveFavorite)
-	video.GET("/favorite/list", interactionHandler.ListFavorites)
-
-	// Comment routes
-	video.POST("/comment", interactionHandler.Comment)
-	video.DELETE("/comment", interactionHandler.DeleteComment)
-	video.GET("/comment/list", interactionHandler.ListComments)
-
-	// ========== Comment Interaction Routes ==========
-	comment := g.Group("/comment")
-	comment.POST("/like", interactionHandler.LikeComment)
+func RegisterInteractionRoutes(h *server.Hertz, ih *interactionHdl.InteractionHandler) {
+	interactionRtr.RegisterRoutes(h, ih)
 }

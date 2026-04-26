@@ -8,12 +8,13 @@ import (
 	"syscall"
 
 	"vicomova/internal/gateway"
-	"vicomova/internal/gateway/handlers"
 	"vicomova/internal/user/interfaces/http/handler"
 	"vicomova/internal/user/interfaces/http/router"
 	rpc "vicomova/internal/user/interfaces/grpc"
 	videoRpc "vicomova/internal/video/interfaces/grpc"
 	interactionRpc "vicomova/internal/interaction/interfaces/grpc"
+	videoHandler "vicomova/internal/video/interfaces/http/handler"
+	interactionHandler "vicomova/internal/interaction/interfaces/http/handler"
 	"vicomova/internal/shared/pkg/log"
 	"vicomova/pkg/config"
 	hertz "vicomova/pkg/hertz"
@@ -90,9 +91,10 @@ func main() {
 	}
 
 	// 创建 video/interaction handlers 并注册路由
-	videoHandler := handlers.NewVideoHandler(videoClient)
-	interactionHandler := handlers.NewInteractionHandler(interactionClient)
-	gateway.RegisterVideoAndInteractionRoutes(h, videoHandler, interactionHandler, tokenSvc)
+	vh := videoHandler.NewVideoHandler(videoClient)
+	ih := interactionHandler.NewInteractionHandler(interactionClient)
+	gateway.RegisterVideoRoutes(h, vh, tokenSvc)
+	gateway.RegisterInteractionRoutes(h, ih)
 
 	// 初始化 etcd 路由管理器（用于热更新路由配置）
 	if bs.Client() != nil {

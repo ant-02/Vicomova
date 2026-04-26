@@ -1,11 +1,105 @@
 definitions:
-  handler.ErrorResponse:
-    description: 错误响应
+  handler.CommentItem:
     properties:
-      code:
-        type: integer
-      msg:
+      content:
         type: string
+      created_at:
+        type: integer
+      id:
+        type: integer
+      like_count:
+        type: integer
+      parent_id:
+        type: integer
+      user_id:
+        type: integer
+      video_id:
+        type: integer
+    type: object
+  handler.CommentListResponse:
+    properties:
+      comments:
+        items:
+          $ref: '#/definitions/handler.CommentItem'
+        type: array
+      total:
+        type: integer
+    type: object
+  handler.CommentRequest:
+    properties:
+      content:
+        type: string
+      parent_id:
+        type: integer
+      video_id:
+        type: integer
+    type: object
+  handler.CoverResponse:
+    properties:
+      cover_url:
+        type: string
+    type: object
+  handler.DeleteCommentRequest:
+    properties:
+      comment_id:
+        type: integer
+    type: object
+  handler.FavoriteItem:
+    properties:
+      created_at:
+        type: integer
+      id:
+        type: integer
+      user_id:
+        type: integer
+      video_id:
+        type: integer
+    type: object
+  handler.FavoriteListResponse:
+    properties:
+      favorites:
+        items:
+          $ref: '#/definitions/handler.FavoriteItem'
+        type: array
+      total:
+        type: integer
+    type: object
+  handler.FavoriteRequest:
+    properties:
+      video_id:
+        type: integer
+    type: object
+  handler.LikeCommentRequest:
+    properties:
+      comment_id:
+        type: integer
+    type: object
+  handler.LikeItem:
+    properties:
+      created_at:
+        type: integer
+      id:
+        type: integer
+      target_id:
+        type: integer
+      target_type:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  handler.LikeListResponse:
+    properties:
+      likes:
+        items:
+          $ref: '#/definitions/handler.LikeItem'
+        type: array
+      total:
+        type: integer
+    type: object
+  handler.LikeRequest:
+    properties:
+      video_id:
+        type: integer
     type: object
   handler.LoginRequest:
     description: 登录请求
@@ -40,6 +134,21 @@ definitions:
     properties:
       success:
         type: boolean
+    type: object
+  handler.PublishVideoRequest:
+    properties:
+      category_id:
+        type: integer
+      cover_url:
+        type: string
+      description:
+        type: string
+      duration:
+        type: integer
+      title:
+        type: string
+      video_url:
+        type: string
     type: object
   handler.RefreshTokenRequest:
     description: 刷新Token请求
@@ -83,6 +192,23 @@ definitions:
       success:
         type: boolean
     type: object
+  handler.SuccessResponse:
+    properties:
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+  handler.UnfavoriteRequest:
+    properties:
+      video_id:
+        type: integer
+    type: object
+  handler.UnlikeRequest:
+    properties:
+      video_id:
+        type: integer
+    type: object
   handler.UserResponse:
     description: 用户响应
     properties:
@@ -107,150 +233,7 @@ definitions:
       username:
         type: string
     type: object
-  handlers.CommentItem:
-    properties:
-      content:
-        type: string
-      created_at:
-        type: integer
-      id:
-        type: integer
-      like_count:
-        type: integer
-      parent_id:
-        type: integer
-      user_id:
-        type: integer
-      video_id:
-        type: integer
-    type: object
-  handlers.CommentListResponse:
-    properties:
-      comments:
-        items:
-          $ref: '#/definitions/handlers.CommentItem'
-        type: array
-      total:
-        type: integer
-    type: object
-  handlers.CommentRequest:
-    properties:
-      content:
-        type: string
-      parent_id:
-        type: integer
-      video_id:
-        type: integer
-    type: object
-  handlers.CoverResponse:
-    properties:
-      cover_url:
-        type: string
-    type: object
-  handlers.DeleteCommentRequest:
-    properties:
-      comment_id:
-        type: integer
-    type: object
-  handlers.ErrorResponse:
-    properties:
-      code:
-        type: integer
-      msg:
-        type: string
-    type: object
-  handlers.FavoriteItem:
-    properties:
-      created_at:
-        type: integer
-      id:
-        type: integer
-      user_id:
-        type: integer
-      video:
-        $ref: '#/definitions/handlers.VideoItem'
-      video_id:
-        type: integer
-    type: object
-  handlers.FavoriteListResponse:
-    properties:
-      favorites:
-        items:
-          $ref: '#/definitions/handlers.FavoriteItem'
-        type: array
-      total:
-        type: integer
-    type: object
-  handlers.FavoriteRequest:
-    properties:
-      video_id:
-        type: integer
-    type: object
-  handlers.LikeCommentRequest:
-    properties:
-      comment_id:
-        type: integer
-    type: object
-  handlers.LikeItem:
-    properties:
-      created_at:
-        type: integer
-      id:
-        type: integer
-      target_id:
-        type: integer
-      target_type:
-        type: string
-      user_id:
-        type: integer
-    type: object
-  handlers.LikeListResponse:
-    properties:
-      likes:
-        items:
-          $ref: '#/definitions/handlers.LikeItem'
-        type: array
-      total:
-        type: integer
-    type: object
-  handlers.LikeRequest:
-    properties:
-      video_id:
-        type: integer
-    type: object
-  handlers.PublishVideoRequest:
-    properties:
-      category_id:
-        type: integer
-      cover_url:
-        type: string
-      description:
-        type: string
-      duration:
-        type: integer
-      title:
-        type: string
-      video_url:
-        type: string
-    type: object
-  handlers.SuccessResponse:
-    properties:
-      message:
-        type: string
-      success:
-        type: boolean
-    type: object
-  handlers.UnfavoriteRequest:
-    properties:
-      video_id:
-        type: integer
-    type: object
-  handlers.UnlikeRequest:
-    properties:
-      video_id:
-        type: integer
-    type: object
-  handlers.VideoItem:
+  handler.VideoItem:
     properties:
       category_id:
         type: integer
@@ -277,20 +260,42 @@ definitions:
       view_count:
         type: integer
     type: object
-  handlers.VideoListResponse:
+  handler.VideoListResponse:
     properties:
       total:
         type: integer
       videos:
         items:
-          $ref: '#/definitions/handlers.VideoItem'
+          $ref: '#/definitions/handler.VideoItem'
         type: array
     type: object
-  handlers.VideoStreamResponse:
+  handler.VideoStreamResponse:
     properties:
       title:
         type: string
       video_url:
+        type: string
+    type: object
+  internal_interaction_interfaces_http_handler.ErrorResponse:
+    properties:
+      code:
+        type: integer
+      msg:
+        type: string
+    type: object
+  internal_user_interfaces_http_handler.ErrorResponse:
+    description: 错误响应
+    properties:
+      code:
+        type: integer
+      msg:
+        type: string
+    type: object
+  internal_video_interfaces_http_handler.ErrorResponse:
+    properties:
+      code:
+        type: integer
+      msg:
         type: string
     type: object
 info:
@@ -307,26 +312,26 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handlers.LikeCommentRequest'
+          $ref: '#/definitions/handler.LikeCommentRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handlers.SuccessResponse'
+            $ref: '#/definitions/handler.SuccessResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse'
       security:
       - BearerAuth: []
       summary: 点赞评论
@@ -345,11 +350,11 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/handler.ErrorResponse'
+            $ref: '#/definitions/internal_user_interfaces_http_handler.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/handler.ErrorResponse'
+            $ref: '#/definitions/internal_user_interfaces_http_handler.ErrorResponse'
       security:
       - BearerAuth: []
       summary: 获取用户信息
@@ -377,11 +382,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/handler.ErrorResponse'
+            $ref: '#/definitions/internal_user_interfaces_http_handler.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/handler.ErrorResponse'
+            $ref: '#/definitions/internal_user_interfaces_http_handler.ErrorResponse'
       summary: 用户登录
       tags:
       - user
@@ -407,11 +412,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/handler.ErrorResponse'
+            $ref: '#/definitions/internal_user_interfaces_http_handler.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/handler.ErrorResponse'
+            $ref: '#/definitions/internal_user_interfaces_http_handler.ErrorResponse'
       summary: 用户登出
       tags:
       - user
@@ -437,11 +442,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/handler.ErrorResponse'
+            $ref: '#/definitions/internal_user_interfaces_http_handler.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/handler.ErrorResponse'
+            $ref: '#/definitions/internal_user_interfaces_http_handler.ErrorResponse'
       summary: 刷新Token
       tags:
       - user
@@ -467,7 +472,7 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/handler.ErrorResponse'
+            $ref: '#/definitions/internal_user_interfaces_http_handler.ErrorResponse'
       summary: 发送邮箱验证码
       tags:
       - user
@@ -493,7 +498,7 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/handler.ErrorResponse'
+            $ref: '#/definitions/internal_user_interfaces_http_handler.ErrorResponse'
       summary: 验证邮箱并完成注册
       tags:
       - user
@@ -508,26 +513,26 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handlers.DeleteCommentRequest'
+          $ref: '#/definitions/handler.DeleteCommentRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handlers.SuccessResponse'
+            $ref: '#/definitions/handler.SuccessResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse'
       security:
       - BearerAuth: []
       summary: 删除评论
@@ -543,7 +548,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handlers.CommentRequest'
+          $ref: '#/definitions/handler.CommentRequest'
       produces:
       - application/json
       responses:
@@ -555,15 +560,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse'
       security:
       - BearerAuth: []
       summary: 评论视频
@@ -603,15 +608,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handlers.CommentListResponse'
+            $ref: '#/definitions/handler.CommentListResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse'
       summary: 获取评论列表
       tags:
       - video-comment
@@ -631,15 +636,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handlers.CoverResponse'
+            $ref: '#/definitions/handler.CoverResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/internal_video_interfaces_http_handler.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/internal_video_interfaces_http_handler.ErrorResponse'
       summary: 获取视频封面
       tags:
       - video
@@ -654,26 +659,26 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handlers.UnfavoriteRequest'
+          $ref: '#/definitions/handler.UnfavoriteRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handlers.SuccessResponse'
+            $ref: '#/definitions/handler.SuccessResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse'
       security:
       - BearerAuth: []
       summary: 取消收藏视频
@@ -689,26 +694,26 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handlers.FavoriteRequest'
+          $ref: '#/definitions/handler.FavoriteRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handlers.SuccessResponse'
+            $ref: '#/definitions/handler.SuccessResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse'
       security:
       - BearerAuth: []
       summary: 收藏视频
@@ -736,15 +741,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handlers.FavoriteListResponse'
+            $ref: '#/definitions/handler.FavoriteListResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse'
       security:
       - BearerAuth: []
       summary: 获取收藏列表
@@ -766,11 +771,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handlers.VideoListResponse'
+            $ref: '#/definitions/handler.VideoListResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/internal_video_interfaces_http_handler.ErrorResponse'
       summary: 获取热门视频
       tags:
       - video
@@ -785,26 +790,26 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handlers.UnlikeRequest'
+          $ref: '#/definitions/handler.UnlikeRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handlers.SuccessResponse'
+            $ref: '#/definitions/handler.SuccessResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse'
       security:
       - BearerAuth: []
       summary: 取消点赞视频
@@ -820,26 +825,26 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handlers.LikeRequest'
+          $ref: '#/definitions/handler.LikeRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handlers.SuccessResponse'
+            $ref: '#/definitions/handler.SuccessResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse'
       security:
       - BearerAuth: []
       summary: 点赞视频
@@ -872,15 +877,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handlers.LikeListResponse'
+            $ref: '#/definitions/handler.LikeListResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/internal_interaction_interfaces_http_handler.ErrorResponse'
       security:
       - BearerAuth: []
       summary: 获取点赞列表
@@ -914,15 +919,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handlers.VideoListResponse'
+            $ref: '#/definitions/handler.VideoListResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/internal_video_interfaces_http_handler.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/internal_video_interfaces_http_handler.ErrorResponse'
       summary: 按类别获取视频列表
       tags:
       - video
@@ -948,15 +953,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handlers.VideoListResponse'
+            $ref: '#/definitions/handler.VideoListResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/internal_video_interfaces_http_handler.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/internal_video_interfaces_http_handler.ErrorResponse'
       security:
       - BearerAuth: []
       summary: 获取发布列表
@@ -973,7 +978,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handlers.PublishVideoRequest'
+          $ref: '#/definitions/handler.PublishVideoRequest'
       produces:
       - application/json
       responses:
@@ -985,15 +990,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/internal_video_interfaces_http_handler.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/internal_video_interfaces_http_handler.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/internal_video_interfaces_http_handler.ErrorResponse'
       security:
       - BearerAuth: []
       summary: 投稿视频
@@ -1015,15 +1020,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handlers.VideoStreamResponse'
+            $ref: '#/definitions/handler.VideoStreamResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/internal_video_interfaces_http_handler.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
+            $ref: '#/definitions/internal_video_interfaces_http_handler.ErrorResponse'
       summary: 获取视频流
       tags:
       - video
