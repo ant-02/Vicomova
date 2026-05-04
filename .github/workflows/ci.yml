@@ -19,6 +19,9 @@ jobs:
           go-version: '1.25'
           cache: true
 
+      - name: Install kitex
+        run: go install github.com/cloudwego/kitex/tool/cmd/kitex@latest
+
       - name: Generate code
         run: make proto
 
@@ -44,6 +47,9 @@ jobs:
         with:
           go-version: '1.25'
           cache: true
+
+      - name: Install kitex
+        run: go install github.com/cloudwego/kitex/tool/cmd/kitex@latest
 
       - name: Generate code
         run: make proto
