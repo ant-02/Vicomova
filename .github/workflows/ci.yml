@@ -23,7 +23,9 @@ jobs:
         run: go install github.com/cloudwego/kitex/tool/cmd/kitex@latest
 
       - name: Generate code
-        run: make proto
+        run: |
+          export PATH="$HOME/go/bin:$PATH"
+          make proto
 
       - name: Go vet
         run: go vet ./...
@@ -52,7 +54,9 @@ jobs:
         run: go install github.com/cloudwego/kitex/tool/cmd/kitex@latest
 
       - name: Generate code
-        run: make proto
+        run: |
+          export PATH="$HOME/go/bin:$PATH"
+          make proto
 
       - name: Run unit tests
         run: go test ./... -v -short
