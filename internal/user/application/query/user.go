@@ -26,7 +26,7 @@ func (s *UserQueryService) GetUser(ctx context.Context, query *GetUserQuery) (*U
 
 	return &UserResult{
 		UserID:   u.ID,
-		Username: u.Username.Value(),
-		Email:    u.Email.Value(),
+		Username: u.Username.String(),
+		Email:    u.Email.String(),
 	}, nil
 }

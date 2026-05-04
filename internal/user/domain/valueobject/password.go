@@ -6,8 +6,6 @@ import (
 	"errors"
 )
 
-var ErrInvalidPassword = errors.New("invalid password")
-
 type Password struct {
 	hash string
 }

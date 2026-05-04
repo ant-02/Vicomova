@@ -5,8 +5,6 @@ import (
 	"regexp"
 )
 
-var ErrInvalidEmail = errors.New("invalid email")
-
 type Email struct {
 	value string
 }
@@ -24,10 +22,6 @@ func validateEmail(value string) error {
 		return errors.New("invalid email format")
 	}
 	return nil
-}
-
-func (e *Email) Value() string {
-	return e.value
 }
 
 func (e *Email) String() string {

@@ -5,8 +5,6 @@ import (
 	"regexp"
 )
 
-var ErrInvalidUsername = errors.New("invalid username")
-
 type Username struct {
 	value string
 }
@@ -26,10 +24,6 @@ func validateUsername(value string) error {
 		return errors.New("username can only contain letters, numbers, and underscores")
 	}
 	return nil
-}
-
-func (u *Username) Value() string {
-	return u.value
 }
 
 func (u *Username) String() string {

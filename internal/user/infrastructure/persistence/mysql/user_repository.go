@@ -23,10 +23,10 @@ func NewUserRepository(mysqlClient *sharedMysql.Client) userRepo.UserRepository 
 func (r *UserRepository) Create(ctx context.Context, u *userEntity.User) error {
 	po := UserToPO(u)
 	if err := r.mysql.WithContext(ctx).Create(po).Error; err != nil {
-		log.Error.Printf("UserRepository.Create: failed for username=%s: %v", u.Username.Value(), err)
+		log.Error.Printf("UserRepository.Create: failed for username=%s: %v", u.Username.String(), err)
 		return err
 	}
-	log.Info.Printf("UserRepository.Create: created user username=%s", u.Username.Value())
+	log.Info.Printf("UserRepository.Create: created user username=%s", u.Username.String())
 	return nil
 }
 
@@ -45,12 +45,12 @@ func (r *UserRepository) GetByID(ctx context.Context, id int64) (*userEntity.Use
 
 func (r *UserRepository) GetByUsername(ctx context.Context, username *userVO.Username) (*userEntity.User, error) {
 	var po UserPO
-	err := r.mysql.WithContext(ctx).Where("username = ?", username.Value()).First(&po).Error
+	err := r.mysql.WithContext(ctx).Where("username = ?", username.String()).First(&po).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, nil
 		}
-		log.Error.Printf("UserRepository.GetByUsername: failed for username=%s: %v", username.Value(), err)
+		log.Error.Printf("UserRepository.GetByUsername: failed for username=%s: %v", username.String(), err)
 		return nil, err
 	}
 	return POToUser(&po), nil

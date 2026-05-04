@@ -11,13 +11,13 @@ func UserToPO(u *userEntity.User) *UserPO {
 	}
 	var username, password, email string
 	if u.Username != nil {
-		username = u.Username.Value()
+		username = u.Username.String()
 	}
 	if u.Password != nil {
 		password = u.Password.Hash()
 	}
 	if u.Email != nil {
-		email = u.Email.Value()
+		email = u.Email.String()
 	}
 	return &UserPO{
 		ID:        u.ID,

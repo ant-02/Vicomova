@@ -126,7 +126,7 @@ func (s *UserCommandService) VerifyAndRegister(ctx context.Context, cmd *VerifyA
 
 	return &UserResult{
 		UserID:   u.ID,
-		Username: u.Username.Value(),
+		Username: u.Username.String(),
 	}, nil
 }
 
@@ -200,7 +200,7 @@ func (s *UserCommandService) Logout(ctx context.Context, cmd *LogoutCommand) err
 }
 
 func (s *UserCommandService) generateTokenPair(ctx context.Context, userID int64, username *userVO.Username) (*TokenResult, error) {
-	accessToken, err := s.tokenService.GenerateAccessToken(userID, username.Value())
+	accessToken, err := s.tokenService.GenerateAccessToken(userID, username.String())
 	if err != nil {
 		return nil, err
 	}
@@ -215,7 +215,7 @@ func (s *UserCommandService) generateTokenPair(ctx context.Context, userID int64
 
 	return &TokenResult{
 		UserID:       userID,
-		Username:     username.Value(),
+		Username:     username.String(),
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 		ExpiresIn:    int64(s.tokenService.GetAccessTokenExpiry().Seconds()),

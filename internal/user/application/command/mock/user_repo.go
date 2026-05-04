@@ -28,7 +28,7 @@ func (m *MockUserRepository) Create(ctx context.Context, u *userEntity.User) err
 	}
 	u.ID = int64(len(m.Users) + 1)
 	if u.Username != nil {
-		m.Users[u.Username.Value()] = u
+		m.Users[u.Username.String()] = u
 	}
 	return nil
 }
@@ -40,7 +40,7 @@ func (m *MockUserRepository) GetByUsername(ctx context.Context, username *userVO
 	if username == nil {
 		return nil, nil
 	}
-	return m.Users[username.Value()], nil
+	return m.Users[username.String()], nil
 }
 
 func (m *MockUserRepository) GetByID(ctx context.Context, id int64) (*userEntity.User, error) {
@@ -60,7 +60,7 @@ func (m *MockUserRepository) Update(ctx context.Context, u *userEntity.User) err
 		return m.UpdateErr
 	}
 	if u.Username != nil {
-		m.Users[u.Username.Value()] = u
+		m.Users[u.Username.String()] = u
 	}
 	return nil
 }
