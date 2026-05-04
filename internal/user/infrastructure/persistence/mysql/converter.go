@@ -35,7 +35,7 @@ func POToUser(po *UserPO) *userEntity.User {
 	}
 	username, _ := userVO.NewUsername(po.Username)
 	email, _ := userVO.NewEmail(po.Email)
-	password := userVO.NewPasswordFromHash(po.Password)
+	password := userVO.NewPassword(po.Password)
 	return &userEntity.User{
 		ID:        po.ID,
 		Username:  username,

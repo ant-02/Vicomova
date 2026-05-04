@@ -96,7 +96,8 @@ func (s *UserCommandService) VerifyAndRegister(ctx context.Context, cmd *VerifyA
 		return nil, errorsPkg.ErrInvalidUsername
 	}
 
-	password, err := userVO.NewPassword(cmd.Password)
+	// 使用 hasher 生成密码哈希
+	password, err := userVO.NewPasswordFromPlain(cmd.Password, s.passwordHasher)
 	if err != nil {
 		return nil, errorsPkg.ErrInvalidPassword
 	}
@@ -144,7 +145,8 @@ func (s *UserCommandService) Login(ctx context.Context, cmd *LoginCommand) (*Tok
 		return nil, errorsPkg.ErrUserNotFound
 	}
 
-	if !u.CanLogin(cmd.Password) {
+	// 使用 hasher 验证密码
+	if !s.passwordHasher.Verify(cmd.Password, u.Password.Hash()) {
 		return nil, errorsPkg.ErrPasswordWrong
 	}
 
@@ -152,21 +154,20 @@ func (s *UserCommandService) Login(ctx context.Context, cmd *LoginCommand) (*Tok
 }
 
 func (s *UserCommandService) RefreshToken(ctx context.Context, cmd *RefreshTokenCommand) (*TokenResult, error) {
-	rt, err := s.refreshTokenRepo.GetByToken(ctx, cmd.RefreshToken)
+	exists, err := s.refreshTokenRepo.Exists(ctx, cmd.RefreshToken)
 	if err != nil {
 		return nil, errorsPkg.ErrInternalServer
 	}
-	if rt == nil {
+	if !exists {
 		return nil, errorsPkg.ErrInvalidToken
-	}
-	if rt.IsRevoked() {
-		return nil, errorsPkg.ErrInvalidToken
-	}
-	if rt.IsExpired() {
-		return nil, errorsPkg.ErrTokenExpired
 	}
 
-	u, err := s.userRepo.GetByID(ctx, rt.UserID)
+	userID, err := s.refreshTokenRepo.GetUserID(ctx, cmd.RefreshToken)
+	if err != nil {
+		return nil, errorsPkg.ErrInternalServer
+	}
+
+	u, err := s.userRepo.GetByID(ctx, userID)
 	if err != nil {
 		return nil, errorsPkg.ErrInternalServer
 	}
@@ -182,20 +183,9 @@ func (s *UserCommandService) RefreshToken(ctx context.Context, cmd *RefreshToken
 }
 
 func (s *UserCommandService) Logout(ctx context.Context, cmd *LogoutCommand) error {
-	claims, err := s.tokenService.ParseAccessToken(cmd.AccessToken)
-	if err != nil {
-		return errorsPkg.ErrInvalidToken
-	}
-
-	userID, ok := claims["user_id"].(float64)
-	if !ok {
-		return errorsPkg.ErrInvalidToken
-	}
-
-	if err := s.refreshTokenRepo.RevokeAllForUser(ctx, int64(userID)); err != nil {
+	if err := s.refreshTokenRepo.Revoke(ctx, cmd.RefreshToken); err != nil {
 		return errorsPkg.ErrInternalServer
 	}
-
 	return nil
 }
 
@@ -206,10 +196,9 @@ func (s *UserCommandService) generateTokenPair(ctx context.Context, userID int64
 	}
 
 	refreshToken := uuid.New().String()
+	ttl := s.tokenService.GetRefreshTokenExpiry()
 
-	rt := userVO.NewRefreshToken(userID, refreshToken, s.tokenService.GetRefreshTokenExpiry())
-
-	if err := s.refreshTokenRepo.Create(ctx, rt); err != nil {
+	if err := s.refreshTokenRepo.Create(ctx, userID, refreshToken, ttl); err != nil {
 		return nil, errorsPkg.ErrInternalServer
 	}
 

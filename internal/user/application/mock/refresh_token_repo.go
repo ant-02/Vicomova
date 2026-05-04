@@ -2,12 +2,11 @@ package mock
 
 import (
 	"context"
-
-	userVO "vicomova/internal/user/domain/valueobject"
+	"time"
 )
 
 type MockRefreshTokenRepository struct {
-	Tokens    map[string]*userVO.RefreshToken
+	Tokens    map[string]int64 // token -> userID
 	CreateErr error
 	GetErr    error
 	RevokeErr error
@@ -15,32 +14,35 @@ type MockRefreshTokenRepository struct {
 
 func NewMockRefreshTokenRepository() *MockRefreshTokenRepository {
 	return &MockRefreshTokenRepository{
-		Tokens: make(map[string]*userVO.RefreshToken),
+		Tokens: make(map[string]int64),
 	}
 }
 
-func (m *MockRefreshTokenRepository) Create(ctx context.Context, rt *userVO.RefreshToken) error {
+func (m *MockRefreshTokenRepository) Create(ctx context.Context, userID int64, token string, ttl time.Duration) error {
 	if m.CreateErr != nil {
 		return m.CreateErr
 	}
-	m.Tokens[rt.Token] = rt
+	m.Tokens[token] = userID
 	return nil
 }
 
-func (m *MockRefreshTokenRepository) GetByToken(ctx context.Context, token string) (*userVO.RefreshToken, error) {
+func (m *MockRefreshTokenRepository) GetUserID(ctx context.Context, token string) (int64, error) {
 	if m.GetErr != nil {
-		return nil, m.GetErr
+		return 0, m.GetErr
 	}
 	return m.Tokens[token], nil
+}
+
+func (m *MockRefreshTokenRepository) Exists(ctx context.Context, token string) (bool, error) {
+	_, ok := m.Tokens[token]
+	return ok, nil
 }
 
 func (m *MockRefreshTokenRepository) Revoke(ctx context.Context, token string) error {
 	if m.RevokeErr != nil {
 		return m.RevokeErr
 	}
-	if rt, ok := m.Tokens[token]; ok {
-		rt.Revoked = true
-	}
+	delete(m.Tokens, token)
 	return nil
 }
 

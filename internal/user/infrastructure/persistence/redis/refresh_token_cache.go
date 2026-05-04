@@ -6,7 +6,6 @@ import (
 	"time"
 
 	userRepo "vicomova/internal/user/domain/repository"
-	userVO "vicomova/internal/user/domain/valueobject"
 	sharedRedis "vicomova/internal/shared/infrastructure/data/redis"
 	"vicomova/internal/shared/pkg/log"
 
@@ -23,36 +22,37 @@ func NewRefreshTokenRepository(redisClient *sharedRedis.Client) userRepo.Refresh
 	return &RefreshTokenRepository{redis: redisClient}
 }
 
-func (r *RefreshTokenRepository) Create(ctx context.Context, rt *userVO.RefreshToken) error {
+func (r *RefreshTokenRepository) Create(ctx context.Context, userID int64, token string, ttl time.Duration) error {
 	data := &RefreshTokenData{
-		UserID:    rt.UserID,
-		ExpiresAt: rt.ExpiresAt,
+		UserID: userID,
 	}
-	ttl := rt.ExpiresAt.Sub(rt.CreatedAt)
-	if err := SetRefreshToken(ctx, r.redis, rt.Token, data, ttl); err != nil {
-		log.Error.Printf("RefreshTokenRepository.Create: failed for userID=%d: %v", rt.UserID, err)
+	if err := SetRefreshToken(ctx, r.redis, token, data, ttl); err != nil {
+		log.Error.Printf("RefreshTokenRepository.Create: failed for userID=%d: %v", userID, err)
 		return err
 	}
-	log.Info.Printf("RefreshTokenRepository.Create: created token for userID=%d", rt.UserID)
+	log.Info.Printf("RefreshTokenRepository.Create: created token for userID=%d", userID)
 	return nil
 }
 
-func (r *RefreshTokenRepository) GetByToken(ctx context.Context, token string) (*userVO.RefreshToken, error) {
+func (r *RefreshTokenRepository) Exists(ctx context.Context, token string) (bool, error) {
 	data, err := GetRefreshToken(ctx, r.redis, token)
 	if err != nil {
-		log.Error.Printf("RefreshTokenRepository.GetByToken: failed: %v", err)
-		return nil, err
+		log.Error.Printf("RefreshTokenRepository.Exists: failed: %v", err)
+		return false, err
+	}
+	return data != nil, nil
+}
+
+func (r *RefreshTokenRepository) GetUserID(ctx context.Context, token string) (int64, error) {
+	data, err := GetRefreshToken(ctx, r.redis, token)
+	if err != nil {
+		log.Error.Printf("RefreshTokenRepository.GetUserID: failed: %v", err)
+		return 0, err
 	}
 	if data == nil {
-		return nil, nil
+		return 0, nil
 	}
-
-	return &userVO.RefreshToken{
-		UserID:    data.UserID,
-		Token:     token,
-		ExpiresAt: data.ExpiresAt,
-		Revoked:   false,
-	}, nil
+	return data.UserID, nil
 }
 
 func (r *RefreshTokenRepository) Revoke(ctx context.Context, token string) error {
@@ -74,8 +74,7 @@ func (r *RefreshTokenRepository) RevokeAllForUser(ctx context.Context, userID in
 }
 
 type RefreshTokenData struct {
-	UserID    int64     `json:"user_id"`
-	ExpiresAt time.Time `json:"expires_at"`
+	UserID int64 `json:"user_id"`
 }
 
 func SetRefreshToken(ctx context.Context, client *sharedRedis.Client, token string, data *RefreshTokenData, ttl time.Duration) error {

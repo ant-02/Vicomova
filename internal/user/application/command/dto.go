@@ -12,7 +12,8 @@ type RefreshTokenCommand struct {
 }
 
 type LogoutCommand struct {
-	AccessToken string
+	AccessToken  string
+	RefreshToken string
 }
 
 type SendVerificationCodeCommand struct {

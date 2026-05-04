@@ -17,8 +17,9 @@ type UserRepository interface {
 }
 
 type RefreshTokenRepository interface {
-	Create(ctx context.Context, rt *valueobject.RefreshToken) error
-	GetByToken(ctx context.Context, token string) (*valueobject.RefreshToken, error)
+	Create(ctx context.Context, userID int64, token string, ttl time.Duration) error
+	GetUserID(ctx context.Context, token string) (int64, error)
+	Exists(ctx context.Context, token string) (bool, error)
 	Revoke(ctx context.Context, token string) error
 	RevokeAllForUser(ctx context.Context, userID int64) error
 }

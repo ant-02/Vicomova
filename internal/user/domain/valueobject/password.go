@@ -1,36 +1,32 @@
 package valueobject
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
 	"errors"
 )
+
+var ErrPasswordTooShort = errors.New("password must be between 6 and 128 characters")
 
 type Password struct {
 	hash string
 }
 
-func NewPassword(plain string) (*Password, error) {
-	if err := validatePassword(plain); err != nil {
-		return nil, err
-	}
-	return &Password{hash: hashPassword(plain)}, nil
+// NewPassword creates a Password with a pre-hashed value (for repository layer).
+func NewPassword(hash string) *Password {
+	return &Password{hash: hash}
 }
 
-func validatePassword(plain string) error {
+// NewPasswordFromPlain creates a Password from plain text with validation.
+func NewPasswordFromPlain(plain string, hasher Hasher) (*Password, error) {
 	if len(plain) < 6 || len(plain) > 128 {
-		return errors.New("password must be between 6 and 128 characters")
+		return nil, ErrPasswordTooShort
 	}
-	return nil
+	return &Password{hash: hasher.Hash(plain)}, nil
 }
 
-func hashPassword(password string) string {
-	hash := sha256.Sum256([]byte(password))
-	return hex.EncodeToString(hash[:])
-}
-
-func (p *Password) Verify(plain string) bool {
-	return p.hash == hashPassword(plain)
+// Hasher interface for password hashing.
+type Hasher interface {
+	Hash(password string) string
+	Verify(password, hash string) bool
 }
 
 func (p *Password) Hash() string {
@@ -39,9 +35,4 @@ func (p *Password) Hash() string {
 
 func (p *Password) Equal(other *Password) bool {
 	return p.hash == other.hash
-}
-
-// NewPasswordFromHash creates a Password from an existing hash (for repository layer).
-func NewPasswordFromHash(hash string) *Password {
-	return &Password{hash: hash}
 }

@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"vicomova/internal/shared/pkg/constants"
-	userdomain "vicomova/internal/user/domain"
+	errorsPkg "vicomova/internal/shared/pkg/errors"
 
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -37,7 +37,7 @@ func (s *TokenService) GenerateAccessToken(userID int64, username string) (strin
 func (s *TokenService) ParseAccessToken(tokenString string) (jwt.MapClaims, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, userdomain.ErrInvalidToken
+			return nil, errorsPkg.ErrInvalidToken
 		}
 		return []byte(s.jwtSecret), nil
 	})
@@ -50,7 +50,7 @@ func (s *TokenService) ParseAccessToken(tokenString string) (jwt.MapClaims, erro
 		return claims, nil
 	}
 
-	return nil, userdomain.ErrInvalidToken
+	return nil, errorsPkg.ErrInvalidToken
 }
 
 func (s *TokenService) GetAccessTokenExpiry() time.Duration {

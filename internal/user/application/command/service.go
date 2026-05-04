@@ -4,6 +4,7 @@ import (
 	userRepo "vicomova/internal/user/domain/repository"
 	"vicomova/internal/user/domain/service"
 	infraEmail "vicomova/internal/user/infrastructure/external/email"
+	sharedHasher "vicomova/internal/shared/pkg/hasher"
 )
 
 type UserCommandService struct {
@@ -12,6 +13,7 @@ type UserCommandService struct {
 	emailCodeRepo    userRepo.EmailCodeRepository
 	emailService     infraEmail.EmailService
 	tokenService     *service.TokenService
+	passwordHasher   sharedHasher.Hasher
 }
 
 func NewUserCommandService(
@@ -20,6 +22,7 @@ func NewUserCommandService(
 	emailCodeRepo userRepo.EmailCodeRepository,
 	emailService infraEmail.EmailService,
 	tokenService *service.TokenService,
+	passwordHasher sharedHasher.Hasher,
 ) *UserCommandService {
 	return &UserCommandService{
 		userRepo:         userRepo,
@@ -27,5 +30,6 @@ func NewUserCommandService(
 		emailCodeRepo:    emailCodeRepo,
 		emailService:     emailService,
 		tokenService:     tokenService,
+		passwordHasher:   passwordHasher,
 	}
 }

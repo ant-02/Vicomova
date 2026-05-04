@@ -44,9 +44,10 @@ func (c *UserClient) RefreshToken(ctx context.Context, refreshToken string) (*us
 	})
 }
 
-func (c *UserClient) Logout(ctx context.Context, accessToken string) (*user.LogoutResponse, error) {
+func (c *UserClient) Logout(ctx context.Context, accessToken, refreshToken string) (*user.LogoutResponse, error) {
 	return c.cli.Logout(ctx, &user.LogoutRequest{
-		AccessToken: accessToken,
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
 	})
 }
 

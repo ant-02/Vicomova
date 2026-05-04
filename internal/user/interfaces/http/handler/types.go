@@ -29,7 +29,8 @@ type RefreshTokenResponse struct {
 
 // @Description 登出请求
 type LogoutRequest struct {
-	AccessToken string `json:"access_token"`
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
 }
 
 // @Description 登出响应

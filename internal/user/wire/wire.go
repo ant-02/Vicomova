@@ -10,6 +10,7 @@ import (
 	rpc "vicomova/internal/user/interfaces/grpc"
 	sharedMysql "vicomova/internal/shared/infrastructure/data/mysql"
 	sharedRedis "vicomova/internal/shared/infrastructure/data/redis"
+	sharedHasher "vicomova/internal/shared/pkg/hasher"
 	"vicomova/pkg/config"
 )
 
@@ -52,8 +53,11 @@ func NewProvider(cfg *config.Config) (*Provider, error) {
 	// 初始化 Domain Service
 	tokenSvc := svc.NewTokenService(cfg.JWT.Secret)
 
+	// 初始化 Password Hasher
+	hasher := &sharedHasher.SHA256Hasher{}
+
 	// 初始化 Application Service
-	cmdSvc := appCommand.NewUserCommandService(userRepo, refreshTokenRepo, emailCodeRepo, emailService, tokenSvc)
+	cmdSvc := appCommand.NewUserCommandService(userRepo, refreshTokenRepo, emailCodeRepo, emailService, tokenSvc, hasher)
 	querySvc := appQuery.NewUserQueryService(userRepo)
 
 	// 初始化 Handler
