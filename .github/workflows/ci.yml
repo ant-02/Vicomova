@@ -19,6 +19,9 @@ jobs:
           go-version: '1.25'
           cache: true
 
+      - name: Generate code
+        run: make proto
+
       - name: Go vet
         run: go vet ./...
 
@@ -28,9 +31,7 @@ jobs:
           version: latest
 
       - name: Build
-        run: |
-          make proto
-          go build ./...
+        run: go build ./...
 
   test:
     name: Test
@@ -43,6 +44,9 @@ jobs:
         with:
           go-version: '1.25'
           cache: true
+
+      - name: Generate code
+        run: make proto
 
       - name: Run unit tests
         run: go test ./... -v -short
