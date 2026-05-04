@@ -15,10 +15,12 @@ import (
 
 const refreshTokenPrefix = "refresh_token:"
 
-type RefreshTokenRepository struct{}
+type RefreshTokenRepository struct {
+	redis *sharedRedis.Client
+}
 
-func NewRefreshTokenRepository() userRepo.RefreshTokenRepository {
-	return &RefreshTokenRepository{}
+func NewRefreshTokenRepository(redisClient *sharedRedis.Client) userRepo.RefreshTokenRepository {
+	return &RefreshTokenRepository{redis: redisClient}
 }
 
 func (r *RefreshTokenRepository) Create(ctx context.Context, rt *userVO.RefreshToken) error {
@@ -27,7 +29,7 @@ func (r *RefreshTokenRepository) Create(ctx context.Context, rt *userVO.RefreshT
 		ExpiresAt: rt.ExpiresAt,
 	}
 	ttl := rt.ExpiresAt.Sub(rt.CreatedAt)
-	if err := SetRefreshToken(ctx, rt.Token, data, ttl); err != nil {
+	if err := SetRefreshToken(ctx, r.redis, rt.Token, data, ttl); err != nil {
 		log.Error.Printf("RefreshTokenRepository.Create: failed for userID=%d: %v", rt.UserID, err)
 		return err
 	}
@@ -36,7 +38,7 @@ func (r *RefreshTokenRepository) Create(ctx context.Context, rt *userVO.RefreshT
 }
 
 func (r *RefreshTokenRepository) GetByToken(ctx context.Context, token string) (*userVO.RefreshToken, error) {
-	data, err := GetRefreshToken(ctx, token)
+	data, err := GetRefreshToken(ctx, r.redis, token)
 	if err != nil {
 		log.Error.Printf("RefreshTokenRepository.GetByToken: failed: %v", err)
 		return nil, err
@@ -54,7 +56,7 @@ func (r *RefreshTokenRepository) GetByToken(ctx context.Context, token string) (
 }
 
 func (r *RefreshTokenRepository) Revoke(ctx context.Context, token string) error {
-	if err := DeleteRefreshToken(ctx, token); err != nil {
+	if err := DeleteRefreshToken(ctx, r.redis, token); err != nil {
 		log.Error.Printf("RefreshTokenRepository.Revoke: failed: %v", err)
 		return err
 	}
@@ -63,7 +65,7 @@ func (r *RefreshTokenRepository) Revoke(ctx context.Context, token string) error
 }
 
 func (r *RefreshTokenRepository) RevokeAllForUser(ctx context.Context, userID int64) error {
-	if err := DeleteUserRefreshTokens(ctx, userID); err != nil {
+	if err := DeleteUserRefreshTokens(ctx, r.redis, userID); err != nil {
 		log.Error.Printf("RefreshTokenRepository.RevokeAllForUser: failed for userID=%d: %v", userID, err)
 		return err
 	}
@@ -76,18 +78,18 @@ type RefreshTokenData struct {
 	ExpiresAt time.Time `json:"expires_at"`
 }
 
-func SetRefreshToken(ctx context.Context, token string, data *RefreshTokenData, ttl time.Duration) error {
+func SetRefreshToken(ctx context.Context, client *sharedRedis.Client, token string, data *RefreshTokenData, ttl time.Duration) error {
 	key := refreshTokenPrefix + token
 	jsonData, err := json.Marshal(data)
 	if err != nil {
 		return err
 	}
-	return sharedRedis.GetClient().Set(ctx, key, jsonData, ttl).Err()
+	return client.Set(ctx, key, jsonData, ttl).Err()
 }
 
-func GetRefreshToken(ctx context.Context, token string) (*RefreshTokenData, error) {
+func GetRefreshToken(ctx context.Context, client *sharedRedis.Client, token string) (*RefreshTokenData, error) {
 	key := refreshTokenPrefix + token
-	val, err := sharedRedis.GetClient().Get(ctx, key).Result()
+	val, err := client.Get(ctx, key).Result()
 	if err != nil {
 		if err == redis.Nil {
 			return nil, nil
@@ -102,17 +104,17 @@ func GetRefreshToken(ctx context.Context, token string) (*RefreshTokenData, erro
 	return &data, nil
 }
 
-func DeleteRefreshToken(ctx context.Context, token string) error {
+func DeleteRefreshToken(ctx context.Context, client *sharedRedis.Client, token string) error {
 	key := refreshTokenPrefix + token
-	return sharedRedis.GetClient().Del(ctx, key).Err()
+	return client.Del(ctx, key).Err()
 }
 
-func DeleteUserRefreshTokens(ctx context.Context, userID int64) error {
+func DeleteUserRefreshTokens(ctx context.Context, client *sharedRedis.Client, userID int64) error {
 	pattern := refreshTokenPrefix + "*"
-	iter := sharedRedis.GetClient().Scan(ctx, 0, pattern, 0).Iterator()
+	iter := client.Scan(ctx, 0, pattern, 0).Iterator()
 	for iter.Next(ctx) {
 		key := iter.Val()
-		val, err := sharedRedis.GetClient().Get(ctx, key).Result()
+		val, err := client.Get(ctx, key).Result()
 		if err != nil {
 			continue
 		}
@@ -121,7 +123,7 @@ func DeleteUserRefreshTokens(ctx context.Context, userID int64) error {
 			continue
 		}
 		if data.UserID == userID {
-			sharedRedis.GetClient().Del(ctx, key)
+			client.Del(ctx, key)
 		}
 	}
 	return iter.Err()

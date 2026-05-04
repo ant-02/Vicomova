@@ -27,10 +27,13 @@ func NewProvider(cfg *config.Config) (*Provider, error) {
 		return nil, err
 	}
 
+	// 获取 MySQL/Redis 客户端
+	mysqlClient := sharedMysql.GetClient()
+
 	// 初始化 Repositories
-	likeRepo := infraMysql.NewLikeRepository()
-	commentRepo := infraMysql.NewCommentRepository()
-	favoriteRepo := infraMysql.NewFavoriteRepository()
+	likeRepo := infraMysql.NewLikeRepository(mysqlClient)
+	commentRepo := infraMysql.NewCommentRepository(mysqlClient)
+	favoriteRepo := infraMysql.NewFavoriteRepository(mysqlClient)
 
 	// 初始化 Application Service
 	cmdSvc := interactionAppCmd.NewInteractionCommandService(likeRepo, commentRepo, favoriteRepo)
@@ -40,7 +43,7 @@ func NewProvider(cfg *config.Config) (*Provider, error) {
 	handler := interactionGrpc.NewInteractionHandler(cmdSvc, querySvc)
 
 	return &Provider{
-		MySQL:             sharedMysql.GetClient(),
+		MySQL:             mysqlClient,
 		Redis:             sharedRedis.GetClient(),
 		InteractionHandler: handler,
 	}, nil

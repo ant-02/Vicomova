@@ -16,10 +16,12 @@ const emailCodePrefix = "email_code:"
 
 var ErrCodeNotFound = errors.New("verification code not found")
 
-type EmailCodeRepository struct{}
+type EmailCodeRepository struct {
+	redis *sharedRedis.Client
+}
 
-func NewEmailCodeRepository() userRepo.EmailCodeRepository {
-	return &EmailCodeRepository{}
+func NewEmailCodeRepository(redisClient *sharedRedis.Client) userRepo.EmailCodeRepository {
+	return &EmailCodeRepository{redis: redisClient}
 }
 
 func (r *EmailCodeRepository) Store(ctx context.Context, email, code string, ttl time.Duration) error {
@@ -28,7 +30,7 @@ func (r *EmailCodeRepository) Store(ctx context.Context, email, code string, ttl
 		return errors.New("code cannot be empty")
 	}
 	key := emailCodePrefix + email
-	if err := sharedRedis.GetClient().Set(ctx, key, code, ttl).Err(); err != nil {
+	if err := r.redis.Set(ctx, key, code, ttl).Err(); err != nil {
 		log.Error.Printf("EmailCodeRepository.Store: failed for %s: %v", email, err)
 		return err
 	}
@@ -38,7 +40,7 @@ func (r *EmailCodeRepository) Store(ctx context.Context, email, code string, ttl
 
 func (r *EmailCodeRepository) Verify(ctx context.Context, email, code string) (bool, error) {
 	key := emailCodePrefix + email
-	storedCode, err := sharedRedis.GetClient().Get(ctx, key).Result()
+	storedCode, err := r.redis.Get(ctx, key).Result()
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
 			log.Warn.Printf("EmailCodeRepository.Verify: code not found for %s", email)
@@ -57,7 +59,7 @@ func (r *EmailCodeRepository) Verify(ctx context.Context, email, code string) (b
 
 func (r *EmailCodeRepository) Delete(ctx context.Context, email string) error {
 	key := emailCodePrefix + email
-	if err := sharedRedis.GetClient().Del(ctx, key).Err(); err != nil {
+	if err := r.redis.Del(ctx, key).Err(); err != nil {
 		log.Error.Printf("EmailCodeRepository.Delete: failed for %s: %v", email, err)
 		return err
 	}

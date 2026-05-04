@@ -29,8 +29,11 @@ func NewProvider(cfg *config.Config) (*Provider, error) {
 		return nil, err
 	}
 
+	// 获取 MySQL/Redis 客户端
+	mysqlClient := sharedMysql.GetClient()
+
 	// 初始化 Repository
-	videoRepo := infraMysql.NewVideoRepository()
+	videoRepo := infraMysql.NewVideoRepository(mysqlClient)
 
 	// 初始化 Storage
 	var storage infraStorage.VideoStorage
@@ -58,7 +61,7 @@ func NewProvider(cfg *config.Config) (*Provider, error) {
 	videoHandler := videoGrpc.NewVideoHandler(cmdSvc, querySvc)
 
 	return &Provider{
-		MySQL:      sharedMysql.GetClient(),
+		MySQL:      mysqlClient,
 		Redis:      sharedRedis.GetClient(),
 		VideoHandler: videoHandler,
 	}, nil

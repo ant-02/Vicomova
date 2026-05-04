@@ -30,10 +30,14 @@ func NewProvider(cfg *config.Config) (*Provider, error) {
 		return nil, err
 	}
 
+	// 获取 MySQL/Redis 客户端
+	mysqlClient := sharedMysql.GetClient()
+	redisClient := sharedRedis.GetClient()
+
 	// 初始化 Repository
-	userRepo := infraMysql.NewUserRepository()
-	refreshTokenRepo := infraRedis.NewRefreshTokenRepository()
-	emailCodeRepo := infraRedis.NewEmailCodeRepository()
+	userRepo := infraMysql.NewUserRepository(mysqlClient)
+	refreshTokenRepo := infraRedis.NewRefreshTokenRepository(redisClient)
+	emailCodeRepo := infraRedis.NewEmailCodeRepository(redisClient)
 
 	// 初始化 Email Service
 	var emailService infraEmail.EmailService
@@ -56,8 +60,8 @@ func NewProvider(cfg *config.Config) (*Provider, error) {
 	userHandler := rpc.NewUserHandler(cmdSvc, querySvc)
 
 	return &Provider{
-		MySQL:      sharedMysql.GetClient(),
-		Redis:      sharedRedis.GetClient(),
+		MySQL:      mysqlClient,
+		Redis:      redisClient,
 		UserHandler: userHandler,
 	}, nil
 }
