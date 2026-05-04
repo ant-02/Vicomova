@@ -8,23 +8,25 @@ import (
 	infraRedis "vicomova/internal/user/infrastructure/persistence/redis"
 	svc "vicomova/internal/user/domain/service"
 	rpc "vicomova/internal/user/interfaces/grpc"
-	"vicomova/internal/shared/infrastructure/data/mysql"
-	redisClient "vicomova/internal/shared/infrastructure/data/redis"
+	sharedMysql "vicomova/internal/shared/infrastructure/data/mysql"
+	sharedRedis "vicomova/internal/shared/infrastructure/data/redis"
 	"vicomova/pkg/config"
 )
 
 type Provider struct {
+	MySQL      *sharedMysql.Client
+	Redis      *sharedRedis.Client
 	UserHandler *rpc.UserHandler
 }
 
 func NewProvider(cfg *config.Config) (*Provider, error) {
 	// 初始化数据库
-	if err := mysql.Init(&cfg.Database); err != nil {
+	if err := sharedMysql.Init(&cfg.Database); err != nil {
 		return nil, err
 	}
 
 	// 初始化 Redis
-	if err := redisClient.Init(&cfg.Redis); err != nil {
+	if err := sharedRedis.Init(&cfg.Redis); err != nil {
 		return nil, err
 	}
 
@@ -54,6 +56,8 @@ func NewProvider(cfg *config.Config) (*Provider, error) {
 	userHandler := rpc.NewUserHandler(cmdSvc, querySvc)
 
 	return &Provider{
+		MySQL:      sharedMysql.GetClient(),
+		Redis:      sharedRedis.GetClient(),
 		UserHandler: userHandler,
 	}, nil
 }

@@ -11,7 +11,7 @@ import (
 	"vicomova/internal/shared/infrastructure/data/mysql"
 	userEntity "vicomova/internal/user/domain/entity"
 	"vicomova/internal/shared/pkg/log"
-	"vicomova/internal/wire"
+	"vicomova/internal/user/wire"
 	"vicomova/pkg/config"
 	"vicomova/pkg/etcd"
 
