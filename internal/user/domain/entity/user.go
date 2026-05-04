@@ -1,37 +1,32 @@
 package entity
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
 	"time"
+
+	"vicomova/internal/user/domain/valueobject"
 )
 
 type User struct {
-	ID        int64     `json:"id" gorm:"primaryKey;autoIncrement"`
-	Username  string    `json:"username" gorm:"uniqueIndex;size:64;not null"`
-	Password  string    `json:"-" gorm:"size:255;not null"`
-	Email     string    `json:"email" gorm:"size:128"`
-	CreatedAt time.Time `json:"created_at" gorm:"autoCreateTime"`
-	UpdatedAt time.Time `json:"updated_at" gorm:"autoUpdateTime"`
+	ID        int64          `json:"id" gorm:"primaryKey;autoIncrement"`
+	Username  *valueobject.Username `json:"-" gorm:"-"`
+	Password  *valueobject.Password `json:"-" gorm:"-"`
+	Email     *valueobject.Email    `json:"-" gorm:"-"`
+	CreatedAt time.Time      `json:"created_at" gorm:"autoCreateTime"`
+	UpdatedAt time.Time      `json:"updated_at" gorm:"autoUpdateTime"`
 }
 
 func (User) TableName() string {
 	return "users"
 }
 
-func NewUser(username, password, email string) *User {
+func NewUser(username *valueobject.Username, password *valueobject.Password, email *valueobject.Email) *User {
 	return &User{
 		Username: username,
-		Password: hashPassword(password),
+		Password: password,
 		Email:    email,
 	}
 }
 
-func (u *User) CanLogin(password string) bool {
-	return u.Password == hashPassword(password)
-}
-
-func hashPassword(password string) string {
-	hash := sha256.Sum256([]byte(password))
-	return hex.EncodeToString(hash[:])
+func (u *User) CanLogin(plainPassword string) bool {
+	return u.Password.Verify(plainPassword)
 }

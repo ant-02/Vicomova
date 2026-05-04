@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	userEntity "vicomova/internal/user/domain/entity"
+	"vicomova/internal/user/domain/valueobject"
 	userRepo "vicomova/internal/user/domain/repository"
 	"vicomova/internal/user/application/command/mock"
 	"vicomova/internal/user/domain/service"
@@ -57,9 +58,11 @@ func TestSendVerificationCode_Success(t *testing.T) {
 func TestSendVerificationCode_UserAlreadyExists(t *testing.T) {
 	ctx := context.Background()
 	userRepo := mock.NewMockUserRepository()
+	username, _ := valueobject.NewUsername("testuser")
+	email, _ := valueobject.NewEmail("existing@example.com")
 	userRepo.Users["testuser"] = &userEntity.User{
-		Username: "testuser",
-		Email:    "existing@example.com",
+		Username: username,
+		Email:    email,
 	}
 
 	svc := newTestService(
@@ -228,9 +231,11 @@ func TestVerifyAndRegister_UserAlreadyExists(t *testing.T) {
 	emailCodeRepo.Codes["test@example.com"] = "123456"
 
 	userRepo := mock.NewMockUserRepository()
+	existingUsername, _ := valueobject.NewUsername("existinguser")
+	existingEmail, _ := valueobject.NewEmail("other@example.com")
 	userRepo.Users["existinguser"] = &userEntity.User{
-		Username: "existinguser",
-		Email:    "other@example.com",
+		Username: existingUsername,
+		Email:    existingEmail,
 	}
 
 	svc := newTestService(

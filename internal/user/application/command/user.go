@@ -8,13 +8,33 @@ import (
 	constants "vicomova/internal/shared/pkg/constants"
 	errorsPkg "vicomova/internal/shared/pkg/errors"
 	"vicomova/internal/shared/pkg/log"
+	"vicomova/internal/shared/pkg/utils"
 
 	"github.com/google/uuid"
 )
 
 func (s *UserCommandService) SendVerificationCode(ctx context.Context, cmd *SendVerificationCodeCommand) (*SendCodeResult, error) {
+	// 验证值对象格式
+	username, err := userVO.NewUsername(cmd.Username)
+	if err != nil {
+		log.Warn.Printf("SendVerificationCode: invalid username: %v", err)
+		return &SendCodeResult{
+			Success: false,
+			Message: "invalid username",
+		}, nil
+	}
+
+	_, err = userVO.NewEmail(cmd.Email)
+	if err != nil {
+		log.Warn.Printf("SendVerificationCode: invalid email: %v", err)
+		return &SendCodeResult{
+			Success: false,
+			Message: "invalid email",
+		}, nil
+	}
+
 	// 检查用户是否已存在
-	existing, err := s.userRepo.GetByUsername(ctx, cmd.Username)
+	existing, err := s.userRepo.GetByUsername(ctx, username)
 	if err != nil {
 		log.Error.Printf("SendVerificationCode: GetByUsername failed: %v", err)
 		return nil, errorsPkg.ErrInternalServer
@@ -28,10 +48,10 @@ func (s *UserCommandService) SendVerificationCode(ctx context.Context, cmd *Send
 	}
 
 	// 生成验证码
-	code := userVO.GenerateEmailCode(cmd.Email)
+	code := utils.GenerateEmailCode(constants.EmailCodeLength)
 
 	// 存储验证码到 Redis
-	if err := s.emailCodeRepo.Store(ctx, cmd.Email, code.Code, constants.EmailCodeTTL); err != nil {
+	if err := s.emailCodeRepo.Store(ctx, cmd.Email, code, constants.EmailCodeTTL); err != nil {
 		log.Error.Printf("SendVerificationCode: Redis Store failed for %s: %v", cmd.Email, err)
 		return nil, errorsPkg.ErrInternalServer
 	}
@@ -44,7 +64,7 @@ func (s *UserCommandService) SendVerificationCode(ctx context.Context, cmd *Send
 			Message: "email service not configured",
 		}, errorsPkg.ErrInternalServer
 	}
-	if err := s.emailService.SendVerificationCode(ctx, cmd.Email, code.Code); err != nil {
+	if err := s.emailService.SendVerificationCode(ctx, cmd.Email, code); err != nil {
 		log.Error.Printf("SendVerificationCode: SendEmail failed for %s: %v", cmd.Email, err)
 		return &SendCodeResult{
 			Success: false,
@@ -56,7 +76,7 @@ func (s *UserCommandService) SendVerificationCode(ctx context.Context, cmd *Send
 
 	return &SendCodeResult{
 		Success: true,
- 		Message: "verification code sent",
+		Message: "verification code sent",
 	}, nil
 }
 
@@ -70,8 +90,24 @@ func (s *UserCommandService) VerifyAndRegister(ctx context.Context, cmd *VerifyA
 		return nil, errorsPkg.ErrInvalidToken
 	}
 
+	// 创建值对象
+	username, err := userVO.NewUsername(cmd.Username)
+	if err != nil {
+		return nil, errorsPkg.ErrInvalidUsername
+	}
+
+	password, err := userVO.NewPassword(cmd.Password)
+	if err != nil {
+		return nil, errorsPkg.ErrInvalidPassword
+	}
+
+	email, err := userVO.NewEmail(cmd.Email)
+	if err != nil {
+		return nil, errorsPkg.ErrInvalidEmail
+	}
+
 	// 检查用户是否已存在
-	existing, err := s.userRepo.GetByUsername(ctx, cmd.Username)
+	existing, err := s.userRepo.GetByUsername(ctx, username)
 	if err != nil {
 		return nil, errorsPkg.ErrInternalServer
 	}
@@ -80,7 +116,7 @@ func (s *UserCommandService) VerifyAndRegister(ctx context.Context, cmd *VerifyA
 	}
 
 	// 创建用户
-	u := userEntity.NewUser(cmd.Username, cmd.Password, cmd.Email)
+	u := userEntity.NewUser(username, password, email)
 	if err := s.userRepo.Create(ctx, u); err != nil {
 		return nil, errorsPkg.ErrInternalServer
 	}
@@ -90,12 +126,17 @@ func (s *UserCommandService) VerifyAndRegister(ctx context.Context, cmd *VerifyA
 
 	return &UserResult{
 		UserID:   u.ID,
-		Username: u.Username,
+		Username: u.Username.Value(),
 	}, nil
 }
 
 func (s *UserCommandService) Login(ctx context.Context, cmd *LoginCommand) (*TokenResult, error) {
-	u, err := s.userRepo.GetByUsername(ctx, cmd.Username)
+	username, err := userVO.NewUsername(cmd.Username)
+	if err != nil {
+		return nil, errorsPkg.ErrUserNotFound
+	}
+
+	u, err := s.userRepo.GetByUsername(ctx, username)
 	if err != nil {
 		return nil, errorsPkg.ErrInternalServer
 	}
@@ -158,8 +199,8 @@ func (s *UserCommandService) Logout(ctx context.Context, cmd *LogoutCommand) err
 	return nil
 }
 
-func (s *UserCommandService) generateTokenPair(ctx context.Context, userID int64, username string) (*TokenResult, error) {
-	accessToken, err := s.tokenService.GenerateAccessToken(userID, username)
+func (s *UserCommandService) generateTokenPair(ctx context.Context, userID int64, username *userVO.Username) (*TokenResult, error) {
+	accessToken, err := s.tokenService.GenerateAccessToken(userID, username.Value())
 	if err != nil {
 		return nil, err
 	}
@@ -174,7 +215,7 @@ func (s *UserCommandService) generateTokenPair(ctx context.Context, userID int64
 
 	return &TokenResult{
 		UserID:       userID,
-		Username:     username,
+		Username:     username.Value(),
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 		ExpiresIn:    int64(s.tokenService.GetAccessTokenExpiry().Seconds()),

@@ -1,12 +1,7 @@
 package valueobject
 
 import (
-	"crypto/rand"
-	"fmt"
-	"math/big"
 	"time"
-
-	"vicomova/internal/shared/pkg/constants"
 )
 
 type EmailCode struct {
@@ -15,24 +10,18 @@ type EmailCode struct {
 	ExpiresAt time.Time
 }
 
-func GenerateEmailCode(email string) *EmailCode {
-	code := generateRandomCode()
+func NewEmailCode(email, code string, expiresAt time.Time) *EmailCode {
 	return &EmailCode{
 		Email:     email,
 		Code:      code,
-		ExpiresAt: time.Now().Add(constants.EmailCodeTTL),
+		ExpiresAt: expiresAt,
 	}
-}
-
-func generateRandomCode() string {
-	code := make([]byte, constants.EmailCodeLength)
-	for i := range code {
-		n, _ := rand.Int(rand.Reader, big.NewInt(10))
-		code[i] = byte('0' + n.Int64())
-	}
-	return fmt.Sprintf("%s", code)
 }
 
 func (e *EmailCode) IsExpired() bool {
 	return time.Now().After(e.ExpiresAt)
+}
+
+func (e *EmailCode) IsValid() bool {
+	return !e.IsExpired() && len(e.Code) > 0
 }

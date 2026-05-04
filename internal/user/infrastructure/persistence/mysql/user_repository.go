@@ -5,6 +5,7 @@ import (
 
 	userEntity "vicomova/internal/user/domain/entity"
 	userRepo "vicomova/internal/user/domain/repository"
+	userVO "vicomova/internal/user/domain/valueobject"
 	sharedMysql "vicomova/internal/shared/infrastructure/data/mysql"
 	"vicomova/internal/shared/pkg/log"
 
@@ -22,10 +23,10 @@ func NewUserRepository(mysqlClient *sharedMysql.Client) userRepo.UserRepository 
 func (r *UserRepository) Create(ctx context.Context, u *userEntity.User) error {
 	po := UserToPO(u)
 	if err := r.mysql.WithContext(ctx).Create(po).Error; err != nil {
-		log.Error.Printf("UserRepository.Create: failed for username=%s: %v", u.Username, err)
+		log.Error.Printf("UserRepository.Create: failed for username=%s: %v", u.Username.Value(), err)
 		return err
 	}
-	log.Info.Printf("UserRepository.Create: created user username=%s", u.Username)
+	log.Info.Printf("UserRepository.Create: created user username=%s", u.Username.Value())
 	return nil
 }
 
@@ -42,14 +43,14 @@ func (r *UserRepository) GetByID(ctx context.Context, id int64) (*userEntity.Use
 	return POToUser(&po), nil
 }
 
-func (r *UserRepository) GetByUsername(ctx context.Context, username string) (*userEntity.User, error) {
+func (r *UserRepository) GetByUsername(ctx context.Context, username *userVO.Username) (*userEntity.User, error) {
 	var po UserPO
-	err := r.mysql.WithContext(ctx).Where("username = ?", username).First(&po).Error
+	err := r.mysql.WithContext(ctx).Where("username = ?", username.Value()).First(&po).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, nil
 		}
-		log.Error.Printf("UserRepository.GetByUsername: failed for username=%s: %v", username, err)
+		log.Error.Printf("UserRepository.GetByUsername: failed for username=%s: %v", username.Value(), err)
 		return nil, err
 	}
 	return POToUser(&po), nil

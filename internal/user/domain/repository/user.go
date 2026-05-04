@@ -11,7 +11,7 @@ import (
 type UserRepository interface {
 	Create(ctx context.Context, u *entity.User) error
 	GetByID(ctx context.Context, id int64) (*entity.User, error)
-	GetByUsername(ctx context.Context, username string) (*entity.User, error)
+	GetByUsername(ctx context.Context, username *valueobject.Username) (*entity.User, error)
 	Update(ctx context.Context, u *entity.User) error
 	Delete(ctx context.Context, id int64) error
 }

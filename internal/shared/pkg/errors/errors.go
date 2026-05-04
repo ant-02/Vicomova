@@ -18,12 +18,15 @@ func NewBizError(code int32, msg string) *BizError {
 }
 
 var (
-	ErrInvalidParams   = NewBizError(400, "Invalid parameters")
-	ErrUnauthorized    = NewBizError(401, "Unauthorized")
-	ErrUserNotFound    = NewBizError(404, "User not found")
-	ErrUserExists      = NewBizError(409, "User already exists")
-	ErrPasswordWrong   = NewBizError(401, "Password is incorrect")
-	ErrInternalServer  = NewBizError(500, "Internal server error")
-	ErrInvalidToken    = NewBizError(401, "Invalid token")
-	ErrTokenExpired    = NewBizError(401, "Token expired")
+	ErrInvalidParams    = NewBizError(400, "Invalid parameters")
+	ErrUnauthorized     = NewBizError(401, "Unauthorized")
+	ErrUserNotFound     = NewBizError(404, "User not found")
+	ErrUserExists       = NewBizError(409, "User already exists")
+	ErrPasswordWrong    = NewBizError(401, "Password is incorrect")
+	ErrInternalServer   = NewBizError(500, "Internal server error")
+	ErrInvalidToken     = NewBizError(401, "Invalid token")
+	ErrTokenExpired     = NewBizError(401, "Token expired")
+	ErrInvalidUsername  = NewBizError(400, "Invalid username")
+	ErrInvalidPassword  = NewBizError(400, "Invalid password")
+	ErrInvalidEmail     = NewBizError(400, "Invalid email")
 )

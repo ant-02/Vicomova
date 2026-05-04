@@ -4,6 +4,7 @@ import (
 	"context"
 
 	userEntity "vicomova/internal/user/domain/entity"
+	userVO "vicomova/internal/user/domain/valueobject"
 )
 
 type MockUserRepository struct {
@@ -21,26 +22,25 @@ func NewMockUserRepository() *MockUserRepository {
 	}
 }
 
-// GetUser returns a user by username for testing
-func (m *MockUserRepository) GetUser(username string) (*userEntity.User, bool) {
-	u, ok := m.Users[username]
-	return u, ok
-}
-
 func (m *MockUserRepository) Create(ctx context.Context, u *userEntity.User) error {
 	if m.CreateErr != nil {
 		return m.CreateErr
 	}
 	u.ID = int64(len(m.Users) + 1)
-	m.Users[u.Username] = u
+	if u.Username != nil {
+		m.Users[u.Username.Value()] = u
+	}
 	return nil
 }
 
-func (m *MockUserRepository) GetByUsername(ctx context.Context, username string) (*userEntity.User, error) {
+func (m *MockUserRepository) GetByUsername(ctx context.Context, username *userVO.Username) (*userEntity.User, error) {
 	if m.GetByUNErr != nil {
 		return nil, m.GetByUNErr
 	}
-	return m.Users[username], nil
+	if username == nil {
+		return nil, nil
+	}
+	return m.Users[username.Value()], nil
 }
 
 func (m *MockUserRepository) GetByID(ctx context.Context, id int64) (*userEntity.User, error) {
@@ -59,7 +59,9 @@ func (m *MockUserRepository) Update(ctx context.Context, u *userEntity.User) err
 	if m.UpdateErr != nil {
 		return m.UpdateErr
 	}
-	m.Users[u.Username] = u
+	if u.Username != nil {
+		m.Users[u.Username.Value()] = u
+	}
 	return nil
 }
 

@@ -3,25 +3,30 @@ package query
 import (
 	"context"
 
-	"vicomova/internal/user/application/command"
-	errorsPkg "vicomova/internal/shared/pkg/errors"
+	userVO "vicomova/internal/user/domain/valueobject"
+	"vicomova/internal/shared/pkg/errors"
 	"vicomova/internal/shared/pkg/log"
 )
 
-func (s *UserQueryService) GetUser(ctx context.Context, query *GetUserQuery) (*command.UserResult, error) {
-	u, err := s.userRepo.GetByID(ctx, query.UserID)
+func (s *UserQueryService) GetUser(ctx context.Context, query *GetUserQuery) (*UserResult, error) {
+	username, err := userVO.NewUsername(query.Username)
 	if err != nil {
-		log.Error.Printf("GetUser: GetByID failed for userID=%d: %v", query.UserID, err)
-		return nil, errorsPkg.ErrInternalServer
-	}
-	if u == nil {
-		log.Warn.Printf("GetUser: user not found, userID=%d", query.UserID)
-		return nil, errorsPkg.ErrUserNotFound
+		return nil, errors.ErrUserNotFound
 	}
 
-	return &command.UserResult{
+	u, err := s.userRepo.GetByUsername(ctx, username)
+	if err != nil {
+		log.Error.Printf("GetUser: GetByUsername failed for userID=%d: %v", query.UserID, err)
+		return nil, errors.ErrInternalServer
+	}
+	if u == nil {
+		log.Warn.Printf("GetUser: user not found, username=%s", query.Username)
+		return nil, errors.ErrUserNotFound
+	}
+
+	return &UserResult{
 		UserID:   u.ID,
-		Username: u.Username,
-		Email:    u.Email,
+		Username: u.Username.Value(),
+		Email:    u.Email.Value(),
 	}, nil
 }
