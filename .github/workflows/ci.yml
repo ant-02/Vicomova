@@ -28,7 +28,9 @@ jobs:
           version: latest
 
       - name: Build
-        run: go build ./...
+        run: |
+          make proto
+          go build ./...
 
   test:
     name: Test
