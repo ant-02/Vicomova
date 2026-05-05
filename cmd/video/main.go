@@ -53,12 +53,12 @@ func main() {
 		if err != nil {
 			log.Warn.Printf("Failed to create etcd client: %v", err)
 		} else {
-			defer etcdClient.Close()
+			defer func() { _ = etcdClient.Close() }()
 			registry = etcd.NewRegistry(etcdClient, "video", fmt.Sprintf("127.0.0.1:%d", port))
 			if err := registry.Register(); err != nil {
 				log.Warn.Printf("Failed to register to etcd: %v", err)
 			}
-			defer registry.Unregister()
+			defer func() { _ = registry.Unregister() }()
 		}
 	}
 
@@ -69,9 +69,9 @@ func main() {
 		<-sig
 		klog.Info("Shutting down video service...")
 		if registry != nil {
-			registry.Unregister()
+			_ = registry.Unregister()
 		}
-		svr.Stop()
+		_ = svr.Stop()
 	}()
 
 	log.Info.Printf("Video service starting on 127.0.0.1:%d", port)

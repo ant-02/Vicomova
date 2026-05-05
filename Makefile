@@ -1,4 +1,4 @@
-.PHONY: dev dev-stop dev-logs run-user run-gateway run-video run-interaction docker-build docker-up docker-up-prod docker-down docker-clean proto swagger
+.PHONY: dev dev-stop dev-logs run-user run-gateway run-video run-interaction docker-build docker-up docker-up-prod docker-down docker-clean proto swagger lint test
 
 CONFIG_FILE = config/base.yaml
 SESSION_NAME = vicomova
@@ -64,7 +64,18 @@ proto:
 
 # Swagger 文档生成
 swagger:
-	$(HOME)/go/1.24.10/bin/swag init -g cmd/gateway/main.go -o docs
+	$(HOME)/go/1.25.0/bin/swag init -g cmd/gateway/main.go -o docs
+
+# Lint 代码
+lint:
+	golangci-lint run ./...
+
+# 运行测试
+test:
+	go test ./... -short
+
+# 检查项目（lint + test）
+check: lint test
 
 # Docker 构建
 docker-build:

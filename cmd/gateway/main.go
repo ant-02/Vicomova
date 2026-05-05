@@ -88,7 +88,7 @@ func main() {
 		signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
 		<-sig
 		log.Info.Print("Shutting down gateway...")
-		h.Shutdown(context.Background())
+		_ = h.Shutdown(context.Background())
 	}()
 
 	log.Info.Printf("Gateway starting on :%d", port)

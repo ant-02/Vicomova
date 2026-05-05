@@ -49,7 +49,9 @@ func main() {
 	}
 
 	// 自动迁移
-	mysql.GetDB().AutoMigrate(&userEntity.User{})
+	if err := mysql.GetDB().AutoMigrate(&userEntity.User{}); err != nil {
+		log.Error.Fatalf("Failed to auto migrate: %v", err)
+	}
 
 	// 创建 Kitex Server
 	svr := userService.NewServer(p.UserHandler)
@@ -66,13 +68,14 @@ func main() {
 		if err != nil {
 			log.Error.Fatalf("Failed to create etcd client: %v", err)
 		}
-		defer etcdClient.Close()
+		defer func() { _ = etcdClient.Close() }()
 
 		registry = etcd.NewRegistry(etcdClient, "user", addr)
 		if err := registry.Register(); err != nil {
 			log.Error.Fatalf("Failed to register to etcd: %v", err)
 		}
-		defer registry.Unregister()
+		defer func() { _ = registry.Unregister() }()
+		defer func() { _ = svr.Stop() }()
 
 		// 初始化配置热更新
 		configWatcher = config.NewConfigWatcher(etcdClient, cfg)
@@ -80,7 +83,9 @@ func main() {
 			log.Info.Printf("JWT secret changed: %v -> %v", oldVal, newVal)
 		})
 		configWatcher.Start(context.Background())
-		config.InitDefaultConfig(context.Background(), etcdClient, cfg)
+		if err := config.InitDefaultConfig(context.Background(), etcdClient, cfg); err != nil {
+			log.Error.Fatalf("Failed to init default config: %v", err)
+		}
 	}
 
 	// 优雅关闭
@@ -90,9 +95,9 @@ func main() {
 		<-sig
 		klog.Info("Shutting down server...")
 		if registry != nil {
-			registry.Unregister()
+			_ = registry.Unregister()
 		}
-		svr.Stop()
+		_ = svr.Stop()
 	}()
 
 	if err := svr.Run(); err != nil {

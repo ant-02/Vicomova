@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -53,8 +52,8 @@ func main() {
 		if err != nil {
 			log.Info.Printf("Failed to create etcd client: %v", err)
 		} else {
-			defer etcdClient.Close()
-			registry = etcd.NewRegistry(etcdClient, "interaction", fmt.Sprintf("127.0.0.1:%d", port))
+			defer func() { _ = etcdClient.Close() }()
+			defer func() { _ = registry.Unregister() }()
 			if err := registry.Register(); err != nil {
 				log.Info.Printf("Failed to register to etcd: %v", err)
 			}
@@ -69,9 +68,9 @@ func main() {
 		<-sig
 		klog.Info("Shutting down interaction service...")
 		if registry != nil {
-			registry.Unregister()
+			_ = registry.Unregister()
 		}
-		svr.Stop()
+		_ = svr.Stop()
 	}()
 
 	log.Info.Printf("Interaction service starting on 127.0.0.1:%d", port)
