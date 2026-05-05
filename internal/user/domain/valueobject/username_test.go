@@ -23,7 +23,7 @@ func TestNewUsername_TooShort(t *testing.T) {
 }
 
 func TestNewUsername_TooLong(t *testing.T) {
-	_, err := NewUsername("abcdefghijklmnopqrstuvwxyz12345") // 33 chars
+	_, err := NewUsername("abcdefghijklmnopqrstuvwxyz1234567") // 33 chars
 	if err == nil {
 		t.Error("expected error for username > 32 chars")
 	}
