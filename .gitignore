@@ -18,6 +18,9 @@ docker/mysql/undo_*
 config/base.yaml
 docker/config/base.yaml
 
+# Kitex
+kitex_info.yaml
+
 # Generated code
 third_party/kitex_gen/
 docs/

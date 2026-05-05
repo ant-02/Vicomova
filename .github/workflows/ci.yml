@@ -27,18 +27,11 @@ jobs:
           export PATH="$HOME/go/bin:$PATH"
           make proto
 
-      - name: Go vet
-        run: go vet ./...
-
-      # golangci-lint v2.x built with Go 1.25, v1.x with Go 1.24
       - name: golangci-lint
-        if: false  # TODO: re-enable when golangci-lint releases version built with Go 1.25
         uses: golangci/golangci-lint-action@v6
         with:
           version: latest
-
-      - name: Build
-        run: go build ./...
+          args: --timeout=5m
 
   test:
     name: Test
