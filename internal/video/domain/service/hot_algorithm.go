@@ -1,13 +1,13 @@
 package service
 
 import (
-    "context"
+	"context"
 
-    "vicomova/internal/video/domain/entity"
+	"vicomova/internal/video/domain/entity"
 )
 
 type HotAlgorithm interface {
-    CalculateScore(ctx context.Context, videoID int64) (float64, error)
-    IncrementView(ctx context.Context, videoID int64) error
-    GetHotVideos(ctx context.Context, limit int) ([]*entity.Video, error)
+	CalculateScore(ctx context.Context, videoID int64) (float64, error)
+	IncrementView(ctx context.Context, videoID int64) error
+	GetHotVideos(ctx context.Context, limit int) ([]*entity.Video, error)
 }

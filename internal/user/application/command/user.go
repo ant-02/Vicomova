@@ -3,12 +3,12 @@ package command
 import (
 	"context"
 
-	userEntity "vicomova/internal/user/domain/entity"
-	userVO "vicomova/internal/user/domain/valueobject"
 	constants "vicomova/internal/shared/pkg/constants"
 	errorsPkg "vicomova/internal/shared/pkg/errors"
 	"vicomova/internal/shared/pkg/log"
 	"vicomova/internal/shared/pkg/utils"
+	userEntity "vicomova/internal/user/domain/entity"
+	userVO "vicomova/internal/user/domain/valueobject"
 
 	"github.com/google/uuid"
 )

@@ -26,8 +26,8 @@ func (s *TokenService) GenerateAccessToken(userID int64, username string) (strin
 	claims := jwt.MapClaims{
 		"user_id":  userID,
 		"username": username,
-		"exp":     time.Now().Add(constants.AccessTokenExpiry).Unix(),
-		"iat":     time.Now().Unix(),
+		"exp":      time.Now().Add(constants.AccessTokenExpiry).Unix(),
+		"iat":      time.Now().Unix(),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

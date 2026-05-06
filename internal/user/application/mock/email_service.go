@@ -5,10 +5,10 @@ import (
 )
 
 type MockEmailService struct {
-	SendErr     error
-	SendCalled  bool
-	SentTo      string
-	SentCode    string
+	SendErr    error
+	SendCalled bool
+	SentTo     string
+	SentCode   string
 }
 
 func NewMockEmailService() *MockEmailService {

@@ -16,7 +16,7 @@ import (
 type ChangeCallback func(oldVal, newVal interface{})
 
 type ConfigWatcher struct {
-	etcdClient   *etcd.Client
+	etcdClient  *etcd.Client
 	config      *Config
 	subscribers map[string][]ChangeCallback
 	mu          sync.RWMutex
@@ -24,9 +24,9 @@ type ConfigWatcher struct {
 
 func NewConfigWatcher(etcdClient *etcd.Client, cfg *Config) *ConfigWatcher {
 	return &ConfigWatcher{
-		etcdClient:   etcdClient,
-		config:       cfg,
-		subscribers:  make(map[string][]ChangeCallback),
+		etcdClient:  etcdClient,
+		config:      cfg,
+		subscribers: make(map[string][]ChangeCallback),
 	}
 }
 
@@ -205,7 +205,7 @@ func InitDefaultConfig(ctx context.Context, etcdClient *etcd.Client, cfg *Config
 	}
 	if len(resp.Kvs) == 0 {
 		defaultRateLimit := map[string]interface{}{
-			"enabled": true,
+			"enabled":             true,
 			"requests_per_second": 100,
 		}
 		data, _ := json.Marshal(defaultRateLimit)

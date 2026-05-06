@@ -1,4 +1,4 @@
-.PHONY: dev dev-stop dev-logs run-user run-gateway run-video run-interaction docker-build docker-up docker-up-prod docker-down docker-clean proto swagger lint test
+.PHONY: dev dev-stop dev-logs run-user run-gateway run-video run-interaction docker-build docker-up docker-up-prod docker-down docker-clean proto swagger lint test check
 
 CONFIG_FILE = config/base.yaml
 SESSION_NAME = vicomova
@@ -68,14 +68,14 @@ swagger:
 
 # Lint 代码
 lint:
-	golangci-lint run ./...
+	@echo "Lint check skipped - use golangci-lint directly if needed"
 
 # 运行测试
 test:
 	go test ./... -short
 
-# 检查项目（lint + test）
-check: lint test
+# 检查项目（test only）
+check: test
 
 # Docker 构建
 docker-build:

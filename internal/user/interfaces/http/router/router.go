@@ -2,8 +2,8 @@ package router
 
 import (
 	"vicomova/internal/shared/pkg/middleware"
-	"vicomova/internal/user/interfaces/http/handler"
 	"vicomova/internal/user/domain/service"
+	"vicomova/internal/user/interfaces/http/handler"
 
 	"github.com/cloudwego/hertz/pkg/app/server"
 )

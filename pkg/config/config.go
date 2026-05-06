@@ -10,14 +10,14 @@ import (
 )
 
 type Config struct {
-	Server   ServerConfig       `mapstructure:"server"`
-	Database DatabaseConfig    `mapstructure:"database"`
-	Redis    RedisConfig       `mapstructure:"redis"`
-	Kafka    KafkaConfig       `mapstructure:"kafka"`
-	JWT      JWTConfig         `mapstructure:"jwt"`
-	Email    AliyunEmailConfig `mapstructure:"email"`
-	Video    VideoConfig       `mapstructure:"video"`
-	Etcd     etcd.EtcdConfig   `mapstructure:"etcd"`
+	Server   ServerConfig             `mapstructure:"server"`
+	Database DatabaseConfig           `mapstructure:"database"`
+	Redis    RedisConfig              `mapstructure:"redis"`
+	Kafka    KafkaConfig              `mapstructure:"kafka"`
+	JWT      JWTConfig                `mapstructure:"jwt"`
+	Email    AliyunEmailConfig        `mapstructure:"email"`
+	Video    VideoConfig              `mapstructure:"video"`
+	Etcd     etcd.EtcdConfig          `mapstructure:"etcd"`
 	Services map[string]ServiceConfig `mapstructure:"services"`
 }
 
@@ -26,11 +26,11 @@ type VideoConfig struct {
 }
 
 type VideoStorageConfig struct {
-	Type   string              `mapstructure:"type"` // local/qiniu/aliyun/aws
-	Local  LocalStorageConfig  `mapstructure:"local"`
-	Qiniu  QiniuStorageConfig  `mapstructure:"qiniu"`
+	Type   string             `mapstructure:"type"` // local/qiniu/aliyun/aws
+	Local  LocalStorageConfig `mapstructure:"local"`
+	Qiniu  QiniuStorageConfig `mapstructure:"qiniu"`
 	Aliyun AliyunOSSConfig    `mapstructure:"aliyun"`
-	AWS    AWSStorageConfig    `mapstructure:"aws"`
+	AWS    AWSStorageConfig   `mapstructure:"aws"`
 }
 
 type LocalStorageConfig struct {
@@ -41,8 +41,8 @@ type LocalStorageConfig struct {
 type QiniuStorageConfig struct {
 	AccessKey string `mapstructure:"access_key"`
 	SecretKey string `mapstructure:"secret_key"`
-	Bucket   string `mapstructure:"bucket"`
-	Domain   string `mapstructure:"domain"`
+	Bucket    string `mapstructure:"bucket"`
+	Domain    string `mapstructure:"domain"`
 }
 
 type AliyunOSSConfig struct {
@@ -77,29 +77,29 @@ type AliyunEmailConfig struct {
 
 type ServerConfig struct {
 	Host string `mapstructure:"host"`
-	Port int `mapstructure:"port"`
+	Port int    `mapstructure:"port"`
 }
 
 type DatabaseConfig struct {
-	Host string `mapstructure:"host"`
-	Port int `mapstructure:"port"`
-	User string `mapstructure:"user"`
-	Password string `mapstructure:"password"`
-	DBName string `mapstructure:"dbname"`
-	MaxOpenConns int `mapstructure:"max_open_conns"`
-	MaxIdleConns int `mapstructure:"max_idle_conns"`
+	Host         string `mapstructure:"host"`
+	Port         int    `mapstructure:"port"`
+	User         string `mapstructure:"user"`
+	Password     string `mapstructure:"password"`
+	DBName       string `mapstructure:"dbname"`
+	MaxOpenConns int    `mapstructure:"max_open_conns"`
+	MaxIdleConns int    `mapstructure:"max_idle_conns"`
 }
 
 type RedisConfig struct {
-	Host string `mapstructure:"host"`
-	Port int `mapstructure:"port"`
+	Host     string `mapstructure:"host"`
+	Port     int    `mapstructure:"port"`
 	Password string `mapstructure:"password"`
-	DB int `mapstructure:"db"`
+	DB       int    `mapstructure:"db"`
 }
 
 type KafkaConfig struct {
 	Brokers []string `mapstructure:"brokers"`
-	Topic string `mapstructure:"topic"`
+	Topic   string   `mapstructure:"topic"`
 }
 
 func (d *DatabaseConfig) DSN() string {

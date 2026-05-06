@@ -6,8 +6,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"vicomova/internal/shared/pkg/log"
 	"vicomova/internal/interaction/wire"
+	"vicomova/internal/shared/pkg/log"
 	"vicomova/pkg/config"
 	"vicomova/pkg/etcd"
 

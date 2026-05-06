@@ -1,10 +1,10 @@
 package command
 
 import (
+	sharedHasher "vicomova/internal/shared/pkg/hasher"
 	userRepo "vicomova/internal/user/domain/repository"
 	"vicomova/internal/user/domain/service"
 	infraEmail "vicomova/internal/user/infrastructure/external/email"
-	sharedHasher "vicomova/internal/shared/pkg/hasher"
 )
 
 type UserCommandService struct {

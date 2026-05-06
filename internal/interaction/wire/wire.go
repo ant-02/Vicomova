@@ -11,8 +11,8 @@ import (
 )
 
 type Provider struct {
-	MySQL             *sharedMysql.Client
-	Redis             *sharedRedis.Client
+	MySQL              *sharedMysql.Client
+	Redis              *sharedRedis.Client
 	InteractionHandler *interactionGrpc.InteractionHandler
 }
 
@@ -43,8 +43,8 @@ func NewProvider(cfg *config.Config) (*Provider, error) {
 	handler := interactionGrpc.NewInteractionHandler(cmdSvc, querySvc)
 
 	return &Provider{
-		MySQL:             mysqlClient,
-		Redis:             sharedRedis.GetClient(),
+		MySQL:              mysqlClient,
+		Redis:              sharedRedis.GetClient(),
 		InteractionHandler: handler,
 	}, nil
 }

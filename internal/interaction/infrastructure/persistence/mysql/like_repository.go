@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 
-	sharedMysql "vicomova/internal/shared/infrastructure/data/mysql"
-	"vicomova/internal/shared/pkg/log"
 	"vicomova/internal/interaction/domain/entity"
 	repo "vicomova/internal/interaction/domain/repository"
+	sharedMysql "vicomova/internal/shared/infrastructure/data/mysql"
+	"vicomova/internal/shared/pkg/log"
 
 	"gorm.io/gorm"
 )
@@ -24,7 +24,7 @@ func (r *LikeRepository) Create(ctx context.Context, like *entity.Like) error {
 	po := &LikePO{
 		UserID:     like.UserID,
 		TargetType: like.TargetType,
-		TargetID:  like.TargetID,
+		TargetID:   like.TargetID,
 	}
 	if err := r.mysql.WithContext(ctx).Create(po).Error; err != nil {
 		log.Error.Printf("LikeRepository.Create: failed: %v", err)

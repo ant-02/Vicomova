@@ -5,14 +5,14 @@ import (
 	"errors"
 	"testing"
 
-	userEntity "vicomova/internal/user/domain/entity"
-	"vicomova/internal/user/domain/valueobject"
-	userRepo "vicomova/internal/user/domain/repository"
-	"vicomova/internal/user/application/mock"
-	"vicomova/internal/user/domain/service"
-	infraEmail "vicomova/internal/user/infrastructure/external/email"
 	"vicomova/internal/shared/pkg/constants"
 	sharedHasher "vicomova/internal/shared/pkg/hasher"
+	"vicomova/internal/user/application/mock"
+	userEntity "vicomova/internal/user/domain/entity"
+	userRepo "vicomova/internal/user/domain/repository"
+	"vicomova/internal/user/domain/service"
+	"vicomova/internal/user/domain/valueobject"
+	infraEmail "vicomova/internal/user/infrastructure/external/email"
 )
 
 // Helper to create test service

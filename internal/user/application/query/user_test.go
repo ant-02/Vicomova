@@ -4,10 +4,10 @@ import (
 	"context"
 	"testing"
 
-	userEntity "vicomova/internal/user/domain/entity"
-	"vicomova/internal/user/domain/valueobject"
-	userRepo "vicomova/internal/user/domain/repository"
 	"vicomova/internal/user/application/mock"
+	userEntity "vicomova/internal/user/domain/entity"
+	userRepo "vicomova/internal/user/domain/repository"
+	"vicomova/internal/user/domain/valueobject"
 )
 
 func newTestService(userRepo userRepo.UserRepository) *UserQueryService {

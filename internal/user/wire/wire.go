@@ -1,22 +1,22 @@
 package wire
 
 import (
-	appCommand "vicomova/internal/user/application/command"
-	appQuery "vicomova/internal/user/application/query"
-	infraEmail "vicomova/internal/user/infrastructure/external/email"
-	infraMysql "vicomova/internal/user/infrastructure/persistence/mysql"
-	infraRedis "vicomova/internal/user/infrastructure/persistence/redis"
-	svc "vicomova/internal/user/domain/service"
-	rpc "vicomova/internal/user/interfaces/grpc"
 	sharedMysql "vicomova/internal/shared/infrastructure/data/mysql"
 	sharedRedis "vicomova/internal/shared/infrastructure/data/redis"
 	sharedHasher "vicomova/internal/shared/pkg/hasher"
+	appCommand "vicomova/internal/user/application/command"
+	appQuery "vicomova/internal/user/application/query"
+	svc "vicomova/internal/user/domain/service"
+	infraEmail "vicomova/internal/user/infrastructure/external/email"
+	infraMysql "vicomova/internal/user/infrastructure/persistence/mysql"
+	infraRedis "vicomova/internal/user/infrastructure/persistence/redis"
+	rpc "vicomova/internal/user/interfaces/grpc"
 	"vicomova/pkg/config"
 )
 
 type Provider struct {
-	MySQL      *sharedMysql.Client
-	Redis      *sharedRedis.Client
+	MySQL       *sharedMysql.Client
+	Redis       *sharedRedis.Client
 	UserHandler *rpc.UserHandler
 }
 
@@ -64,8 +64,8 @@ func NewProvider(cfg *config.Config) (*Provider, error) {
 	userHandler := rpc.NewUserHandler(cmdSvc, querySvc)
 
 	return &Provider{
-		MySQL:      mysqlClient,
-		Redis:      redisClient,
+		MySQL:       mysqlClient,
+		Redis:       redisClient,
 		UserHandler: userHandler,
 	}, nil
 }

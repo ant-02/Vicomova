@@ -1,20 +1,20 @@
 package wire
 
 import (
+	sharedMysql "vicomova/internal/shared/infrastructure/data/mysql"
+	sharedRedis "vicomova/internal/shared/infrastructure/data/redis"
 	videoAppCmd "vicomova/internal/video/application/command"
 	videoAppQuery "vicomova/internal/video/application/query"
 	infraMysql "vicomova/internal/video/infrastructure/persistence/mysql"
 	infraService "vicomova/internal/video/infrastructure/service"
 	infraStorage "vicomova/internal/video/infrastructure/storage"
 	videoGrpc "vicomova/internal/video/interfaces/grpc"
-	sharedMysql "vicomova/internal/shared/infrastructure/data/mysql"
-	sharedRedis "vicomova/internal/shared/infrastructure/data/redis"
 	"vicomova/pkg/config"
 )
 
 type Provider struct {
-	MySQL      *sharedMysql.Client
-	Redis      *sharedRedis.Client
+	MySQL        *sharedMysql.Client
+	Redis        *sharedRedis.Client
 	VideoHandler *videoGrpc.VideoHandler
 }
 
@@ -61,8 +61,8 @@ func NewProvider(cfg *config.Config) (*Provider, error) {
 	videoHandler := videoGrpc.NewVideoHandler(cmdSvc, querySvc)
 
 	return &Provider{
-		MySQL:      mysqlClient,
-		Redis:      sharedRedis.GetClient(),
+		MySQL:        mysqlClient,
+		Redis:        sharedRedis.GetClient(),
 		VideoHandler: videoHandler,
 	}, nil
 }

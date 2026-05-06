@@ -8,17 +8,17 @@ import (
 	"syscall"
 
 	"vicomova/internal/gateway"
-	"vicomova/internal/user/interfaces/http/handler"
-	"vicomova/internal/user/interfaces/http/router"
-	rpc "vicomova/internal/user/interfaces/grpc"
-	videoRpc "vicomova/internal/video/interfaces/grpc"
 	interactionRpc "vicomova/internal/interaction/interfaces/grpc"
-	videoHandler "vicomova/internal/video/interfaces/http/handler"
 	interactionHandler "vicomova/internal/interaction/interfaces/http/handler"
 	"vicomova/internal/shared/pkg/log"
+	"vicomova/internal/user/domain/service"
+	rpc "vicomova/internal/user/interfaces/grpc"
+	"vicomova/internal/user/interfaces/http/handler"
+	"vicomova/internal/user/interfaces/http/router"
+	videoRpc "vicomova/internal/video/interfaces/grpc"
+	videoHandler "vicomova/internal/video/interfaces/http/handler"
 	"vicomova/pkg/config"
 	hertz "vicomova/pkg/hertz"
-	"vicomova/internal/user/domain/service"
 )
 
 var (

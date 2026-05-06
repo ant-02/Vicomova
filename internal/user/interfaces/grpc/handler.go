@@ -3,15 +3,15 @@ package rpc
 import (
 	"context"
 
-	user "vicomova/third_party/kitex_gen/user"
 	appCommand "vicomova/internal/user/application/command"
 	appQuery "vicomova/internal/user/application/query"
+	user "vicomova/third_party/kitex_gen/user"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 )
 
 type UserHandler struct {
-	cmdSvc  *appCommand.UserCommandService
+	cmdSvc   *appCommand.UserCommandService
 	querySvc *appQuery.UserQueryService
 }
 

@@ -8,11 +8,11 @@ import (
 	"vicomova/internal/shared/pkg/constants"
 	"vicomova/pkg/config"
 
-	dm20151123 "github.com/alibabacloud-go/dm-20151123/v2/client"
 	openapi "github.com/alibabacloud-go/darabonba-openapi/v2/client"
+	dm20151123 "github.com/alibabacloud-go/dm-20151123/v2/client"
 	util "github.com/alibabacloud-go/tea-utils/v2/service"
-	credential "github.com/aliyun/credentials-go/credentials"
 	"github.com/alibabacloud-go/tea/tea"
+	credential "github.com/aliyun/credentials-go/credentials"
 )
 
 type EmailService interface {
