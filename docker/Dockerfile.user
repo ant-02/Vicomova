@@ -7,6 +7,12 @@ RUN go mod download
 
 COPY . .
 
+# Install kitex and generate proto code
+RUN go install github.com/cloudwego/kitex/tool/cmd/kitex@latest && \
+    go install github.com/cloudwego/thriftgo@latest && \
+    chmod +x script/proto/gen.sh && \
+    ./script/proto/gen.sh
+
 RUN CGO_ENABLED=0 GOOS=linux go build -o /app/user ./cmd/user
 
 FROM alpine:3.19
