@@ -1,4 +1,4 @@
-.PHONY: dev dev-stop dev-logs run-user run-gateway run-video run-interaction docker-build docker-up docker-up-prod docker-down docker-clean proto swagger lint test check
+.PHONY: dev dev-stop dev-logs run-user run-gateway run-video run-interaction docker-build docker-up docker-up-prod docker-down docker-clean proto swagger goimports vet test check
 
 CONFIG_FILE = config/base.yaml
 SESSION_NAME = vicomova
@@ -66,16 +66,20 @@ proto:
 swagger:
 	$(HOME)/go/1.25.0/bin/swag init -g cmd/gateway/main.go -o docs
 
-# Lint 代码
-lint:
-	@echo "Lint check skipped - use golangci-lint directly if needed"
+# 格式化 import
+goimports:
+	goimports -w .
+
+# 代码检查
+vet:
+	go vet ./...
 
 # 运行测试
 test:
-	go test ./... -short
+	go test -race -cover $$(go list ./... | grep -v -E 'cmd|docs|pkg|third_party|wire') -short
 
-# 检查项目（test only）
-check: test
+# 检查项目（goimports + vet + test）
+check: goimports vet test
 
 # Docker 构建
 docker-build:
