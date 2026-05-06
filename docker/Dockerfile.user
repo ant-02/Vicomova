@@ -5,13 +5,18 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 
-COPY . .
+COPY api ./api
+COPY third_party ./third_party
 
 # Install kitex and generate proto code
 RUN go install github.com/cloudwego/kitex/tool/cmd/kitex@latest && \
     go install github.com/cloudwego/thriftgo@latest && \
-    chmod +x script/proto/gen.sh && \
-    ./script/proto/gen.sh
+    kitex -module vicomova -service user -gen-path third_party/kitex_gen api/rpc/user/user.proto && \
+    kitex -module vicomova -service video -gen-path third_party/kitex_gen api/rpc/video/video.proto && \
+    kitex -module vicomova -service interaction -gen-path third_party/kitex_gen api/rpc/interaction/interaction.proto && \
+    rm -f main.go handler.go build.sh script.go 2>/dev/null || true
+
+COPY . .
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o /app/user ./cmd/user
 
