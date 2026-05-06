@@ -57,7 +57,6 @@ func main() {
 			if err := registry.Register(); err != nil {
 				log.Info.Printf("Failed to register to etcd: %v", err)
 			}
-			defer registry.Unregister()
 		}
 	}
 

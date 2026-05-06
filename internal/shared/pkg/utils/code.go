@@ -13,7 +13,7 @@ func GenerateEmailCode(length int) string {
 		n, _ := rand.Int(rand.Reader, big.NewInt(10))
 		code[i] = byte('0' + n.Int64())
 	}
-	return fmt.Sprintf("%s", code)
+	return string(code)
 }
 
 // GenerateRandomString generates a random string of specified length.

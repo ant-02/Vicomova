@@ -11,10 +11,6 @@ type Server interface {
 }
 
 type KitexServer struct {
-	svr interface {
-		Run() error
-		Stop()
-	}
 	addr string
 }
 

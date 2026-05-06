@@ -39,7 +39,7 @@ func NewBootstrap(cfg *config.Config) (*Bootstrap, error) {
 // Close closes etcd connections
 func (b *Bootstrap) Close() {
 	if b.EtcdClient != nil {
-		b.EtcdClient.Close()
+		_ = b.EtcdClient.Close()
 	}
 }
 

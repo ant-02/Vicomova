@@ -89,7 +89,7 @@ func (d *Discovery) WatchInstances(ctx context.Context, serviceName string, call
 				callback(newInstances)
 
 			case <-ctx.Done():
-				watcher.Close()
+				_ = watcher.Close()
 				return
 			}
 		}

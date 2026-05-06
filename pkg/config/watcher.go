@@ -105,7 +105,7 @@ func (w *ConfigWatcher) watchLoop(ctx context.Context) {
 			}
 
 		case <-ctx.Done():
-			watcher.Close()
+			_ = watcher.Close()
 			return
 		}
 	}
@@ -171,10 +171,11 @@ func (w *ConfigWatcher) updateLocalConfig(key string, value []byte) {
 			log.Info.Printf("Updated local config: jwt.secret")
 		}
 	case "redis":
-		if parts[1] == "host" {
+		switch parts[1] {
+		case "host":
 			w.config.Redis.Host = string(value)
-		} else if parts[1] == "port" {
-			fmt.Sscanf(string(value), "%d", &w.config.Redis.Port)
+		case "port":
+			_, _ = fmt.Sscanf(string(value), "%d", &w.config.Redis.Port)
 		}
 	}
 }
