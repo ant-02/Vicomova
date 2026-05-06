@@ -6,11 +6,11 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY api ./api
-COPY third_party ./third_party
 
 # Install kitex and generate proto code
 RUN go install github.com/cloudwego/kitex/tool/cmd/kitex@latest && \
     go install github.com/cloudwego/thriftgo@latest && \
+    mkdir -p third_party/kitex_gen && \
     kitex -module vicomova -service user -gen-path third_party/kitex_gen api/rpc/user/user.proto && \
     kitex -module vicomova -service video -gen-path third_party/kitex_gen api/rpc/video/video.proto && \
     kitex -module vicomova -service interaction -gen-path third_party/kitex_gen api/rpc/interaction/interaction.proto && \
