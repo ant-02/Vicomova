@@ -35,6 +35,11 @@ func NewProvider(cfg *config.Config) (*Provider, error) {
 	mysqlClient := sharedMysql.GetClient()
 	redisClient := sharedRedis.GetClient()
 
+	// 自动迁移
+	if err := sharedMysql.GetDB().AutoMigrate(&infraMysql.UserPO{}); err != nil {
+		return nil, err
+	}
+
 	// 初始化 Repository
 	userRepo := infraMysql.NewUserRepository(mysqlClient)
 	refreshTokenRepo := infraRedis.NewRefreshTokenRepository(redisClient)

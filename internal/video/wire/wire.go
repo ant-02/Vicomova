@@ -32,6 +32,11 @@ func NewProvider(cfg *config.Config) (*Provider, error) {
 	// 获取 MySQL/Redis 客户端
 	mysqlClient := sharedMysql.GetClient()
 
+	// 自动迁移
+	if err := sharedMysql.GetDB().AutoMigrate(&infraMysql.VideoPO{}); err != nil {
+		return nil, err
+	}
+
 	// 初始化 Repository
 	videoRepo := infraMysql.NewVideoRepository(mysqlClient)
 

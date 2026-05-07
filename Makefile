@@ -46,17 +46,17 @@ build:
 	go build -o bin/gateway ./cmd/gateway
 
 # 直接运行（编译后执行）
-run-user: build
-	./bin/user -config $(CONFIG_FILE) -port 8888
+run-user:
+	mkdir -p bin && go build -o bin/user ./cmd/user && ./bin/user -config $(CONFIG_FILE) -port 8888
 
-run-video: build
-	./bin/video -config $(CONFIG_FILE) -port 8889
+run-video:
+	mkdir -p bin && go build -o bin/video ./cmd/video && ./bin/video -config $(CONFIG_FILE) -port 8889
 
-run-interaction: build
-	./bin/interaction -config $(CONFIG_FILE) -port 8890
+run-interaction:
+	mkdir -p bin && go build -o bin/interaction ./cmd/interaction && ./bin/interaction -config $(CONFIG_FILE) -port 8890
 
-run-gateway: build
-	./bin/gateway -config $(CONFIG_FILE) -port 8080
+run-gateway:
+	mkdir -p bin && go build -o bin/gateway ./cmd/gateway && ./bin/gateway -config $(CONFIG_FILE) -port 8080
 
 # Proto 代码生成
 proto:

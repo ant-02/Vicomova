@@ -8,9 +8,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"vicomova/internal/shared/infrastructure/data/mysql"
 	"vicomova/internal/shared/pkg/log"
-	userEntity "vicomova/internal/user/domain/entity"
 	"vicomova/internal/user/wire"
 	"vicomova/pkg/config"
 	"vicomova/pkg/etcd"
@@ -46,11 +44,6 @@ func main() {
 	p, err := wire.NewProvider(cfg)
 	if err != nil {
 		log.Error.Fatalf("Failed to init provider: %v", err)
-	}
-
-	// 自动迁移
-	if err := mysql.GetDB().AutoMigrate(&userEntity.User{}); err != nil {
-		log.Error.Fatalf("Failed to auto migrate: %v", err)
 	}
 
 	// 创建 Kitex Server

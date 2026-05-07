@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"os"
@@ -59,6 +60,16 @@ func main() {
 				log.Warn.Printf("Failed to register to etcd: %v", err)
 			}
 			defer func() { _ = registry.Unregister() }()
+
+			// 初始化配置热更新
+			configWatcher := config.NewConfigWatcher(etcdClient, cfg)
+			configWatcher.Watch("jwt.secret", func(oldVal, newVal interface{}) {
+				log.Info.Printf("JWT secret changed: %v -> %v", oldVal, newVal)
+			})
+			configWatcher.Start(context.Background())
+			if err := config.InitDefaultConfig(context.Background(), etcdClient, cfg); err != nil {
+				log.Warn.Printf("Failed to init default config: %v", err)
+			}
 		}
 	}
 

@@ -1,7 +1,9 @@
 package main
 
 import (
+	"context"
 	"flag"
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -52,10 +54,21 @@ func main() {
 		if err != nil {
 			log.Info.Printf("Failed to create etcd client: %v", err)
 		} else {
+			registry = etcd.NewRegistry(etcdClient, "interaction", fmt.Sprintf("127.0.0.1:%d", port))
 			defer func() { _ = etcdClient.Close() }()
 			defer func() { _ = registry.Unregister() }()
 			if err := registry.Register(); err != nil {
 				log.Info.Printf("Failed to register to etcd: %v", err)
+			}
+
+			// 初始化配置热更新
+			configWatcher := config.NewConfigWatcher(etcdClient, cfg)
+			configWatcher.Watch("jwt.secret", func(oldVal, newVal interface{}) {
+				log.Info.Printf("JWT secret changed: %v -> %v", oldVal, newVal)
+			})
+			configWatcher.Start(context.Background())
+			if err := config.InitDefaultConfig(context.Background(), etcdClient, cfg); err != nil {
+				log.Info.Printf("Failed to init default config: %v", err)
 			}
 		}
 	}

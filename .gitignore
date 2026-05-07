@@ -22,7 +22,7 @@ docker/config/base.yaml
 kitex_info.yaml
 
 # Generated code
-third_party/kitex_gen/
+third_party/
 docs/
 
 # IDE
