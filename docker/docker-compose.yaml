@@ -1,17 +1,14 @@
-version: '3.8'
-
 services:
   mysql:
     image: docker.io/library/mysql:8.0
     container_name: vicomova-mysql
     restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: password
-      MYSQL_DATABASE: vicomova
+    env_file:
+      - ./env/mysql.env
     ports:
       - "3306:3306"
     volumes:
-      - ./mysql:/var/lib/mysql
+      - ./data/mysql:/var/lib/mysql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
@@ -24,10 +21,12 @@ services:
     image: docker.io/library/redis:7-alpine
     container_name: vicomova-redis
     restart: unless-stopped
+    env_file:
+      - ./env/redis.env
     ports:
       - "6379:6379"
     volumes:
-      - ./redis:/data
+      - ./data/redis:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -40,18 +39,33 @@ services:
     image: quay.io/coreos/etcd:v3.5.9
     container_name: vicomova-etcd
     restart: unless-stopped
-    environment:
-      ETCD_AUTO_COMPACTION_MODE: revision
-      ETCD_AUTO_COMPACTION_RETENTION: 1000
-      ETCD_QUOTA_BACKEND_BYTES: 4294967296
-      ETCD_SNAPSHOT_COUNT: 5000
+    env_file:
+      - ./env/etcd.env
     ports:
       - "2379:2379"
     volumes:
-      - ./etcd:/etcd
+      - ./data/etcd:/etcd
     command: etcd --advertise-client-urls=http://0.0.0.0:2379 --listen-client-urls=http://0.0.0.0:2379 --data-dir=/etcd
     networks:
       - vicomova
+
+  config-sync:
+    image: debian:stable-slim
+    container_name: vicomova-config-sync
+    restart: unless-stopped
+    volumes:
+      - ./config:/app/config:ro
+    environment:
+      ETCD_ENDPOINTS: "etcd:2379"
+    command: >
+      bash -c "apt-get update &&
+               apt-get install -y -qq etcd-client inotify-tools > /dev/null 2>&1 &&
+               chmod +x /app/script/entrypoint.sh &&
+               /app/script/entrypoint.sh"
+    networks:
+      - vicomova
+    depends_on:
+      - etcd
 
 networks:
   vicomova:

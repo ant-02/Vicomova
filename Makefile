@@ -1,6 +1,6 @@
 .PHONY: dev dev-stop dev-logs run-user run-gateway run-video run-interaction docker-build docker-up docker-up-prod docker-down docker-clean proto swagger goimports vet test check
 
-CONFIG_FILE = config/base.yaml
+CONFIG_FILE = docker/config/base.yaml
 SESSION_NAME = vicomova
 
 # tmux 开发模式：5 个窗口
@@ -98,4 +98,4 @@ docker-down:
 
 docker-clean:
 	cd docker && docker-compose down -v
-	rm -rf docker/mysql/* docker/redis/*
+	rm -rf docker/data/*

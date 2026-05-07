@@ -3,19 +3,16 @@ bin/
 *.exe
 
 # Docker data
-docker/mysql/
-docker/redis/
-docker/etcd/
-docker/mysql/#ib_16384_0.dblwr
-docker/mysql/#ib_16384_1.dblwr
-docker/mysql/#innodb_redo/
-docker/mysql/#innodb_temp/
-docker/mysql/binlog.*
-docker/mysql/ib_*
-docker/mysql/undo_*
+docker/data/
+docker/data/mysql/#ib_16384_0.dblwr
+docker/data/mysql/#ib_16384_1.dblwr
+docker/data/mysql/#innodb_redo/
+docker/data/mysql/#innodb_temp/
+docker/data/mysql/binlog.*
+docker/data/mysql/ib_*
+docker/data/mysql/undo_*
 
 # Config with secrets
-config/base.yaml
 docker/config/base.yaml
 
 # Kitex
@@ -32,7 +29,6 @@ docs/
 # Environment
 .env
 *.local
-config/local.yaml
 
 # OS
 .DS_Store
