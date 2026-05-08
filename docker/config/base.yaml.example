@@ -1,12 +1,8 @@
-server:
-  host: "0.0.0.0"
-  port: 8080
-
 database:
   host: "localhost"
   port: 3306
-  user: "root"
-  password: "password"
+  user: "vicomova"
+  password: "xxx"
   dbname: "vicomova"
   max_open_conns: 100
   max_idle_conns: 10
@@ -14,7 +10,7 @@ database:
 redis:
   host: "localhost"
   port: 6379
-  password: ""
+  password: "xxx"
   db: 0
 
 kafka:
@@ -23,36 +19,14 @@ kafka:
   topic: "vicomova"
 
 jwt:
-  secret: "your-secret-key-change-in-production"
+  secret: "xxx"
 
 email:
-  access_key: ""  # 从环境变量 ALIBABA_CLOUD_ACCESS_KEY_ID 读取
-  access_secret: ""  # 从环境变量 ALIBABA_CLOUD_ACCESS_KEY_SECRET 读取
-  account_name: "noreply@mail.xhhx.xyz"
+  access_key: "xxx"
+  access_secret: "xxx"
+  account_name: "mail.xhhx.xyz"
   region: "cn-hangzhou"
   api_url: "https://dm.aliyuncs.com/"
-
-video:
-  storage:
-    type: "local"  # local/qiniu/aliyun/aws
-    local:
-      base_path: "./static/video"
-      base_url: "http://localhost:8080/static/video"
-    qiniu:
-      access_key: ""
-      secret_key: ""
-      bucket: ""
-      domain: ""
-    aliyun:
-      access_key: ""
-      secret_key: ""
-      bucket: ""
-      endpoint: ""
-    aws:
-      access_key: ""
-      secret_key: ""
-      bucket: ""
-      region: ""
 
 etcd:
   endpoints:
@@ -62,11 +36,15 @@ etcd:
   namespace: "vicomova"
 
 services:
+  gateway:
+    name: "gateway"
+    addr: "127.0.0.1:8080"
   user:
+    name: "user"
     addr: "127.0.0.1:8888"
   video:
+    name: "video"
     addr: "127.0.0.1:8889"
   interaction:
+    name: "interaction"
     addr: "127.0.0.1:8890"
-  gateway:
-    addr: "127.0.0.1:8080"

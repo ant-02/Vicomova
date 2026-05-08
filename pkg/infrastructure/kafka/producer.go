@@ -3,16 +3,16 @@ package kafka
 import (
 	"fmt"
 
-	"vicomova/internal/shared/pkg/constants"
-	"vicomova/internal/shared/pkg/log"
 	"vicomova/pkg/config"
+	"vicomova/pkg/constants"
+	"vicomova/pkg/log"
 
 	"github.com/IBM/sarama"
 )
 
 var Producer sarama.SyncProducer
 
-func InitProducer(cfg *config.KafkaConfig) error {
+func InitProducer(cfg *config.Kafka) error {
 	saramaConfig := sarama.NewConfig()
 	saramaConfig.Producer.RequiredAcks = sarama.WaitForAll
 	saramaConfig.Producer.Retry.Max = constants.KafkaProducerRetryMax

@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"vicomova/internal/shared/pkg/log"
 	"vicomova/pkg/config"
+	"vicomova/pkg/log"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -20,27 +20,22 @@ func (c *Client) RDB() *redis.Client {
 	return c.rdb
 }
 
-// Set delegates to underlying redis client.
 func (c *Client) Set(ctx context.Context, key string, value interface{}, ttl time.Duration) *redis.StatusCmd {
 	return c.rdb.Set(ctx, key, value, ttl)
 }
 
-// Get delegates to underlying redis client.
 func (c *Client) Get(ctx context.Context, key string) *redis.StringCmd {
 	return c.rdb.Get(ctx, key)
 }
 
-// Del delegates to underlying redis client.
 func (c *Client) Del(ctx context.Context, keys ...string) *redis.IntCmd {
 	return c.rdb.Del(ctx, keys...)
 }
 
-// Scan delegates to underlying redis client.
 func (c *Client) Scan(ctx context.Context, cursor uint64, match string, count int64) *redis.ScanCmd {
 	return c.rdb.Scan(ctx, cursor, match, count)
 }
 
-// Ping delegates to underlying redis client.
 func (c *Client) Ping(ctx context.Context) error {
 	return c.rdb.Ping(ctx).Err()
 }
@@ -55,27 +50,29 @@ func (c *Client) Close() error {
 var (
 	client  *Client
 	once    sync.Once
-	initErr error
+	onceErr error
+	initMu  sync.Mutex
 )
 
-func Init(cfg *config.RedisConfig) error {
+func Init(cfg *config.Redis) error {
 	once.Do(func() {
+		addr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 		rdb := redis.NewClient(&redis.Options{
-			Addr:     cfg.Addr(),
+			Addr:     addr,
 			Password: cfg.Password,
 			DB:       cfg.DB,
 		})
 
 		ctx := context.Background()
 		if err := rdb.Ping(ctx).Err(); err != nil {
-			initErr = fmt.Errorf("failed to connect to redis: %w", err)
+			onceErr = fmt.Errorf("failed to connect to redis: %w", err)
 			return
 		}
 
 		client = &Client{rdb: rdb}
-		log.Info.Printf("Redis connected: %s", cfg.Addr())
+		log.Info.Printf("Redis connected: %s", addr)
 	})
-	return initErr
+	return onceErr
 }
 
 func GetClient() *Client {
@@ -86,5 +83,32 @@ func Close() error {
 	if client != nil {
 		return client.Close()
 	}
+	return nil
+}
+
+func Reload(cfg *config.Redis) error {
+	initMu.Lock()
+	defer initMu.Unlock()
+
+	if client != nil {
+		if err := client.Close(); err != nil {
+			log.Error.Printf("failed to close redis: %v", err)
+		}
+	}
+
+	addr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     addr,
+		Password: cfg.Password,
+		DB:       cfg.DB,
+	})
+
+	ctx := context.Background()
+	if err := rdb.Ping(ctx).Err(); err != nil {
+		return fmt.Errorf("failed to connect to redis: %w", err)
+	}
+
+	client = &Client{rdb: rdb}
+	log.Info.Printf("Redis reloaded: %s", addr)
 	return nil
 }

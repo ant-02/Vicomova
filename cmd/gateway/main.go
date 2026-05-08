@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"flag"
 	"os"
 	"os/signal"
 	"syscall"
@@ -10,7 +9,6 @@ import (
 	"vicomova/internal/gateway"
 	interactionRpc "vicomova/internal/interaction/interfaces/grpc"
 	interactionHandler "vicomova/internal/interaction/interfaces/http/handler"
-	"vicomova/internal/shared/pkg/log"
 	"vicomova/internal/user/domain/service"
 	rpc "vicomova/internal/user/interfaces/grpc"
 	"vicomova/internal/user/interfaces/http/handler"
@@ -18,71 +16,54 @@ import (
 	videoRpc "vicomova/internal/video/interfaces/grpc"
 	videoHandler "vicomova/internal/video/interfaces/http/handler"
 	"vicomova/pkg/config"
-	hertz "vicomova/pkg/hertz"
-)
-
-var (
-	configPath string
-	port       int
+	"vicomova/pkg/constants"
+	hertz "vicomova/pkg/infrastructure/hertz"
+	"vicomova/pkg/log"
 )
 
 func init() {
-	flag.StringVar(&configPath, "config", "config/base.yaml", "config file path")
-	flag.IntVar(&port, "port", 8080, "gateway port")
+	config.Init(constants.ServiceGateway)
 }
 
 func main() {
-	flag.Parse()
+	cfg := config.Get()
+	addr := cfg.Service.Addr
 
-	// 加载配置
-	cfg, err := config.Load(configPath)
-	if err != nil {
-		log.Error.Fatalf("Failed to load config: %v", err)
-	}
-
-	// Bootstrap - 初始化 etcd 连接
-	bs, err := gateway.NewBootstrap(cfg)
+	bs, err := gateway.NewBootstrap()
 	if err != nil {
 		log.Error.Fatalf("Failed to bootstrap: %v", err)
 	}
 	defer bs.Close()
 
-	// 创建 Hertz 服务器
-	h := hertz.NewServer(port)
+	h := hertz.NewServer(addr)
 
-	// 初始化 User RPC Client（通过 bootstrap 发现地址）
-	userAddr := bs.GetServiceAddr("user")
-	userClient, err := rpc.NewUserClient("user", userAddr)
+	userAddr := bs.GetServiceAddr(constants.ServiceUser)
+	userClient, err := rpc.NewUserClient(constants.ServiceUser, userAddr)
 	if err != nil {
 		log.Error.Fatalf("Failed to create user client: %v", err)
 	}
 
-	// 创建 handler 并注册路由
 	tokenSvc := service.NewTokenService(cfg.JWT.Secret)
 	userHandler := handler.NewUserHandler(userClient)
 	router.RegisterRoutes(h, userHandler, tokenSvc)
 
-	// 初始化 Video RPC Client
-	videoAddr := bs.GetServiceAddr("video")
-	videoClient, err := videoRpc.NewVideoClient("video", videoAddr)
+	videoAddr := bs.GetServiceAddr(constants.ServiceVideo)
+	videoClient, err := videoRpc.NewVideoClient(constants.ServiceVideo, videoAddr)
 	if err != nil {
 		log.Error.Fatalf("Failed to create video client: %v", err)
 	}
 
-	// 初始化 Interaction RPC Client
-	interactionAddr := bs.GetServiceAddr("interaction")
-	interactionClient, err := interactionRpc.NewInteractionClient("interaction", interactionAddr)
+	interactionAddr := bs.GetServiceAddr(constants.ServiceInteraction)
+	interactionClient, err := interactionRpc.NewInteractionClient(constants.ServiceInteraction, interactionAddr)
 	if err != nil {
 		log.Error.Fatalf("Failed to create interaction client: %v", err)
 	}
 
-	// 创建 video/interaction handlers 并注册路由
 	vh := videoHandler.NewVideoHandler(videoClient)
 	ih := interactionHandler.NewInteractionHandler(interactionClient)
 	gateway.RegisterVideoRoutes(h, vh, tokenSvc)
 	gateway.RegisterInteractionRoutes(h, ih)
 
-	// 优雅关闭
 	go func() {
 		sig := make(chan os.Signal, 1)
 		signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
@@ -91,7 +72,7 @@ func main() {
 		_ = h.Shutdown(context.Background())
 	}()
 
-	log.Info.Printf("Gateway starting on :%d", port)
+	log.Info.Printf("Gateway starting on %s", addr)
 	if err := hertz.Run(h); err != nil {
 		log.Error.Fatalf("Gateway error: %v", err)
 	}

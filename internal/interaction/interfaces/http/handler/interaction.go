@@ -5,7 +5,7 @@ import (
 	"strconv"
 
 	interactionRpc "vicomova/internal/interaction/interfaces/grpc"
-	hertz "vicomova/pkg/hertz"
+	hertz "vicomova/pkg/infrastructure/hertz"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"

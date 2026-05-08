@@ -3,7 +3,7 @@ package service
 import (
 	"testing"
 
-	"vicomova/internal/shared/pkg/constants"
+	"vicomova/pkg/constants"
 )
 
 func TestGenerateAccessToken(t *testing.T) {

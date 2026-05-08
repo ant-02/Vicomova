@@ -34,6 +34,20 @@ const (
 	KafkaProducerRetryMax = 3
 )
 
+// 服务名称
+const (
+	ServiceUser        = "user"
+	ServiceVideo       = "video"
+	ServiceInteraction = "interaction"
+	ServiceGateway     = "gateway"
+)
+
+// Etcd config key
+const (
+	// ConfigKeyPrefix Etcd 配置 key 前缀
+	ConfigKeyPrefix = "/vicomova/config"
+)
+
 // HTTP Client 相关
 const (
 	// HTTPClientTimeout HTTP 客户端超时

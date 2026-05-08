@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"vicomova/internal/user/domain/service"
-	"vicomova/pkg/hertz"
+	"vicomova/pkg/infrastructure/hertz"
 
 	"github.com/cloudwego/hertz/pkg/app"
 )

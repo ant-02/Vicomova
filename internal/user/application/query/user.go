@@ -3,9 +3,9 @@ package query
 import (
 	"context"
 
-	"vicomova/internal/shared/pkg/errors"
-	"vicomova/internal/shared/pkg/log"
 	userVO "vicomova/internal/user/domain/valueobject"
+	"vicomova/pkg/errors"
+	"vicomova/pkg/log"
 )
 
 func (s *UserQueryService) GetUser(ctx context.Context, query *GetUserQuery) (*UserResult, error) {

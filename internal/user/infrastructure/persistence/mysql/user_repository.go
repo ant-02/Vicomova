@@ -3,11 +3,11 @@ package mysql
 import (
 	"context"
 
-	sharedMysql "vicomova/internal/shared/infrastructure/data/mysql"
-	"vicomova/internal/shared/pkg/log"
 	userEntity "vicomova/internal/user/domain/entity"
 	userRepo "vicomova/internal/user/domain/repository"
 	userVO "vicomova/internal/user/domain/valueobject"
+	sharedMysql "vicomova/pkg/infrastructure/mysql"
+	"vicomova/pkg/log"
 
 	"gorm.io/gorm"
 )

@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"context"
-	"vicomova/internal/shared/pkg/log"
+	"vicomova/pkg/log"
 
 	"github.com/cloudwego/hertz/pkg/app"
 )

@@ -12,8 +12,8 @@ Client → HTTP Gateway (Hertz:8080) → User RPC (Kitex:8888)
 
 ### 核心特性
 
+- **配置中心**: 基于 Etcd 的配置管理，配置热更新
 - **服务发现**: 基于 Etcd 的服务注册与发现
-- **配置热更新**: 配置文件变更实时推送到各服务
 - **双 Token 认证**: Access Token + Refresh Token 旋转方案
 - **邮件服务**: 阿里云 DirectMail SDK
 - **视频服务**: 投稿、播放、分类、热度算法（Wilson 区间）
@@ -38,33 +38,25 @@ Client → HTTP Gateway (Hertz:8080) → User RPC (Kitex:8888)
 │   ├── user/               # 用户服务
 │   ├── video/              # 视频服务
 │   ├── interaction/        # 互动服务
-│   ├── shared/             # 跨服务共享
 │   └── gateway/            # HTTP 网关
 │
 ├── pkg/                     # 公共工具
-│   ├── config/             # 配置加载 (Viper) + 热更新
-│   ├── etcd/               # Etcd 客户端封装
-│   ├── hertz/              # Hertz 封装
-│   └── kitex/              # Kitex 封装
+│   ├── config/             # 配置加载 (Etcd) + 热更新
+│   ├── infrastructure/    # 基础设施 (MySQL/Redis/Kafka/Hertz)
+│   ├── utils/              # 工具函数
+│   └── log/                # 日志封装
 │
 ├── docker/                  # Docker 配置
-├── config/                  # 配置文件（gitignore）
+│   ├── config/             # 配置文件 (base.yaml)
+│   └── script/              # 容器启动脚本
+│
 ├── third_party/kitex_gen/   # 生成的 RPC 代码
 └── Makefile
 ```
 
 ## 快速开始
 
-### 1. 配置
-
-复制配置模板并填写敏感信息：
-
-```bash
-cp config/base.yaml.example config/base.yaml
-# 编辑 config/base.yaml 填入你的密钥
-```
-
-### 2. 启动开发环境
+### 1. 启动开发环境
 
 ```bash
 # 启动 MySQL + Redis + Etcd
@@ -74,20 +66,17 @@ make docker-up
 make dev
 ```
 
-### 3. 直接运行
+### 2. 直接运行
 
 ```bash
-# 编译所有服务到 bin/
-make build
-
-# 各服务独立运行
-./bin/user -config config/base.yaml -port 8888
-./bin/video -config config/base.yaml -port 8889
-./bin/interaction -config config/base.yaml -port 8890
-./bin/gateway -config config/base.yaml -port 8080
+# 各服务独立运行（需先启动 etcd）
+ETCD_ADDR=127.0.0.1:2379 ./bin/user
+ETCD_ADDR=127.0.0.1:2379 ./bin/video
+ETCD_ADDR=127.0.0.1:2379 ./bin/interaction
+ETCD_ADDR=127.0.0.1:2379 ./bin/gateway
 ```
 
-### 4. Docker 部署
+### 3. Docker 部署
 
 ```bash
 # 构建镜像
@@ -114,6 +103,21 @@ make docker-up-prod
 | `make docker-clean` | 清理数据卷 |
 | `make proto` | 重新生成 RPC 代码 |
 | `make swagger` | 生成 Swagger 文档 |
+
+## 配置热更新
+
+配置存储在 Etcd 中，通过 `docker/config/base.yaml` 上传到 `/vicomova/config` key。
+
+**支持热更新的配置**：
+- `database` - MySQL 连接配置
+- `redis` - Redis 连接配置
+
+**需要重启生效的配置**：
+- `jwt.secret` - JWT 密钥（变更后所有用户 Token 失效）
+- `service.addr` - 服务监听地址
+- `email` - 邮件服务配置
+
+修改 `docker/config/base.yaml` 后，配置会自动同步到 etcd 并热更新到各服务。
 
 ## 认证机制
 
@@ -200,8 +204,7 @@ GitHub Actions 自动构建：
 - **ORM**: gorm.io/gorm + gorm.io/driver/mysql
 - **Redis**: redis/go-redis/v9
 - **Kafka**: IBM/sarama
-- **配置**: spf13/viper
+- **配置**: go.etcd.io/etcd/client/v3
 - **JWT**: golang-jwt/jwt/v5
-- **Etcd**: go.etcd.io/etcd/client/v3
 - **邮件**: github.com/alibabacloud-go/dm-20151123/v2
 - **凭据**: github.com/aliyun/credentials-go

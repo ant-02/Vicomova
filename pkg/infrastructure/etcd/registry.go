@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"vicomova/internal/shared/pkg/constants"
-	"vicomova/internal/shared/pkg/log"
+	"vicomova/pkg/constants"
+	"vicomova/pkg/log"
 
 	clientv3 "go.etcd.io/etcd/client/v3"
 )

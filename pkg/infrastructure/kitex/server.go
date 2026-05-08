@@ -2,7 +2,7 @@ package kitex
 
 import (
 	"fmt"
-	"vicomova/internal/shared/pkg/log"
+	"vicomova/pkg/log"
 )
 
 type Server interface {

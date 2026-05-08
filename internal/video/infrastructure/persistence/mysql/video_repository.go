@@ -3,10 +3,10 @@ package mysql
 import (
 	"context"
 
-	sharedMysql "vicomova/internal/shared/infrastructure/data/mysql"
-	"vicomova/internal/shared/pkg/log"
 	"vicomova/internal/video/domain/entity"
 	"vicomova/internal/video/domain/repository"
+	sharedMysql "vicomova/pkg/infrastructure/mysql"
+	"vicomova/pkg/log"
 
 	"gorm.io/gorm"
 )

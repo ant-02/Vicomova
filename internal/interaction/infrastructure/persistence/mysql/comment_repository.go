@@ -6,8 +6,8 @@ import (
 
 	"vicomova/internal/interaction/domain/entity"
 	repo "vicomova/internal/interaction/domain/repository"
-	sharedMysql "vicomova/internal/shared/infrastructure/data/mysql"
-	"vicomova/internal/shared/pkg/log"
+	sharedMysql "vicomova/pkg/infrastructure/mysql"
+	"vicomova/pkg/log"
 
 	"gorm.io/gorm"
 )

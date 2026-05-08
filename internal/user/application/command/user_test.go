@@ -5,14 +5,14 @@ import (
 	"errors"
 	"testing"
 
-	"vicomova/internal/shared/pkg/constants"
-	sharedHasher "vicomova/internal/shared/pkg/hasher"
 	"vicomova/internal/user/application/mock"
 	userEntity "vicomova/internal/user/domain/entity"
 	userRepo "vicomova/internal/user/domain/repository"
 	"vicomova/internal/user/domain/service"
 	"vicomova/internal/user/domain/valueobject"
 	infraEmail "vicomova/internal/user/infrastructure/external/email"
+	"vicomova/pkg/constants"
+	"vicomova/pkg/utils"
 )
 
 // Helper to create test service
@@ -22,7 +22,7 @@ func newTestService(
 	emailService infraEmail.EmailService,
 ) *UserCommandService {
 	tokenSvc := service.NewTokenService("test-secret")
-	hasher := &sharedHasher.SHA256Hasher{}
+	hasher := &utils.SHA256Hasher{}
 	return NewUserCommandService(
 		userRepo,
 		mock.NewMockRefreshTokenRepository(),

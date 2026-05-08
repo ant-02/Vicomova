@@ -1,73 +1,71 @@
 package wire
 
 import (
-	sharedMysql "vicomova/internal/shared/infrastructure/data/mysql"
-	sharedRedis "vicomova/internal/shared/infrastructure/data/redis"
-	videoAppCmd "vicomova/internal/video/application/command"
-	videoAppQuery "vicomova/internal/video/application/query"
+	"vicomova/internal/video/application/command"
+	"vicomova/internal/video/application/query"
 	infraMysql "vicomova/internal/video/infrastructure/persistence/mysql"
-	infraService "vicomova/internal/video/infrastructure/service"
-	infraStorage "vicomova/internal/video/infrastructure/storage"
-	videoGrpc "vicomova/internal/video/interfaces/grpc"
+	"vicomova/internal/video/infrastructure/service"
+	"vicomova/internal/video/infrastructure/storage"
+	"vicomova/internal/video/interfaces/grpc"
 	"vicomova/pkg/config"
+	"vicomova/pkg/infrastructure/mysql"
+	"vicomova/pkg/infrastructure/redis"
+	"vicomova/pkg/log"
 )
 
 type Provider struct {
-	MySQL        *sharedMysql.Client
-	Redis        *sharedRedis.Client
-	VideoHandler *videoGrpc.VideoHandler
+	MySQL        *mysql.Client
+	Redis        *redis.Client
+	VideoHandler *grpc.VideoHandler
 }
 
-func NewProvider(cfg *config.Config) (*Provider, error) {
-	// 初始化数据库
-	if err := sharedMysql.Init(&cfg.Database); err != nil {
+func NewProvider() (*Provider, error) {
+	cfg := config.Get()
+
+	if err := mysql.Init(&cfg.Database); err != nil {
 		return nil, err
 	}
 
-	// 初始化 Redis
-	if err := sharedRedis.Init(&cfg.Redis); err != nil {
+	if err := redis.Init(&cfg.Redis); err != nil {
 		return nil, err
 	}
 
-	// 获取 MySQL/Redis 客户端
-	mysqlClient := sharedMysql.GetClient()
+	mysqlClient := mysql.GetClient()
 
-	// 自动迁移
-	if err := sharedMysql.GetDB().AutoMigrate(&infraMysql.VideoPO{}); err != nil {
+	if err := mysql.GetDB().AutoMigrate(&infraMysql.VideoPO{}); err != nil {
 		return nil, err
 	}
 
-	// 初始化 Repository
 	videoRepo := infraMysql.NewVideoRepository(mysqlClient)
 
-	// 初始化 Storage
-	var storage infraStorage.VideoStorage
-	switch cfg.Video.Storage.Type {
-	case "local":
-		storage = infraStorage.NewLocalDiskStorage(&infraStorage.LocalDiskConfig{
-			BasePath: cfg.Video.Storage.Local.BasePath,
-			BaseURL:  cfg.Video.Storage.Local.BaseURL,
-		})
-	default:
-		storage = infraStorage.NewLocalDiskStorage(&infraStorage.LocalDiskConfig{
-			BasePath: cfg.Video.Storage.Local.BasePath,
-			BaseURL:  cfg.Video.Storage.Local.BaseURL,
-		})
-	}
+	// TODO: implement storage based on config
+	storage := storage.NewLocalDiskStorage(&storage.LocalDiskConfig{
+		BasePath: "/tmp/videos",
+		BaseURL:  "http://localhost:8080/files",
+	})
 
-	// 初始化 Domain Service
-	hotAlgo := infraService.NewWilsonHotAlgorithm(videoRepo)
+	hotAlgo := service.NewWilsonHotAlgorithm(videoRepo)
 
-	// 初始化 Application Service
-	cmdSvc := videoAppCmd.NewVideoCommandService(videoRepo, storage)
-	querySvc := videoAppQuery.NewVideoQueryService(videoRepo, hotAlgo)
+	cmdSvc := command.NewVideoCommandService(videoRepo, storage)
+	querySvc := query.NewVideoQueryService(videoRepo, hotAlgo)
 
-	// 初始化 Handler
-	videoHandler := videoGrpc.NewVideoHandler(cmdSvc, querySvc)
+	videoHandler := grpc.NewVideoHandler(cmdSvc, querySvc)
+
+	config.RegisterCallback(func(newCfg *config.Config) {
+		if err := mysql.Reload(&newCfg.Database); err != nil {
+			log.Error.Printf("failed to reload mysql: %v", err)
+		}
+		if err := redis.Reload(&newCfg.Redis); err != nil {
+			log.Error.Printf("failed to reload redis: %v", err)
+		}
+		if newCfg.Service.Addr != cfg.Service.Addr {
+			log.Warn.Printf("service addr changed to %s, please restart service to take effect", newCfg.Service.Addr)
+		}
+	})
 
 	return &Provider{
 		MySQL:        mysqlClient,
-		Redis:        sharedRedis.GetClient(),
+		Redis:        redis.GetClient(),
 		VideoHandler: videoHandler,
 	}, nil
 }

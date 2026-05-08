@@ -6,7 +6,7 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"vicomova/internal/shared/pkg/log"
+	"vicomova/pkg/log"
 
 	clientv3 "go.etcd.io/etcd/client/v3"
 )

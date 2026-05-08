@@ -6,9 +6,9 @@ import (
 	"github.com/cloudwego/hertz/pkg/app/server"
 )
 
-func NewServer(port int) *server.Hertz {
+func NewServer(addr string) *server.Hertz {
 	h := server.Default(
-		server.WithHostPorts(fmt.Sprintf(":%d", port)),
+		server.WithHostPorts(addr),
 	)
 	return h
 }

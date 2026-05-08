@@ -2,48 +2,47 @@ package gateway
 
 import (
 	"context"
+	"fmt"
+	"os"
+	"strings"
 
-	"vicomova/internal/shared/pkg/log"
 	"vicomova/pkg/config"
-	"vicomova/pkg/etcd"
+	"vicomova/pkg/infrastructure/etcd"
+	"vicomova/pkg/log"
 )
 
 type Bootstrap struct {
-	Config     *config.Config
 	EtcdClient *etcd.Client
 	Discovery  *etcd.Discovery
 }
 
-func NewBootstrap(cfg *config.Config) (*Bootstrap, error) {
-	b := &Bootstrap{
-		Config: cfg,
+func NewBootstrap() (*Bootstrap, error) {
+	b := &Bootstrap{}
+
+	etcdAddr := os.Getenv("ETCD_ADDR")
+	if etcdAddr == "" {
+		return nil, fmt.Errorf("ETCD_ADDR is required")
 	}
 
-	// 连接 etcd 进行服务发现
-	if len(cfg.Etcd.Endpoints) > 0 {
-		cli, err := etcd.NewClient(&cfg.Etcd)
-		if err != nil {
-			log.Error.Fatalf("Failed to connect to etcd: %v", err)
-		}
-		b.EtcdClient = cli
-		b.Discovery = etcd.NewDiscovery(cli)
-
-		log.Info.Printf("Connected to etcd at %v", cfg.Etcd.Endpoints)
-	} else {
-		log.Error.Fatalf("No etcd endpoints configured")
+	cli, err := etcd.NewClient(&config.Etcd{
+		Endpoints: strings.Split(etcdAddr, ","),
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to connect to etcd: %w", err)
 	}
+	b.EtcdClient = cli
+	b.Discovery = etcd.NewDiscovery(cli)
 
+	log.Info.Printf("Gateway connected to etcd at %v", etcdAddr)
 	return b, nil
 }
 
-// Close closes etcd connections
 func (b *Bootstrap) Close() {
 	if b.EtcdClient != nil {
 		_ = b.EtcdClient.Close()
 	}
 }
 
-// GetServiceAddr discovers a service address from etcd
 func (b *Bootstrap) GetServiceAddr(serviceName string) string {
 	if b.Discovery == nil {
 		log.Error.Fatalf("etcd not connected, cannot discover service %s", serviceName)
@@ -58,7 +57,6 @@ func (b *Bootstrap) GetServiceAddr(serviceName string) string {
 	return addr
 }
 
-// Client returns the etcd client
 func (b *Bootstrap) Client() *etcd.Client {
 	return b.EtcdClient
 }

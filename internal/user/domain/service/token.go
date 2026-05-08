@@ -3,8 +3,8 @@ package service
 import (
 	"time"
 
-	"vicomova/internal/shared/pkg/constants"
-	errorsPkg "vicomova/internal/shared/pkg/errors"
+	"vicomova/pkg/constants"
+	errorsPkg "vicomova/pkg/errors"
 
 	"github.com/golang-jwt/jwt/v5"
 )

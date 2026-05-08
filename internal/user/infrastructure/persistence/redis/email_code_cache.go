@@ -5,9 +5,9 @@ import (
 	"errors"
 	"time"
 
-	sharedRedis "vicomova/internal/shared/infrastructure/data/redis"
-	"vicomova/internal/shared/pkg/log"
 	userRepo "vicomova/internal/user/domain/repository"
+	sharedRedis "vicomova/pkg/infrastructure/redis"
+	"vicomova/pkg/log"
 
 	"github.com/redis/go-redis/v9"
 )

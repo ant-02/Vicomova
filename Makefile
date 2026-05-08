@@ -1,6 +1,5 @@
 .PHONY: dev dev-stop dev-logs run-user run-gateway run-video run-interaction docker-build docker-up docker-up-prod docker-down docker-clean proto swagger goimports vet test check
 
-CONFIG_FILE = docker/config/base.yaml
 SESSION_NAME = vicomova
 
 # tmux 开发模式：5 个窗口
@@ -47,16 +46,16 @@ build:
 
 # 直接运行（编译后执行）
 run-user:
-	mkdir -p bin && go build -o bin/user ./cmd/user && ./bin/user -config $(CONFIG_FILE) -port 8888
+	mkdir -p bin && go build -o bin/user ./cmd/user && ETCD_ADDR=127.0.0.1:2379 ./bin/user
 
 run-video:
-	mkdir -p bin && go build -o bin/video ./cmd/video && ./bin/video -config $(CONFIG_FILE) -port 8889
+	mkdir -p bin && go build -o bin/video ./cmd/video && ETCD_ADDR=127.0.0.1:2379 ./bin/video
 
 run-interaction:
-	mkdir -p bin && go build -o bin/interaction ./cmd/interaction && ./bin/interaction -config $(CONFIG_FILE) -port 8890
+	mkdir -p bin && go build -o bin/interaction ./cmd/interaction && ETCD_ADDR=127.0.0.1:2379 ./bin/interaction
 
 run-gateway:
-	mkdir -p bin && go build -o bin/gateway ./cmd/gateway && ./bin/gateway -config $(CONFIG_FILE) -port 8080
+	mkdir -p bin && go build -o bin/gateway ./cmd/gateway && ETCD_ADDR=127.0.0.1:2379 ./bin/gateway
 
 # Proto 代码生成
 proto:

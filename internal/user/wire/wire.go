@@ -1,72 +1,81 @@
 package wire
 
 import (
-	sharedMysql "vicomova/internal/shared/infrastructure/data/mysql"
-	sharedRedis "vicomova/internal/shared/infrastructure/data/redis"
-	sharedHasher "vicomova/internal/shared/pkg/hasher"
-	appCommand "vicomova/internal/user/application/command"
-	appQuery "vicomova/internal/user/application/query"
-	svc "vicomova/internal/user/domain/service"
-	infraEmail "vicomova/internal/user/infrastructure/external/email"
+	"vicomova/internal/user/application/command"
+	"vicomova/internal/user/application/query"
+	"vicomova/internal/user/domain/service"
+	"vicomova/internal/user/infrastructure/external/email"
 	infraMysql "vicomova/internal/user/infrastructure/persistence/mysql"
 	infraRedis "vicomova/internal/user/infrastructure/persistence/redis"
-	rpc "vicomova/internal/user/interfaces/grpc"
+	usergrpc "vicomova/internal/user/interfaces/grpc"
 	"vicomova/pkg/config"
+	"vicomova/pkg/utils"
+	"vicomova/pkg/infrastructure/mysql"
+	"vicomova/pkg/infrastructure/redis"
+	"vicomova/pkg/log"
 )
 
 type Provider struct {
-	MySQL       *sharedMysql.Client
-	Redis       *sharedRedis.Client
-	UserHandler *rpc.UserHandler
+	MySQL       *mysql.Client
+	Redis       *redis.Client
+	UserHandler *usergrpc.UserHandler
 }
 
-func NewProvider(cfg *config.Config) (*Provider, error) {
-	// 初始化数据库
-	if err := sharedMysql.Init(&cfg.Database); err != nil {
+func NewProvider() (*Provider, error) {
+	cfg := config.Get()
+
+	if err := mysql.Init(&cfg.Database); err != nil {
 		return nil, err
 	}
 
-	// 初始化 Redis
-	if err := sharedRedis.Init(&cfg.Redis); err != nil {
+	if err := redis.Init(&cfg.Redis); err != nil {
 		return nil, err
 	}
 
-	// 获取 MySQL/Redis 客户端
-	mysqlClient := sharedMysql.GetClient()
-	redisClient := sharedRedis.GetClient()
+	mysqlClient := mysql.GetClient()
+	redisClient := redis.GetClient()
 
-	// 自动迁移
-	if err := sharedMysql.GetDB().AutoMigrate(&infraMysql.UserPO{}); err != nil {
+	if err := mysql.GetDB().AutoMigrate(&infraMysql.UserPO{}); err != nil {
 		return nil, err
 	}
 
-	// 初始化 Repository
 	userRepo := infraMysql.NewUserRepository(mysqlClient)
 	refreshTokenRepo := infraRedis.NewRefreshTokenRepository(redisClient)
 	emailCodeRepo := infraRedis.NewEmailCodeRepository(redisClient)
 
-	// 初始化 Email Service
-	var emailService infraEmail.EmailService
-	if cfg.Email.AccessKey != "" && cfg.Email.AccountName != "" && cfg.Email.Region != "" {
+	var emailService email.EmailService
+	if cfg.Email.AccountName != "" && cfg.Email.Region != "" {
 		var err error
-		emailService, err = infraEmail.NewAliyunEmailService(&cfg.Email)
+		emailService, err = email.NewAliyunEmailService(&cfg.Email)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	// 初始化 Domain Service
-	tokenSvc := svc.NewTokenService(cfg.JWT.Secret)
+	tokenSvc := service.NewTokenService(cfg.JWT.Secret)
 
-	// 初始化 Password Hasher
-	hasher := &sharedHasher.SHA256Hasher{}
+	hasher := &utils.SHA256Hasher{}
 
-	// 初始化 Application Service
-	cmdSvc := appCommand.NewUserCommandService(userRepo, refreshTokenRepo, emailCodeRepo, emailService, tokenSvc, hasher)
-	querySvc := appQuery.NewUserQueryService(userRepo)
+	cmdSvc := command.NewUserCommandService(userRepo, refreshTokenRepo, emailCodeRepo, emailService, tokenSvc, hasher)
+	querySvc := query.NewUserQueryService(userRepo)
 
-	// 初始化 Handler
-	userHandler := rpc.NewUserHandler(cmdSvc, querySvc)
+	userHandler := usergrpc.NewUserHandler(cmdSvc, querySvc)
+
+	// Register config change callbacks for hot-reload
+	config.RegisterCallback(func(newCfg *config.Config) {
+		if err := mysql.Reload(&newCfg.Database); err != nil {
+			log.Error.Printf("failed to reload mysql: %v", err)
+		}
+		if err := redis.Reload(&newCfg.Redis); err != nil {
+			log.Error.Printf("failed to reload redis: %v", err)
+		}
+		if newCfg.JWT.Secret != cfg.JWT.Secret {
+			log.Warn.Printf("JWT secret changed, please restart service to take effect")
+		}
+		if newCfg.Service.Addr != cfg.Service.Addr {
+			log.Warn.Printf("service addr changed to %s, please restart service to take effect", newCfg.Service.Addr)
+		}
+	})
 
 	return &Provider{
 		MySQL:       mysqlClient,

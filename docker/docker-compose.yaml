@@ -55,6 +55,7 @@ services:
     restart: unless-stopped
     volumes:
       - ./config:/app/config:ro
+      - ./script:/app/script
     environment:
       ETCD_ENDPOINTS: "etcd:2379"
     command: >

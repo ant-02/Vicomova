@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"vicomova/internal/shared/pkg/constants"
 	"vicomova/pkg/config"
+	"vicomova/pkg/constants"
 
 	openapi "github.com/alibabacloud-go/darabonba-openapi/v2/client"
 	dm20151123 "github.com/alibabacloud-go/dm-20151123/v2/client"
@@ -24,7 +24,7 @@ type AliyunEmailService struct {
 	accountName string
 }
 
-func NewAliyunEmailService(cfg *config.AliyunEmailConfig) (*AliyunEmailService, error) {
+func NewAliyunEmailService(cfg *config.Email) (*AliyunEmailService, error) {
 	credConfig := &credential.Config{
 		AccessKeyId:     tea.String(cfg.AccessKey),
 		AccessKeySecret: tea.String(cfg.AccessSecret),

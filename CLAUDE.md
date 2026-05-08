@@ -16,11 +16,15 @@ Client → HTTP Gateway (Hertz:8080) → User RPC (Kitex:8888)
                                       MySQL / Redis / Kafka / Etcd
 ```
 
-### 服务发现
+### 配置中心
 
-- **Etcd**: 服务注册与发现，配置热更新
-- 服务启动时注册到 etcd，Gateway 从 etcd 发现服务地址
+- **Etcd**: 配置中心，配置热更新
+- 配置存储在 `/vicomova/config` key
+- 配置文件位于 `docker/config/base.yaml`
 - 配置文件变更通过 etcd watch 实时推送到各服务
+
+**支持热更新的配置**：database、redis
+**需要重启生效**：jwt.secret、service.addr、email
 
 ### Go 版本
 ```
@@ -49,10 +53,10 @@ make docker-clean     # 清理数据卷
 ### 编译运行
 ```bash
 make build           # 编译所有服务到 bin/
-make run-user        # 运行 User RPC 服务
-make run-video       # 运行 Video RPC 服务
-make run-interaction # 运行 Interaction RPC 服务
-make run-gateway     # 运行 Gateway
+ETCD_ADDR=127.0.0.1:2379 ./bin/user        # 运行 User RPC
+ETCD_ADDR=127.0.0.1:2379 ./bin/video        # 运行 Video RPC
+ETCD_ADDR=127.0.0.1:2379 ./bin/interaction  # 运行 Interaction RPC
+ETCD_ADDR=127.0.0.1:2379 ./bin/gateway       # 运行 Gateway
 ```
 
 ### 代码检查与测试
@@ -77,7 +81,7 @@ cmd/                    # 服务入口
   ├── gateway/         # HTTP 网关 (Hertz)
   ├── user/            # User RPC 服务 (Kitex)
   ├── video/           # Video RPC 服务 (Kitex)
-  └── interaction/     # Interaction RPC 服务 (Kitex)
+  └── interaction/      # Interaction RPC 服务 (Kitex)
 
 api/rpc/               # Protobuf IDL 定义
   └── rpc/            # Proto 文件目录
@@ -102,7 +106,7 @@ internal/              # 内部业务代码
   │   ├── interfaces/
   │   │   ├── http/
   │   │   └── grpc/
-  │   └── wire/        # 依赖注入 wiregen
+  │   └── wire/        # 依赖注入
   ├── video/           # 视频服务（完整 DDD）
   │   ├── domain/
   │   │   ├── entity/   # Video, Category
@@ -128,18 +132,15 @@ internal/              # 内部业务代码
   │   │   └── persistence/mysql/
   │   ├── interfaces/
   │   └── wire/
-  ├── shared/          # 跨服务共享
-  │   ├── infrastructure/data/
-  │   └── pkg/
   └── gateway/         # HTTP 网关
       ├── bootstrap.go
       └── router.go
 
 pkg/                   # 公共工具
-  ├── config/
-  ├── etcd/
-  ├── hertz/
-  └── kitex/
+  ├── config/          # 配置加载 (Etcd) + 热更新
+  ├── infrastructure/   # 基础设施 (MySQL/Redis/Kafka/Hertz/Kitex)
+  ├── utils/           # 工具函数 (hasher/code)
+  └── log/             # 日志封装
 
 third_party/           # 第三方代码
   └── kitex_gen/       # 生成的 RPC 代码
@@ -151,17 +152,41 @@ script/                # 脚本
 docs/                  # 文档（Swagger）
 
 docker/                # Docker 配置
-
-config/                # 配置文件（已 gitignore）
+  ├── config/          # 配置文件 (base.yaml)
+  ├── env/             # 环境变量文件
+  ├── data/            # 数据卷目录
+  └── script/          # 容器启动脚本
 ```
 
 ---
 
 ## 核心设计
 
+### 配置热更新
+
+配置存储在 Etcd 中，通过 `pkg/config` 包管理：
+
+- `config.Init(serviceName)` - 初始化配置，连接 etcd 加载配置
+- `config.Get()` - 获取全局配置
+- `config.RegisterCallback()` - 注册配置变更回调
+- `config.Close()` - 关闭 etcd 连接
+
+**支持热更新的配置**：
+| 配置 | 回调动作 |
+|------|----------|
+| database | 重建 MySQL 连接池 |
+| redis | 重建 Redis 连接池 |
+
+**需要重启生效的配置**：
+| 配置 | 说明 |
+|------|------|
+| jwt.secret | 变更后所有用户 Token 失效 |
+| service.addr | 服务监听地址，无法热切换 |
+| email | 邮件服务配置 |
+
 ### 存储策略模式
 
-视频存储支持多种后端切换，通过配置文件 `storage.type` 指定：
+视频存储支持多种后端切换：
 
 | 类型 | 说明 |
 |------|------|
@@ -210,27 +235,45 @@ score = (p + z²/2n - z*√((p(1-p)+z²/4n)/n)) / (1+z²/n)
 
 ## 配置文件
 
-**注意**: `config/base.yaml` 包含敏感信息，已从 git 跟踪中移除。
+- 配置模板: `docker/config/base.yaml.example`
+- 实际配置: `docker/config/base.yaml`（已 gitignore）
 
-- 配置模板: `config/base.yaml.example`
-- Docker 配置: `docker/config/base.yaml`（已 gitignore）
+### 配置结构
 
-### 配置项说明
+```yaml
+database:
+  host: "localhost"
+  port: 3306
+  user: "vicomova"
+  password: "password"
+  dbname: "vicomova"
+  max_open_conns: 100
+  max_idle_conns: 10
 
-| 配置 | 说明 |
-|------|------|
-| `email.access_key` | 阿里云 AccessKey ID |
-| `email.access_secret` | 阿里云 AccessKey Secret |
-| `email.account_name` | 发件地址 |
-| `jwt.secret` | JWT 密钥 |
-| `storage.type` | 存储类型（local/qiniu/aliyun/aws） |
+redis:
+  host: "localhost"
+  port: 6379
+  password: ""
+  db: 0
 
-### 启动参数
+services:
+  user:
+    name: "user"
+    addr: "127.0.0.1:8888"
+  video:
+    name: "video"
+    addr: "127.0.0.1:8889"
+  interaction:
+    name: "interaction"
+    addr: "127.0.0.1:8890"
+  gateway:
+    name: "gateway"
+    addr: "127.0.0.1:8080"
+```
+
+### 环境变量
 ```bash
-./bin/user -config config/base.yaml -port 8888
-./bin/video -config config/base.yaml -port 8889
-./bin/interaction -config config/base.yaml -port 8890
-./bin/gateway -config config/base.yaml -port 8080
+ETCD_ADDR=127.0.0.1:2379  # etcd 地址（必需）
 ```
 
 ---
@@ -266,21 +309,11 @@ make proto
 | ORM | gorm.io/gorm + gorm.io/driver/mysql | v1.31.1 / v1.6.0 |
 | Redis | redis/go-redis/v9 | v9.18.0 |
 | Kafka | IBM/sarama | v1.47.0 |
-| 配置 | spf13/viper | v1.21.0 |
+| 配置 | go.etcd.io/etcd/client/v3 | v3.6.10 |
 | JWT | golang-jwt/jwt/v5 | v5.3.1 |
-| Etcd | go.etcd.io/etcd/client/v3 | v3.6.10 |
 | 邮件 | github.com/alibabacloud-go/dm-20151123/v2 | v2.9.0 |
 | 凭据 | github.com/aliyun/credentials-go | v1.4.12 |
 | Swagger | github.com/swaggo/swag | v1.16.6 |
-
----
-
-## 脚本说明
-
-| 脚本 | 说明 |
-|------|------|
-| `script/bootstrap.sh` | 启动脚本 |
-| `script/proto/` | Proto 代码生成脚本 |
 
 ---
 
@@ -313,5 +346,5 @@ internal/{service}/
 ├── interfaces/
 │   ├── http/
 │   └── grpc/
-└── wire/           # 依赖注入 wiregen
+└── wire/           # 依赖注入
 ```
