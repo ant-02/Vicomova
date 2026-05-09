@@ -3,9 +3,7 @@ package etcd
 import (
 	"context"
 	"fmt"
-
-	"vicomova/pkg/config"
-	"vicomova/pkg/constants"
+	"time"
 
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
@@ -15,12 +13,12 @@ type Client struct {
 	namespace string
 }
 
-func NewClient(cfg *config.Etcd) (*Client, error) {
+func NewClient(endpoints []string, username, password, namespace string) (*Client, error) {
 	cli, err := clientv3.New(clientv3.Config{
-		Endpoints:   cfg.Endpoints,
-		Username:    cfg.Username,
-		Password:    cfg.Password,
-		DialTimeout: constants.EtcdDialTimeout,
+		Endpoints:   endpoints,
+		DialTimeout: 5 * time.Second,
+		Username:    username,
+		Password:    password,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create etcd client: %w", err)
@@ -28,7 +26,7 @@ func NewClient(cfg *config.Etcd) (*Client, error) {
 
 	return &Client{
 		cli:       cli,
-		namespace: cfg.Namespace,
+		namespace: namespace,
 	}, nil
 }
 
@@ -47,18 +45,6 @@ func (c *Client) Key(key string) string {
 	return fmt.Sprintf("/%s/%s", c.namespace, key)
 }
 
-func (c *Client) ServicesPath() string {
-	return c.Key("services")
-}
-
-func (c *Client) ServicePath(serviceName string) string {
-	return fmt.Sprintf("%s/%s", c.ServicesPath(), serviceName)
-}
-
-func (c *Client) RoutesPath() string {
-	return c.Key("routes")
-}
-
 func (c *Client) Get(ctx context.Context, key string) (*clientv3.GetResponse, error) {
 	return c.cli.Get(ctx, c.Key(key))
 }
@@ -71,9 +57,9 @@ func (c *Client) Delete(ctx context.Context, key string, opts ...clientv3.OpOpti
 	return c.cli.Delete(ctx, c.Key(key), opts...)
 }
 
-func (c *Client) Watch(ctx context.Context, prefix string) clientv3.WatchChan {
+func (c *Client) Watch(ctx context.Context, prefix string, opts ...clientv3.OpOption) clientv3.WatchChan {
 	watcher := clientv3.NewWatcher(c.cli)
-	return watcher.Watch(ctx, c.Key(prefix))
+	return watcher.Watch(ctx, c.Key(prefix), opts...)
 }
 
 func (c *Client) Grant(ctx context.Context, ttl int64) (*clientv3.LeaseGrantResponse, error) {
@@ -84,8 +70,8 @@ func (c *Client) KeepAlive(ctx context.Context, leaseID clientv3.LeaseID) (<-cha
 	return c.cli.KeepAlive(ctx, leaseID)
 }
 
-func (c *Client) GetInstances(ctx context.Context, serviceName string) ([]string, error) {
-	resp, err := c.cli.Get(ctx, c.ServicePath(serviceName), clientv3.WithPrefix())
+func (c *Client) GetInstances(ctx context.Context, prefix string) ([]string, error) {
+	resp, err := c.cli.Get(ctx, c.Key(prefix), clientv3.WithPrefix())
 	if err != nil {
 		return nil, err
 	}

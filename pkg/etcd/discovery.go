@@ -6,6 +6,7 @@ import (
 	"sync"
 	"sync/atomic"
 
+	"vicomova/pkg/constants"
 	"vicomova/pkg/log"
 
 	clientv3 "go.etcd.io/etcd/client/v3"
@@ -25,12 +26,17 @@ func NewDiscovery(client *Client) *Discovery {
 	}
 }
 
+// Key returns the etcd key prefix for the service
+func (d *Discovery) Key(serviceName string) string {
+	return fmt.Sprintf("%s/%s", constants.EtcdServicesKeyPrefix, serviceName)
+}
+
 func (d *Discovery) GetInstances(ctx context.Context, serviceName string) ([]string, error) {
-	return d.client.GetInstances(ctx, serviceName)
+	return d.client.GetInstances(ctx, d.Key(serviceName))
 }
 
 func (d *Discovery) GetOneInstance(ctx context.Context, serviceName string) (string, error) {
-	instances, err := d.client.GetInstances(ctx, serviceName)
+	instances, err := d.GetInstances(ctx, serviceName)
 	if err != nil {
 		return "", err
 	}
@@ -48,7 +54,7 @@ func (d *Discovery) WatchInstances(ctx context.Context, serviceName string, call
 	d.mu.Unlock()
 
 	// Initial fetch
-	instances, err := d.client.GetInstances(ctx, serviceName)
+	instances, err := d.client.GetInstances(ctx, d.Key(serviceName))
 	if err != nil {
 		return err
 	}
@@ -58,8 +64,7 @@ func (d *Discovery) WatchInstances(ctx context.Context, serviceName string, call
 	callback(instances)
 
 	// Watch for changes
-	watcher := clientv3.NewWatcher(d.client.CLI())
-	ch := watcher.Watch(ctx, d.client.ServicePath(serviceName), clientv3.WithPrefix(), clientv3.WithPrevKV())
+	ch := d.client.Watch(ctx, d.Key(serviceName), clientv3.WithPrefix(), clientv3.WithPrevKV())
 
 	go func() {
 		for {
@@ -75,7 +80,7 @@ func (d *Discovery) WatchInstances(ctx context.Context, serviceName string, call
 				}
 
 				// Re-fetch all instances on any change
-				newInstances, err := d.client.GetInstances(ctx, serviceName)
+				newInstances, err := d.client.GetInstances(ctx, d.Key(serviceName))
 				if err != nil {
 					log.Error.Printf("Failed to get instances for %s: %v", serviceName, err)
 					continue
@@ -89,7 +94,6 @@ func (d *Discovery) WatchInstances(ctx context.Context, serviceName string, call
 				callback(newInstances)
 
 			case <-ctx.Done():
-				_ = watcher.Close()
 				return
 			}
 		}

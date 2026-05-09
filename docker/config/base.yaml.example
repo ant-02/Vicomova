@@ -28,13 +28,6 @@ email:
   region: "cn-hangzhou"
   api_url: "https://dm.aliyuncs.com/"
 
-etcd:
-  endpoints:
-    - "127.0.0.1:2379"
-  username: ""
-  password: ""
-  namespace: "vicomova"
-
 services:
   gateway:
     name: "gateway"

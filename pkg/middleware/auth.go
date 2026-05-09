@@ -4,17 +4,14 @@ import (
 	"context"
 	"strings"
 
-	"vicomova/internal/user/domain/service"
+	"vicomova/pkg/constants"
 	"vicomova/pkg/infrastructure/hertz"
+	"vicomova/pkg/utils"
 
 	"github.com/cloudwego/hertz/pkg/app"
 )
 
-type contextKey string
-
-const UserIDKey contextKey = "user_id"
-
-func Auth(tokenSvc *service.TokenService) app.HandlerFunc {
+func Auth(jwtSecret string) app.HandlerFunc {
 	return func(c context.Context, ctx *app.RequestContext) {
 		authHeader := string(ctx.GetHeader("Authorization"))
 		if authHeader == "" {
@@ -30,21 +27,21 @@ func Auth(tokenSvc *service.TokenService) app.HandlerFunc {
 			return
 		}
 
-		claims, err := tokenSvc.ParseAccessToken(parts[1])
+		claims, err := utils.ParseToken(parts[1], jwtSecret)
 		if err != nil {
 			ctx.JSON(401, hertz.Fail(401, "Invalid token"))
 			ctx.Abort()
 			return
 		}
 
-		userID, ok := claims["user_id"].(float64)
-		if !ok {
+		userID, err := utils.GetUserIDFromClaims(claims)
+		if err != nil {
 			ctx.JSON(401, hertz.Fail(401, "Invalid token claims"))
 			ctx.Abort()
 			return
 		}
 
-		ctx.Set("user_id", int64(userID))
+		ctx.Set(constants.ContextKeyUserID, userID)
 		ctx.Next(c)
 	}
 }

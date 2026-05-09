@@ -44,12 +44,24 @@ const (
 
 // Etcd config key
 const (
-	// ConfigKeyPrefix Etcd 配置 key 前缀
-	ConfigKeyPrefix = "/vicomova/config"
+	// EtcdConfigKey Etcd 配置 key（相对路径）
+	EtcdConfigKey = "config"
+)
+
+// Etcd services key
+const (
+	// EtcdServicesKeyPrefix 服务注册 key 前缀
+	EtcdServicesKeyPrefix = "services"
 )
 
 // HTTP Client 相关
 const (
 	// HTTPClientTimeout HTTP 客户端超时
 	HTTPClientTimeout = 10 * time.Second
+)
+
+// Context Key
+const (
+	// ContextKeyUserID 用户ID上下文key
+	ContextKeyUserID = "user_id"
 )

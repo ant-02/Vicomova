@@ -44,8 +44,8 @@ func NewRegistry(client *Client, serviceName, addr string, opts ...RegistryOptio
 		client:      client,
 		serviceName: serviceName,
 		addr:        addr,
-		ttl:         int64(constants.EtcdLeaseTTL.Seconds()),
 		instanceID:  fmt.Sprintf("%d", time.Now().UnixNano()),
+		ttl:         int64(constants.EtcdLeaseTTL.Seconds()),
 		stopCh:      make(chan struct{}),
 	}
 
@@ -55,6 +55,11 @@ func NewRegistry(client *Client, serviceName, addr string, opts ...RegistryOptio
 
 	r.ctx, r.cancel = context.WithCancel(context.Background())
 	return r
+}
+
+// Key returns the etcd key for this service instance
+func (r *Registry) Key() string {
+	return fmt.Sprintf("%s/%s/%s", constants.EtcdServicesKeyPrefix, r.serviceName, r.instanceID)
 }
 
 func (r *Registry) Register() error {
@@ -69,8 +74,7 @@ func (r *Registry) Register() error {
 	r.leaseID = leaseResp.ID
 
 	// Register service with lease
-	key := fmt.Sprintf("%s/%s", r.client.ServicePath(r.serviceName), r.instanceID)
-	_, err = r.client.Put(r.ctx, key, r.addr, clientv3.WithLease(r.leaseID))
+	_, err = r.client.Put(r.ctx, r.Key(), r.addr, clientv3.WithLease(r.leaseID))
 	if err != nil {
 		return fmt.Errorf("failed to register service: %w", err)
 	}
@@ -99,10 +103,27 @@ func (r *Registry) keepAlive() {
 			}
 
 			ctx, cancel := context.WithTimeout(r.ctx, constants.EtcdKeepAliveTimeout)
-			_, err := r.client.KeepAlive(ctx, leaseID)
-			cancel()
+			ch, err := r.client.KeepAlive(ctx, leaseID)
 			if err != nil {
+				cancel()
 				log.Error.Printf("Failed to keep alive lease %d: %v", leaseID, err)
+				continue
+			}
+
+			// Read from channel to ensure lease is maintained
+			for {
+				select {
+				case resp, ok := <-ch:
+					if !ok {
+						log.Error.Printf("Keep alive channel closed for lease %d", leaseID)
+						cancel()
+						return
+					}
+					log.Info.Printf("Lease %d kept alive: %v", leaseID, resp.ID)
+				case <-ctx.Done():
+					cancel()
+					return
+				}
 			}
 		case <-r.stopCh:
 			return
@@ -117,8 +138,7 @@ func (r *Registry) Unregister() error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	key := fmt.Sprintf("%s/%s", r.client.ServicePath(r.serviceName), r.instanceID)
-	_, err := r.client.Delete(r.ctx, key)
+	_, err := r.client.Delete(r.ctx, r.Key())
 	if err != nil {
 		return fmt.Errorf("failed to unregister service: %w", err)
 	}

@@ -7,8 +7,9 @@ import (
 )
 
 func RegisterRoutes(h *server.Hertz, interactionHandler *handler.InteractionHandler) {
-	// Video interaction routes
-	video := h.Group("/video")
+	g := h.Group("/", rootMw()...)
+
+	video := g.Group("/video")
 	video.POST("/like", interactionHandler.LikeVideo)
 	video.DELETE("/like", interactionHandler.UnlikeVideo)
 	video.GET("/like/list", interactionHandler.ListLikes)
@@ -21,7 +22,6 @@ func RegisterRoutes(h *server.Hertz, interactionHandler *handler.InteractionHand
 	video.DELETE("/comment", interactionHandler.DeleteComment)
 	video.GET("/comment/list", interactionHandler.ListComments)
 
-	// Comment interaction routes
-	comment := h.Group("/comment")
+	comment := g.Group("/comment")
 	comment.POST("/like", interactionHandler.LikeComment)
 }

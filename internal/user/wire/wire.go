@@ -9,10 +9,10 @@ import (
 	infraRedis "vicomova/internal/user/infrastructure/persistence/redis"
 	usergrpc "vicomova/internal/user/interfaces/grpc"
 	"vicomova/pkg/config"
-	"vicomova/pkg/utils"
 	"vicomova/pkg/infrastructure/mysql"
 	"vicomova/pkg/infrastructure/redis"
 	"vicomova/pkg/log"
+	"vicomova/pkg/utils"
 )
 
 type Provider struct {

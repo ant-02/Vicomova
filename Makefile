@@ -46,16 +46,16 @@ build:
 
 # 直接运行（编译后执行）
 run-user:
-	mkdir -p bin && go build -o bin/user ./cmd/user && ETCD_ADDR=127.0.0.1:2379 ./bin/user
+	mkdir -p bin && go build -o bin/user ./cmd/user && set -a && . ./docker/env/base.env && set +a && ./bin/user
 
 run-video:
-	mkdir -p bin && go build -o bin/video ./cmd/video && ETCD_ADDR=127.0.0.1:2379 ./bin/video
+	mkdir -p bin && go build -o bin/video ./cmd/video && set -a && . ./docker/env/base.env && set +a && ./bin/video
 
 run-interaction:
-	mkdir -p bin && go build -o bin/interaction ./cmd/interaction && ETCD_ADDR=127.0.0.1:2379 ./bin/interaction
+	mkdir -p bin && go build -o bin/interaction ./cmd/interaction && set -a && . ./docker/env/base.env && set +a && ./bin/interaction
 
 run-gateway:
-	mkdir -p bin && go build -o bin/gateway ./cmd/gateway && ETCD_ADDR=127.0.0.1:2379 ./bin/gateway
+	mkdir -p bin && go build -o bin/gateway ./cmd/gateway && set -a && . ./docker/env/base.env && set +a && ./bin/gateway
 
 # Proto 代码生成
 proto:

@@ -1,8 +1,6 @@
 package hertz
 
 import (
-	"fmt"
-
 	"github.com/cloudwego/hertz/pkg/app/server"
 )
 
