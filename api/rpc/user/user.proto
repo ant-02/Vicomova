@@ -71,8 +71,7 @@ message RefreshTokenResponse {
 }
 
 message LogoutRequest {
-  string access_token = 1;
-  string refresh_token = 2;
+  string refresh_token = 1;
 }
 
 message LogoutResponse {

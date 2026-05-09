@@ -26,6 +26,7 @@ func (r *RefreshTokenRepository) Create(ctx context.Context, userID int64, token
 	data := &RefreshTokenData{
 		UserID: userID,
 	}
+	log.Debug.Printf("RefreshTokenRepository.Create: userID=%d token=%s ttl=%v", userID, token, ttl)
 	if err := SetRefreshToken(ctx, r.redis, token, data, ttl); err != nil {
 		log.Error.Printf("RefreshTokenRepository.Create: failed for userID=%d: %v", userID, err)
 		return err
@@ -40,6 +41,7 @@ func (r *RefreshTokenRepository) Exists(ctx context.Context, token string) (bool
 		log.Error.Printf("RefreshTokenRepository.Exists: failed: %v", err)
 		return false, err
 	}
+	log.Debug.Printf("RefreshTokenRepository.Exists: token=%s exists=%v", token, data != nil)
 	return data != nil, nil
 }
 
@@ -56,6 +58,7 @@ func (r *RefreshTokenRepository) GetUserID(ctx context.Context, token string) (i
 }
 
 func (r *RefreshTokenRepository) Revoke(ctx context.Context, token string) error {
+	log.Debug.Printf("RefreshTokenRepository.Revoke: token=%s", token)
 	if err := DeleteRefreshToken(ctx, r.redis, token); err != nil {
 		log.Error.Printf("RefreshTokenRepository.Revoke: failed: %v", err)
 		return err
@@ -105,7 +108,10 @@ func GetRefreshToken(ctx context.Context, client *sharedRedis.Client, token stri
 
 func DeleteRefreshToken(ctx context.Context, client *sharedRedis.Client, token string) error {
 	key := refreshTokenPrefix + token
-	return client.Del(ctx, key).Err()
+	log.Debug.Printf("DeleteRefreshToken: deleting key=%s", key)
+	err := client.Del(ctx, key).Err()
+	log.Debug.Printf("DeleteRefreshToken: result=%v", err)
+	return err
 }
 
 func DeleteUserRefreshTokens(ctx context.Context, client *sharedRedis.Client, userID int64) error {

@@ -12,7 +12,6 @@ type RefreshTokenCommand struct {
 }
 
 type LogoutCommand struct {
-	AccessToken  string
 	RefreshToken string
 }
 

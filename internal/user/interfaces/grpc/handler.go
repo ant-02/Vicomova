@@ -122,8 +122,9 @@ func (h *UserHandler) RefreshToken(ctx context.Context, req *user.RefreshTokenRe
 }
 
 func (h *UserHandler) Logout(ctx context.Context, req *user.LogoutRequest) (*user.LogoutResponse, error) {
+	klog.Debugf("UserHandler.Logout: RefreshToken=%s", req.RefreshToken)
 	cmd := &appCommand.LogoutCommand{
-		AccessToken: req.AccessToken,
+		RefreshToken: req.RefreshToken,
 	}
 
 	err := h.cmdSvc.Logout(ctx, cmd)

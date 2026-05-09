@@ -1,7 +1,8 @@
 #!/bin/bash
 set -e
 
-CONFIG_FILE="/app/config/base.yaml"
+CONFIG_DIR="/app/config"
+CONFIG_FILE="$CONFIG_DIR/base.yaml"
 ETCD_KEY="${ETCD_KEY:-/vicomova/config}"
 ETCD_ENDPOINTS="${ETCD_ENDPOINTS:-etcd:2379}"
 
@@ -22,11 +23,13 @@ upload_config() {
 
 watch_config() {
     if command -v inotifywait > /dev/null 2>&1; then
-        echo "Using inotifywait for real-time monitoring"
-        inotifywait -m -e modify "$CONFIG_FILE" | while read path action file; do
-            echo "Config changed, uploading..."
-            ETCDCTL_API=3 etcdctl --endpoints=http://$ETCD_ENDPOINTS put "$ETCD_KEY" < "$CONFIG_FILE"
-            echo "Config updated at $(date +'%Y-%m-%d %H:%M:%S')"
+        echo "Using inotifywait for directory monitoring"
+        inotifywait -m -e modify,close_write,delete "$CONFIG_DIR" | while read path action file; do
+            if [ "$file" = "base.yaml" ]; then
+                echo "Config changed ($action $file), uploading..."
+                ETCDCTL_API=3 etcdctl --endpoints=http://$ETCD_ENDPOINTS put "$ETCD_KEY" < "$CONFIG_FILE"
+                echo "Config updated at $(date +'%Y-%m-%d %H:%M:%S')"
+            fi
         done
     else
         echo "Using polling (60s interval)"

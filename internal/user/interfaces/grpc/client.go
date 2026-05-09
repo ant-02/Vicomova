@@ -7,6 +7,7 @@ import (
 	userservice "vicomova/third_party/kitex_gen/user/userservice"
 
 	"github.com/cloudwego/kitex/client"
+	"github.com/cloudwego/kitex/pkg/klog"
 )
 
 type UserClient struct {
@@ -44,9 +45,9 @@ func (c *UserClient) RefreshToken(ctx context.Context, refreshToken string) (*us
 	})
 }
 
-func (c *UserClient) Logout(ctx context.Context, accessToken, refreshToken string) (*user.LogoutResponse, error) {
+func (c *UserClient) Logout(ctx context.Context, refreshToken string) (*user.LogoutResponse, error) {
+	klog.Debugf("UserClient.Logout: refreshToken=%s", refreshToken)
 	return c.cli.Logout(ctx, &user.LogoutRequest{
-		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 	})
 }

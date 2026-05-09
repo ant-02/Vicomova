@@ -138,8 +138,9 @@ func (h *UserHandler) Logout(ctx context.Context, c *app.RequestContext) {
 		c.JSON(400, hertz.Fail(400, "Invalid request body"))
 		return
 	}
+	hlog.Debugf("Logout: req.RefreshToken=%s", req.RefreshToken)
 
-	resp, err := h.userClient.Logout(ctx, req.AccessToken, req.RefreshToken)
+	resp, err := h.userClient.Logout(ctx, req.RefreshToken)
 	if err != nil {
 		hlog.Errorf("Logout: failed: %v", err)
 		c.JSON(401, hertz.Fail(401, "Logout failed"))
