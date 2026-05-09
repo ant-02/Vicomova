@@ -3,6 +3,7 @@ package etcd
 import (
 	"context"
 	"fmt"
+	"sync"
 	"time"
 
 	clientv3 "go.etcd.io/etcd/client/v3"
@@ -11,6 +12,8 @@ import (
 type Client struct {
 	cli       *clientv3.Client
 	namespace string
+	watcher   clientv3.Watcher
+	watcherMu sync.RWMutex
 }
 
 func NewClient(endpoints []string, username, password, namespace string) (*Client, error) {
@@ -31,6 +34,11 @@ func NewClient(endpoints []string, username, password, namespace string) (*Clien
 }
 
 func (c *Client) Close() error {
+	c.watcherMu.Lock()
+	if c.watcher != nil {
+		c.watcher.Close()
+	}
+	c.watcherMu.Unlock()
 	return c.cli.Close()
 }
 
@@ -58,8 +66,15 @@ func (c *Client) Delete(ctx context.Context, key string, opts ...clientv3.OpOpti
 }
 
 func (c *Client) Watch(ctx context.Context, prefix string, opts ...clientv3.OpOption) clientv3.WatchChan {
-	watcher := clientv3.NewWatcher(c.cli)
-	return watcher.Watch(ctx, c.Key(prefix), opts...)
+	c.watcherMu.Lock()
+	defer c.watcherMu.Unlock()
+
+	if c.watcher != nil {
+		c.watcher.Close()
+	}
+	c.watcher = clientv3.NewWatcher(c.cli)
+
+	return c.watcher.Watch(ctx, c.Key(prefix), opts...)
 }
 
 func (c *Client) Grant(ctx context.Context, ttl int64) (*clientv3.LeaseGrantResponse, error) {

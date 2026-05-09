@@ -66,19 +66,26 @@ func (r *Registry) Register() error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
+	log.Debug.Printf("[Registry] Starting registration for %s at %s", r.serviceName, r.addr)
+
 	// Create lease
 	leaseResp, err := r.client.Grant(r.ctx, r.ttl)
 	if err != nil {
 		return fmt.Errorf("failed to grant lease: %w", err)
 	}
 	r.leaseID = leaseResp.ID
+	log.Debug.Printf("[Registry] Lease granted: %d, TTL: %d", r.leaseID, r.ttl)
 
 	// Register service with lease
-	_, err = r.client.Put(r.ctx, r.Key(), r.addr, clientv3.WithLease(r.leaseID))
+	key := r.Key()
+	log.Debug.Printf("[Registry] Putting key=%s value=%s with lease=%d", key, r.addr, r.leaseID)
+
+	putResp, err := r.client.Put(r.ctx, key, r.addr, clientv3.WithLease(r.leaseID))
 	if err != nil {
 		return fmt.Errorf("failed to register service: %w", err)
 	}
 
+	log.Debug.Printf("[Registry] Put succeeded, revision: %d", putResp.Header.Revision)
 	log.Info.Printf("Registered service %s/%s at %s with lease %d", r.serviceName, r.instanceID, r.addr, r.leaseID)
 
 	// Start keepalive goroutine
@@ -88,8 +95,10 @@ func (r *Registry) Register() error {
 }
 
 func (r *Registry) keepAlive() {
+	log.Debug.Printf("[Registry] keepAlive: started")
 	ticker := time.NewTicker(constants.EtcdLeaseTTL / 2)
 	defer ticker.Stop()
+	defer log.Debug.Printf("[Registry] keepAlive: exited")
 
 	for {
 		select {
@@ -99,8 +108,11 @@ func (r *Registry) keepAlive() {
 			r.mu.RUnlock()
 
 			if leaseID == 0 {
+				log.Debug.Printf("[Registry] keepAlive: leaseID is 0, skipping")
 				continue
 			}
+
+			log.Debug.Printf("[Registry] keepAlive: sending KeepAlive for lease %d", leaseID)
 
 			ctx, cancel := context.WithTimeout(r.ctx, constants.EtcdKeepAliveTimeout)
 			ch, err := r.client.KeepAlive(ctx, leaseID)
@@ -110,22 +122,18 @@ func (r *Registry) keepAlive() {
 				continue
 			}
 
-			// Read from channel to ensure lease is maintained
-			for {
-				select {
-				case resp, ok := <-ch:
-					if !ok {
-						log.Error.Printf("Keep alive channel closed for lease %d", leaseID)
-						cancel()
-						return
-					}
-					log.Info.Printf("Lease %d kept alive: %v", leaseID, resp.ID)
-				case <-ctx.Done():
-					cancel()
-					return
-				}
+			// KeepAlive returns ONE response per request, wait for it then close
+			resp, ok := <-ch
+			if !ok {
+				log.Error.Printf("Keep alive channel closed for lease %d", leaseID)
+				cancel()
+				return
 			}
+			log.Debug.Printf("[Registry] KeepAlive response: lease=%d, TTL=%d", resp.ID, resp.TTL)
+			cancel()
+
 		case <-r.stopCh:
+			log.Debug.Printf("[Registry] keepAlive: received stop signal")
 			return
 		}
 	}
