@@ -10,7 +10,6 @@ import (
 	userRepo "vicomova/internal/user/domain/repository"
 	"vicomova/internal/user/domain/service"
 	"vicomova/internal/user/domain/valueobject"
-	infraEmail "vicomova/pkg/infrastructure/email"
 	"vicomova/pkg/constants"
 	"vicomova/pkg/utils"
 )
@@ -19,7 +18,7 @@ import (
 func newTestService(
 	userRepo userRepo.UserRepository,
 	emailCodeRepo userRepo.EmailCodeRepository,
-	emailService infraEmail.EmailService,
+	emailService service.EmailService,
 ) *UserCommandService {
 	tokenSvc := service.NewTokenService("test-secret")
 	hasher := &utils.SHA256Hasher{}

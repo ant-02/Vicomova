@@ -3,5 +3,5 @@ package email
 import "context"
 
 type EmailService interface {
-	SendVerificationCode(ctx context.Context, toEmail, code string) error
+	Send(ctx context.Context, toEmail, subject, body string) error
 }

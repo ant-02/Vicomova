@@ -1,11 +1,16 @@
 package service
 
 import (
+	"context"
 	"time"
 
 	"vicomova/pkg/constants"
 	"vicomova/pkg/utils"
 )
+
+type EmailService interface {
+	SendVerificationCode(ctx context.Context, toEmail, code string) error
+}
 
 type TokenService struct {
 	jwtSecret string

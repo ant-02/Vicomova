@@ -4,7 +4,8 @@ import (
 	"vicomova/internal/user/application/command"
 	"vicomova/internal/user/application/query"
 	"vicomova/internal/user/domain/service"
-	email "vicomova/pkg/infrastructure/email"
+	internalEmail "vicomova/internal/user/infrastructure/external/email"
+	emailPkg "vicomova/pkg/infrastructure/email"
 	infraMysql "vicomova/internal/user/infrastructure/persistence/mysql"
 	infraRedis "vicomova/internal/user/infrastructure/persistence/redis"
 	usergrpc "vicomova/internal/user/interfaces/grpc"
@@ -43,13 +44,18 @@ func NewProvider() (*Provider, error) {
 	refreshTokenRepo := infraRedis.NewRefreshTokenRepository(redisClient)
 	emailCodeRepo := infraRedis.NewEmailCodeRepository(redisClient)
 
-	var emailService email.EmailService
+	var pkgEmailSvc emailPkg.EmailService
 	if cfg.Email.AccountName != "" && cfg.Email.Region != "" {
 		var err error
-		emailService, err = email.NewAliyunEmailService(&cfg.Email)
+		pkgEmailSvc, err = emailPkg.NewEmailService(emailPkg.EmailTypeAliyun, &cfg.Email)
 		if err != nil {
 			return nil, err
 		}
+	}
+
+	var emailService service.EmailService
+	if pkgEmailSvc != nil {
+		emailService = internalEmail.NewVerificationEmailService(pkgEmailSvc)
 	}
 
 	tokenSvc := service.NewTokenService(cfg.JWT.Secret)

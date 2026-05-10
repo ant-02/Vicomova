@@ -3,10 +3,8 @@ package email
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"vicomova/pkg/config"
-	"vicomova/pkg/constants"
 
 	openapi "github.com/alibabacloud-go/darabonba-openapi/v2/client"
 	dm20151123 "github.com/alibabacloud-go/dm-20151123/v2/client"
@@ -48,23 +46,13 @@ func NewAliyunEmailService(cfg *config.Email) (*AliyunEmailService, error) {
 	}, nil
 }
 
-func (s *AliyunEmailService) SendVerificationCode(ctx context.Context, toEmail, code string) error {
-	emailBody := fmt.Sprintf(`
-		<html>
-		<body>
-			<p>您正在进行安全验证，本次请求的验证码是：</p>
-			<h2 style="color: #ff5722;">%s</h2>
-			<p>验证码有效期为%d分钟，请勿泄露给他人。</p>
-		</body>
-		</html>
-	`, code, constants.EmailCodeTTL/time.Minute)
-
+func (s *AliyunEmailService) Send(ctx context.Context, toEmail, subject, body string) error {
 	request := &dm20151123.SingleSendMailRequest{}
 	request.AccountName = tea.String(s.accountName)
 	request.AddressType = tea.Int32(1)
 	request.ToAddress = tea.String(toEmail)
-	request.Subject = tea.String("Vicomova 邮箱验证码")
-	request.HtmlBody = tea.String(emailBody)
+	request.Subject = tea.String(subject)
+	request.HtmlBody = tea.String(body)
 	request.ReplyToAddress = tea.Bool(true)
 
 	runtime := &util.RuntimeOptions{}
