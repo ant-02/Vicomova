@@ -37,6 +37,14 @@ type Email struct {
 	APIURL       string `yaml:"api_url"`
 }
 
+type OSS struct {
+	Type       string `yaml:"type"` // qiniu, aliyun, aws
+	AccessKey  string `yaml:"access_key"`
+	SecretKey  string `yaml:"secret_key"`
+	Bucket     string `yaml:"bucket"`
+	Domain     string `yaml:"domain"`
+}
+
 type Service struct {
 	Name string `yaml:"name"`
 	Addr string `yaml:"addr"`
@@ -48,6 +56,7 @@ type Config struct {
 	Kafka    Kafka              `yaml:"kafka"`
 	JWT      JWT                `yaml:"jwt"`
 	Email    Email              `yaml:"email"`
+	OSS      OSS                `yaml:"oss"`
 	Services map[string]Service `yaml:"services"`
 	Service  Service
 }

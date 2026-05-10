@@ -4,22 +4,22 @@ import (
 	"context"
 
 	"vicomova/internal/video/domain/entity"
-	videoVO "vicomova/internal/video/domain/valueobject"
 	"vicomova/internal/video/domain/repository"
-	"vicomova/internal/video/infrastructure/storage"
+	videoVO "vicomova/internal/video/domain/valueobject"
 	"vicomova/pkg/errors"
+	"vicomova/pkg/infrastructure/oss"
 	"vicomova/pkg/log"
 )
 
 type VideoCommandService struct {
 	repo    repository.VideoRepository
-	storage storage.VideoStorage
+	oss     oss.OSS
 }
 
-func NewVideoCommandService(repo repository.VideoRepository, storage storage.VideoStorage) *VideoCommandService {
+func NewVideoCommandService(repo repository.VideoRepository, oss oss.OSS) *VideoCommandService {
 	return &VideoCommandService{
-		repo:    repo,
-		storage: storage,
+		repo: repo,
+		oss:  oss,
 	}
 }
 
@@ -57,13 +57,13 @@ func (s *VideoCommandService) Save(ctx context.Context, cmd *SaveVideoCommand) (
 	// 创建新视频
 	v := &entity.Video{
 		UserID:      cmd.UserID,
-		Title:        cmd.Title,
-		Description:  cmd.Description,
-		CategoryID:   cmd.CategoryID,
-		CoverURL:     cmd.CoverURL,
-		VideoURL:     cmd.VideoURL,
-		Duration:     cmd.Duration,
-		Status:       videoVO.VideoStatusEditing,
+		Title:       cmd.Title,
+		Description: cmd.Description,
+		CategoryID:  cmd.CategoryID,
+		CoverURL:    cmd.CoverURL,
+		VideoURL:    cmd.VideoURL,
+		Duration:    cmd.Duration,
+		Status:      videoVO.VideoStatusEditing,
 	}
 	if err := s.repo.Create(ctx, v); err != nil {
 		log.Error.Printf("VideoCommandService.Save: Create failed: %v", err)
@@ -126,13 +126,13 @@ func (s *VideoCommandService) Publish(ctx context.Context, cmd *PublishVideoComm
 	// 无 VideoID，创建新视频并直接发布
 	v := &entity.Video{
 		UserID:      cmd.UserID,
-		Title:        cmd.Title,
-		Description:  cmd.Description,
-		CategoryID:   cmd.CategoryID,
-		CoverURL:     cmd.CoverURL,
-		VideoURL:     cmd.VideoURL,
-		Duration:     cmd.Duration,
-		Status:       videoVO.VideoStatusPublished,
+		Title:       cmd.Title,
+		Description: cmd.Description,
+		CategoryID:  cmd.CategoryID,
+		CoverURL:    cmd.CoverURL,
+		VideoURL:    cmd.VideoURL,
+		Duration:    cmd.Duration,
+		Status:      videoVO.VideoStatusPublished,
 	}
 	if err := s.repo.Create(ctx, v); err != nil {
 		log.Error.Printf("VideoCommandService.Publish: Create failed: %v", err)

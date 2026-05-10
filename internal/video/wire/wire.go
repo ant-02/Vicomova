@@ -5,10 +5,10 @@ import (
 	"vicomova/internal/video/application/query"
 	infraMysql "vicomova/internal/video/infrastructure/persistence/mysql"
 	"vicomova/internal/video/infrastructure/service"
-	"vicomova/internal/video/infrastructure/storage"
 	"vicomova/internal/video/interfaces/grpc"
 	"vicomova/pkg/config"
 	"vicomova/pkg/infrastructure/mysql"
+	"vicomova/pkg/infrastructure/oss"
 	"vicomova/pkg/infrastructure/redis"
 	"vicomova/pkg/log"
 )
@@ -38,15 +38,21 @@ func NewProvider() (*Provider, error) {
 
 	videoRepo := infraMysql.NewVideoRepository(mysqlClient)
 
-	// TODO: implement storage based on config
-	storage := storage.NewLocalDiskStorage(&storage.LocalDiskConfig{
-		BasePath: "/tmp/videos",
-		BaseURL:  "http://localhost:8080/files",
-	})
+	// 初始化 OSS
+	ossCfg := &oss.OSSConfig{
+		AccessKey: cfg.OSS.AccessKey,
+		SecretKey: cfg.OSS.SecretKey,
+		Bucket:    cfg.OSS.Bucket,
+		Domain:    cfg.OSS.Domain,
+	}
+	ossClient, err := oss.NewOSS(oss.OSSType(cfg.OSS.Type), ossCfg)
+	if err != nil {
+		return nil, err
+	}
 
 	hotAlgo := service.NewWilsonHotAlgorithm(videoRepo)
 
-	cmdSvc := command.NewVideoCommandService(videoRepo, storage)
+	cmdSvc := command.NewVideoCommandService(videoRepo, ossClient)
 	querySvc := query.NewVideoQueryService(videoRepo, hotAlgo)
 
 	videoHandler := grpc.NewVideoHandler(cmdSvc, querySvc)

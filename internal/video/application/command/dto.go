@@ -3,7 +3,7 @@ package command
 // Command DTOs
 
 type SaveVideoCommand struct {
-	VideoID     int64  // 可选，有则更新，无则创建
+	VideoID     int64 // 可选，有则更新，无则创建
 	UserID      int64
 	Title       string
 	Description string
@@ -15,11 +15,11 @@ type SaveVideoCommand struct {
 
 type SubmitVideoCommand struct {
 	VideoID int64
-	UserID int64
+	UserID  int64
 }
 
 type PublishVideoCommand struct {
-	VideoID     int64  // 可选，有则更新，无则创建
+	VideoID     int64 // 可选，有则更新，无则创建
 	UserID      int64
 	Title       string
 	Description string
