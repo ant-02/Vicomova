@@ -15,10 +15,6 @@ import (
 	credential "github.com/aliyun/credentials-go/credentials"
 )
 
-type EmailService interface {
-	SendVerificationCode(ctx context.Context, toEmail, code string) error
-}
-
 type AliyunEmailService struct {
 	client      *dm20151123.Client
 	accountName string
