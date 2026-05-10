@@ -65,3 +65,12 @@ const (
 	// ContextKeyUserID 用户ID上下文key
 	ContextKeyUserID = "user_id"
 )
+
+// 数据库表名
+const (
+	TableVideos    = "videos"
+	TableUsers     = "users"
+	TableLikes     = "likes"
+	TableComments  = "comments"
+	TableFavorites = "favorites"
+)

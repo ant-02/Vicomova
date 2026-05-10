@@ -1,6 +1,10 @@
 package mysql
 
-import "time"
+import (
+	"context"
+
+	constants "vicomova/pkg/constants"
+)
 
 type LikePO struct {
 	ID         int64     `gorm:"primaryKey;autoIncrement"`
@@ -11,7 +15,7 @@ type LikePO struct {
 }
 
 func (LikePO) TableName() string {
-	return "likes"
+	return constants.TableLikes
 }
 
 type CommentPO struct {
@@ -26,7 +30,7 @@ type CommentPO struct {
 }
 
 func (CommentPO) TableName() string {
-	return "comments"
+	return constants.TableComments
 }
 
 type FavoritePO struct {
@@ -37,5 +41,5 @@ type FavoritePO struct {
 }
 
 func (FavoritePO) TableName() string {
-	return "favorites"
+	return constants.TableFavorites
 }

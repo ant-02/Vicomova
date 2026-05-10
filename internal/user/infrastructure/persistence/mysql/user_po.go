@@ -1,6 +1,10 @@
 package mysql
 
-import "time"
+import (
+	"context"
+
+	constants "vicomova/pkg/constants"
+)
 
 type UserPO struct {
 	ID        int64     `gorm:"primaryKey;autoIncrement"`
@@ -12,5 +16,5 @@ type UserPO struct {
 }
 
 func (UserPO) TableName() string {
-	return "users"
+	return constants.TableUsers
 }
