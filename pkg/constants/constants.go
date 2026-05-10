@@ -66,6 +66,12 @@ const (
 	ContextKeyUserID = "user_id"
 )
 
+// OSS 相关
+const (
+	// UploadTokenExpire 上传凭证过期时间（秒）
+	UploadTokenExpire = 3600
+)
+
 // 数据库表名
 const (
 	TableVideos    = "videos"

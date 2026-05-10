@@ -159,7 +159,7 @@ func (h *VideoHandler) IncrementView(ctx context.Context, req *video.IncrementVi
 }
 
 func (h *VideoHandler) GetUploadToken(ctx context.Context, req *video.GetUploadTokenRequest) (*video.GetUploadTokenResponse, error) {
-	result, err := h.qrySvc.GetUploadToken(req.UserId)
+	result, err := h.qrySvc.GetUploadToken(ctx, req.UserId)
 	if err != nil {
 		return nil, err
 	}

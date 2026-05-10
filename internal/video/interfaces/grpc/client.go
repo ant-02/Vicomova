@@ -97,8 +97,8 @@ func (c *VideoClient) IncrementView(ctx context.Context, videoID int64) (*video.
 	})
 }
 
-func (c *VideoClient) GetUploadToken(userID int64) (*video.GetUploadTokenResponse, error) {
-	return c.cli.GetUploadToken(context.Background(), &video.GetUploadTokenRequest{
+func (c *VideoClient) GetUploadToken(ctx context.Context, userID int64) (*video.GetUploadTokenResponse, error) {
+	return c.cli.GetUploadToken(ctx, &video.GetUploadTokenRequest{
 		UserId: userID,
 	})
 }

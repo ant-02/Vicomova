@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"vicomova/internal/video/domain/entity"
+	"vicomova/pkg/constants"
 
 	"github.com/google/uuid"
 )
@@ -75,15 +76,15 @@ func (s *VideoQueryService) GetVideoCover(ctx context.Context, videoID int64) (*
 }
 
 // GetUploadToken 获取上传凭证，供前端直传到 OSS（key 和过期时间由后端生成）
-// key 格式：{user_id}/{year}/{month}/{uuid}
-func (s *VideoQueryService) GetUploadToken(userID int64) (*GetUploadTokenResult, error) {
+// key 格式：{user_id}/{year}/{month}/{day}/{uuid}
+func (s *VideoQueryService) GetUploadToken(ctx context.Context, userID int64) (*GetUploadTokenResult, error) {
 	// 生成 key：{user_id}/{year}/{month}/{uuid}
 	now := time.Now()
 	key := fmt.Sprintf("%d/%d/%02d/%02d/%s", userID, now.Year(), now.Month(), now.Day(), uuid.New().String())
 
-	expire := 3600 * time.Second // 默认 1 小时
+	expire := constants.UploadTokenExpire * time.Second
 
-	token, domain, err := s.oss.GetUploadToken(context.TODO(), key, expire)
+	token, domain, err := s.oss.GetUploadToken(ctx, key, expire)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get upload token: %w", err)
 	}

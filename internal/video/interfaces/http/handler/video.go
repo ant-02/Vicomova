@@ -357,9 +357,7 @@ func (h *VideoHandler) GetPublishedList(ctx context.Context, c *app.RequestConte
 // @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Param request body UploadTokenRequest true "上传凭证请求"
 // @Success 200 {object} UploadTokenResponse
-// @Failure 400 {object} ErrorResponse
 // @Failure 401 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse
 // @Router /video/upload/token [post]
@@ -370,7 +368,7 @@ func (h *VideoHandler) GetUploadToken(ctx context.Context, c *app.RequestContext
 		return
 	}
 
-	resp, err := h.videoClient.GetUploadToken(userID)
+	resp, err := h.videoClient.GetUploadToken(ctx, userID)
 	if err != nil {
 		hlog.Errorf("GetUploadToken: userID=%d failed: %v", userID, err)
 		c.JSON(500, hertz.Fail(500, "Failed to get upload token"))
