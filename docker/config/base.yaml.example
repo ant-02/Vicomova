@@ -28,6 +28,14 @@ email:
   region: "cn-hangzhou"
   api_url: "https://dm.aliyuncs.com/"
 
+# OSS 配置（可选，用于前端直传）
+oss:
+  type: "qiniu"           # qiniu / aliyun / aws
+  access_key: "xxx"
+  secret_key: "xxx"
+  bucket: "your-bucket"
+  domain: "your-domain.com"
+
 services:
   gateway:
     name: "gateway"
