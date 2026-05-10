@@ -96,3 +96,10 @@ func (c *VideoClient) IncrementView(ctx context.Context, videoID int64) (*video.
 		VideoId: videoID,
 	})
 }
+
+func (c *VideoClient) GetUploadToken(ctx context.Context, key string, expireSeconds int64) (*video.GetUploadTokenResponse, error) {
+	return c.cli.GetUploadToken(ctx, &video.GetUploadTokenRequest{
+		Key:           key,
+		ExpireSeconds: expireSeconds,
+	})
+}

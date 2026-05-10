@@ -57,7 +57,7 @@ func NewProvider() (*Provider, error) {
 	hotAlgo := service.NewWilsonHotAlgorithm(videoRepo)
 
 	cmdSvc := command.NewVideoCommandService(videoRepo, ossClient)
-	querySvc := query.NewVideoQueryService(videoRepo, hotAlgo)
+	querySvc := query.NewVideoQueryService(videoRepo, hotAlgo, ossClient)
 
 	videoHandler := grpc.NewVideoHandler(cmdSvc, querySvc)
 

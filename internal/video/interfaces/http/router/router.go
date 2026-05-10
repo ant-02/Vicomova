@@ -21,4 +21,5 @@ func RegisterRoutes(h *server.Hertz, videoHandler *handler.VideoHandler) {
 	videoAuth.POST("/submit", videoHandler.SubmitVideo)
 	videoAuth.POST("/publish", videoHandler.PublishVideo)
 	videoAuth.GET("/list/published", videoHandler.GetPublishedList)
+	videoAuth.POST("/upload/token", videoHandler.GetUploadToken)
 }

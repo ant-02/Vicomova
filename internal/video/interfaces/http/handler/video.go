@@ -349,3 +349,43 @@ func (h *VideoHandler) GetPublishedList(ctx context.Context, c *app.RequestConte
 		Total:  resp.Total,
 	}))
 }
+
+// @Summary 获取上传凭证
+// @Description 获取七牛云上传凭证，前端拿到 token 后直传（需要认证）
+// @Tags video
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body UploadTokenRequest true "上传凭证请求"
+// @Success 200 {object} UploadTokenResponse
+// @Failure 400 {object} ErrorResponse
+// @Failure 401 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /video/upload/token [post]
+func (h *VideoHandler) GetUploadToken(ctx context.Context, c *app.RequestContext) {
+	userID := c.GetInt64("user_id")
+	if userID == 0 {
+		c.JSON(401, hertz.Fail(401, "Unauthorized"))
+		return
+	}
+
+	var req UploadTokenRequest
+	if err := c.Bind(&req); err != nil {
+		hlog.Errorf("GetUploadToken: invalid request: %v", err)
+		c.JSON(400, hertz.Fail(400, "Invalid request body"))
+		return
+	}
+
+	resp, err := h.videoClient.GetUploadToken(ctx, req.Key, req.ExpireSeconds)
+	if err != nil {
+		hlog.Errorf("GetUploadToken: userID=%d failed: %v", userID, err)
+		c.JSON(500, hertz.Fail(500, "Failed to get upload token"))
+		return
+	}
+
+	c.JSON(200, hertz.Success(UploadTokenResponse{
+		Token:  resp.Token,
+		Key:    resp.Key,
+		Domain: resp.Domain,
+	}))
+}

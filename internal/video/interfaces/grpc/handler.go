@@ -158,6 +158,19 @@ func (h *VideoHandler) IncrementView(ctx context.Context, req *video.IncrementVi
 	return &video.IncrementViewResponse{}, nil
 }
 
+func (h *VideoHandler) GetUploadToken(ctx context.Context, req *video.GetUploadTokenRequest) (*video.GetUploadTokenResponse, error) {
+	result, err := h.qrySvc.GetUploadToken(ctx, req.Key, req.ExpireSeconds)
+	if err != nil {
+		return nil, err
+	}
+
+	return &video.GetUploadTokenResponse{
+		Token:  result.Token,
+		Key:    result.Key,
+		Domain: result.Domain,
+	}, nil
+}
+
 func toProtoVideo(v *entity.Video) *video.Video {
 	return &video.Video{
 		Id:           v.ID,
