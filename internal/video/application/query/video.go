@@ -79,7 +79,7 @@ func (s *VideoQueryService) GetVideoCover(ctx context.Context, videoID int64) (*
 func (s *VideoQueryService) GetUploadToken(userID int64) (*GetUploadTokenResult, error) {
 	// 生成 key：{user_id}/{year}/{month}/{uuid}
 	now := time.Now()
-	key := fmt.Sprintf("%d/%d/%02d/%s", userID, now.Year(), now.Month(), uuid.New().String())
+	key := fmt.Sprintf("%d/%d/%02d/%02d/%s", userID, now.Year(), now.Month(), now.Day(), uuid.New().String())
 
 	expire := 3600 * time.Second // 默认 1 小时
 
