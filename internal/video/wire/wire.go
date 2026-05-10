@@ -38,16 +38,20 @@ func NewProvider() (*Provider, error) {
 
 	videoRepo := infraMysql.NewVideoRepository(mysqlClient)
 
-	// 初始化 OSS
-	ossCfg := &oss.OSSConfig{
-		AccessKey: cfg.OSS.AccessKey,
-		SecretKey: cfg.OSS.SecretKey,
-		Bucket:    cfg.OSS.Bucket,
-		Domain:    cfg.OSS.Domain,
-	}
-	ossClient, err := oss.NewOSS(oss.OSSType(cfg.OSS.Type), ossCfg)
-	if err != nil {
-		return nil, err
+	// 初始化 OSS（可选，未配置时跳过）
+	var ossClient oss.OSS
+	if cfg.OSS.Type != "" {
+		ossCfg := &oss.OSSConfig{
+			AccessKey: cfg.OSS.AccessKey,
+			SecretKey: cfg.OSS.SecretKey,
+			Bucket:    cfg.OSS.Bucket,
+			Domain:    cfg.OSS.Domain,
+		}
+		var err error
+		ossClient, err = oss.NewOSS(oss.OSSType(cfg.OSS.Type), ossCfg)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	hotAlgo := service.NewWilsonHotAlgorithm(videoRepo)
