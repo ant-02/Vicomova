@@ -10,7 +10,7 @@ import (
 	userRepo "vicomova/internal/user/domain/repository"
 	"vicomova/internal/user/domain/service"
 	"vicomova/internal/user/domain/valueobject"
-	infraEmail "vicomova/internal/user/infrastructure/external/email"
+	infraEmail "vicomova/pkg/infrastructure/email"
 	"vicomova/pkg/constants"
 	"vicomova/pkg/utils"
 )

@@ -4,7 +4,7 @@ import (
 	"vicomova/internal/user/application/command"
 	"vicomova/internal/user/application/query"
 	"vicomova/internal/user/domain/service"
-	"vicomova/internal/user/infrastructure/external/email"
+	email "vicomova/pkg/infrastructure/email"
 	infraMysql "vicomova/internal/user/infrastructure/persistence/mysql"
 	infraRedis "vicomova/internal/user/infrastructure/persistence/redis"
 	usergrpc "vicomova/internal/user/interfaces/grpc"
