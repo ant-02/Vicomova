@@ -110,8 +110,7 @@ message IncrementViewRequest {
 message IncrementViewResponse {}
 
 message GetUploadTokenRequest {
-    string key = 1;        // 文件名（可选，不传则服务端生成）
-    int64  expire_seconds = 2; // token 过期时间（秒），默认 3600
+    int64 user_id = 1; // 从 JWT 解析的用户ID，由 HTTP handler 传入
 }
 
 message GetUploadTokenResponse {

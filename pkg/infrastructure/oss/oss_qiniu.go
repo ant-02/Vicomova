@@ -29,26 +29,15 @@ func NewOSSQiniu(cfg *OSSConfig) *OSSQiniu {
 }
 
 // GetUploadToken 获取上传凭证，前端使用此 token 直传到七牛云
-func (s *OSSQiniu) GetUploadToken(ctx context.Context, key string, expire time.Duration) (string, error) {
+// 同时返回 domain，供前端拼接完整 URL
+func (s *OSSQiniu) GetUploadToken(ctx context.Context, key string, expire time.Duration) (string, string, error) {
 	putPolicy, err := uptoken.NewPutPolicyWithKey(s.bucket, key, time.Now().Add(expire))
 	if err != nil {
-		return "", fmt.Errorf("failed to create put policy: %w", err)
+		return "", "", fmt.Errorf("failed to create put policy: %w", err)
 	}
 	token, err := uptoken.NewSigner(putPolicy, s.credentials).GetUpToken(ctx)
 	if err != nil {
-		return "", fmt.Errorf("failed to get upload token: %w", err)
+		return "", "", fmt.Errorf("failed to get upload token: %w", err)
 	}
-	return token, nil
-}
-
-func (s *OSSQiniu) GetURL(ctx context.Context, key string) (string, error) {
-	return s.getURL(key), nil
-}
-
-func (s *OSSQiniu) getURL(key string) string {
-	return fmt.Sprintf("http://%s/%s", s.domain, key)
-}
-
-func (s *OSSQiniu) Delete(ctx context.Context, key string) error {
-	return fmt.Errorf("delete not yet implemented")
+	return token, s.domain, nil
 }

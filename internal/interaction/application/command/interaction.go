@@ -4,44 +4,7 @@ import (
 	"context"
 
 	"vicomova/internal/interaction/domain/entity"
-	"vicomova/internal/interaction/domain/repository"
 )
-
-type LikeCommand struct {
-	UserID     int64
-	TargetType string
-	TargetID   int64
-}
-
-type CommentCommand struct {
-	UserID   int64
-	VideoID  int64
-	ParentID int64
-	Content  string
-}
-
-type FavoriteCommand struct {
-	UserID  int64
-	VideoID int64
-}
-
-type InteractionCommandService struct {
-	likeRepo     repository.LikeRepository
-	commentRepo  repository.CommentRepository
-	favoriteRepo repository.FavoriteRepository
-}
-
-func NewInteractionCommandService(
-	likeRepo repository.LikeRepository,
-	commentRepo repository.CommentRepository,
-	favoriteRepo repository.FavoriteRepository,
-) *InteractionCommandService {
-	return &InteractionCommandService{
-		likeRepo:     likeRepo,
-		commentRepo:  commentRepo,
-		favoriteRepo: favoriteRepo,
-	}
-}
 
 func (s *InteractionCommandService) LikeVideo(ctx context.Context, cmd *LikeCommand) error {
 	existing, err := s.likeRepo.Get(ctx, cmd.UserID, entity.TargetTypeVideo, cmd.TargetID)
@@ -102,10 +65,6 @@ func (s *InteractionCommandService) AddFavorite(ctx context.Context, cmd *Favori
 
 func (s *InteractionCommandService) RemoveFavorite(ctx context.Context, cmd *FavoriteCommand) error {
 	return s.favoriteRepo.Delete(ctx, cmd.UserID, cmd.VideoID)
-}
-
-type CommentResult struct {
-	CommentID int64
 }
 
 func (s *InteractionCommandService) Comment(ctx context.Context, cmd *CommentCommand) (*CommentResult, error) {

@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	interactionRpc "vicomova/internal/interaction/interfaces/grpc"
+	"vicomova/pkg/constants"
 	hertz "vicomova/pkg/infrastructure/hertz"
 
 	"github.com/cloudwego/hertz/pkg/app"
@@ -32,7 +33,7 @@ func NewInteractionHandler(interactionClient *interactionRpc.InteractionClient) 
 // @Failure 500 {object} ErrorResponse
 // @Router /video/like [post]
 func (h *InteractionHandler) LikeVideo(ctx context.Context, c *app.RequestContext) {
-	userID := c.GetInt64("user_id")
+	userID := c.GetInt64(constants.ContextKeyUserID)
 	if userID == 0 {
 		c.JSON(401, hertz.Fail(401, "Unauthorized"))
 		return
@@ -68,7 +69,7 @@ func (h *InteractionHandler) LikeVideo(ctx context.Context, c *app.RequestContex
 // @Failure 500 {object} ErrorResponse
 // @Router /video/like [delete]
 func (h *InteractionHandler) UnlikeVideo(ctx context.Context, c *app.RequestContext) {
-	userID := c.GetInt64("user_id")
+	userID := c.GetInt64(constants.ContextKeyUserID)
 	if userID == 0 {
 		c.JSON(401, hertz.Fail(401, "Unauthorized"))
 		return
@@ -104,7 +105,7 @@ func (h *InteractionHandler) UnlikeVideo(ctx context.Context, c *app.RequestCont
 // @Failure 500 {object} ErrorResponse
 // @Router /video/like/list [get]
 func (h *InteractionHandler) ListLikes(ctx context.Context, c *app.RequestContext) {
-	userID := c.GetInt64("user_id")
+	userID := c.GetInt64(constants.ContextKeyUserID)
 	if userID == 0 {
 		c.JSON(401, hertz.Fail(401, "Unauthorized"))
 		return
@@ -151,7 +152,7 @@ func (h *InteractionHandler) ListLikes(ctx context.Context, c *app.RequestContex
 // @Failure 500 {object} ErrorResponse
 // @Router /video/favorite [post]
 func (h *InteractionHandler) AddFavorite(ctx context.Context, c *app.RequestContext) {
-	userID := c.GetInt64("user_id")
+	userID := c.GetInt64(constants.ContextKeyUserID)
 	if userID == 0 {
 		c.JSON(401, hertz.Fail(401, "Unauthorized"))
 		return
@@ -187,7 +188,7 @@ func (h *InteractionHandler) AddFavorite(ctx context.Context, c *app.RequestCont
 // @Failure 500 {object} ErrorResponse
 // @Router /video/favorite [delete]
 func (h *InteractionHandler) RemoveFavorite(ctx context.Context, c *app.RequestContext) {
-	userID := c.GetInt64("user_id")
+	userID := c.GetInt64(constants.ContextKeyUserID)
 	if userID == 0 {
 		c.JSON(401, hertz.Fail(401, "Unauthorized"))
 		return
@@ -222,7 +223,7 @@ func (h *InteractionHandler) RemoveFavorite(ctx context.Context, c *app.RequestC
 // @Failure 500 {object} ErrorResponse
 // @Router /video/favorite/list [get]
 func (h *InteractionHandler) ListFavorites(ctx context.Context, c *app.RequestContext) {
-	userID := c.GetInt64("user_id")
+	userID := c.GetInt64(constants.ContextKeyUserID)
 	if userID == 0 {
 		c.JSON(401, hertz.Fail(401, "Unauthorized"))
 		return
@@ -267,7 +268,7 @@ func (h *InteractionHandler) ListFavorites(ctx context.Context, c *app.RequestCo
 // @Failure 500 {object} ErrorResponse
 // @Router /video/comment [post]
 func (h *InteractionHandler) Comment(ctx context.Context, c *app.RequestContext) {
-	userID := c.GetInt64("user_id")
+	userID := c.GetInt64(constants.ContextKeyUserID)
 	if userID == 0 {
 		c.JSON(401, hertz.Fail(401, "Unauthorized"))
 		return
@@ -306,7 +307,7 @@ func (h *InteractionHandler) Comment(ctx context.Context, c *app.RequestContext)
 // @Failure 500 {object} ErrorResponse
 // @Router /video/comment [delete]
 func (h *InteractionHandler) DeleteComment(ctx context.Context, c *app.RequestContext) {
-	userID := c.GetInt64("user_id")
+	userID := c.GetInt64(constants.ContextKeyUserID)
 	if userID == 0 {
 		c.JSON(401, hertz.Fail(401, "Unauthorized"))
 		return
@@ -391,7 +392,7 @@ func (h *InteractionHandler) ListComments(ctx context.Context, c *app.RequestCon
 // @Failure 500 {object} ErrorResponse
 // @Router /comment/like [post]
 func (h *InteractionHandler) LikeComment(ctx context.Context, c *app.RequestContext) {
-	userID := c.GetInt64("user_id")
+	userID := c.GetInt64(constants.ContextKeyUserID)
 	if userID == 0 {
 		c.JSON(401, hertz.Fail(401, "Unauthorized"))
 		return

@@ -85,8 +85,8 @@ func (h *VideoHandler) GetVideoStream(ctx context.Context, req *video.GetVideoSt
 	}
 
 	return &video.GetVideoStreamResponse{
-		VideoUrl: v.VideoURL,
-		Title:    v.Title,
+		VideoUrl: v.Video.VideoURL,
+		Title:    v.Video.Title,
 	}, nil
 }
 
@@ -122,7 +122,7 @@ func (h *VideoHandler) ListHotVideos(ctx context.Context, req *video.ListHotVide
 }
 
 func (h *VideoHandler) GetVideoCover(ctx context.Context, req *video.GetVideoCoverRequest) (*video.GetVideoCoverResponse, error) {
-	result, err := h.qrySvc.GetVideo(ctx, req.VideoId)
+	result, err := h.qrySvc.GetVideoByID(ctx, req.VideoId)
 	if err != nil {
 		return nil, err
 	}
@@ -159,7 +159,7 @@ func (h *VideoHandler) IncrementView(ctx context.Context, req *video.IncrementVi
 }
 
 func (h *VideoHandler) GetUploadToken(ctx context.Context, req *video.GetUploadTokenRequest) (*video.GetUploadTokenResponse, error) {
-	result, err := h.qrySvc.GetUploadToken(ctx, req.Key, req.ExpireSeconds)
+	result, err := h.qrySvc.GetUploadToken(req.UserId)
 	if err != nil {
 		return nil, err
 	}

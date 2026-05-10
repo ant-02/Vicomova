@@ -8,7 +8,21 @@ type GetVideoResult struct {
 	Video *entity.Video
 }
 
-type ListVideosResult struct {
+type ListVideoResult struct {
 	Videos []*entity.Video
-	Total  int64
+	Total   int64
+}
+
+type GetVideoStreamResult struct {
+	Video *entity.Video
+}
+
+type GetVideoCoverResult struct {
+	CoverURL string
+}
+
+type GetUploadTokenResult struct {
+	Token  string
+	Key    string
+	Domain string
 }

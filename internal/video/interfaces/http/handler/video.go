@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	videoRpc "vicomova/internal/video/interfaces/grpc"
+	"vicomova/pkg/constants"
 	hertz "vicomova/pkg/infrastructure/hertz"
 
 	"github.com/cloudwego/hertz/pkg/app"
@@ -161,7 +162,7 @@ func (h *VideoHandler) ListHotVideos(ctx context.Context, c *app.RequestContext)
 // @Failure 500 {object} ErrorResponse
 // @Router /video/save [post]
 func (h *VideoHandler) SaveVideo(ctx context.Context, c *app.RequestContext) {
-	userID := c.GetInt64("user_id")
+	userID := c.GetInt64(constants.ContextKeyUserID)
 	if userID == 0 {
 		c.JSON(401, hertz.Fail(401, "Unauthorized"))
 		return
@@ -202,7 +203,7 @@ func (h *VideoHandler) SaveVideo(ctx context.Context, c *app.RequestContext) {
 // @Failure 500 {object} ErrorResponse
 // @Router /video/submit [post]
 func (h *VideoHandler) SubmitVideo(ctx context.Context, c *app.RequestContext) {
-	userID := c.GetInt64("user_id")
+	userID := c.GetInt64(constants.ContextKeyUserID)
 	if userID == 0 {
 		c.JSON(401, hertz.Fail(401, "Unauthorized"))
 		return
@@ -243,7 +244,7 @@ func (h *VideoHandler) SubmitVideo(ctx context.Context, c *app.RequestContext) {
 // @Failure 500 {object} ErrorResponse
 // @Router /video/publish [post]
 func (h *VideoHandler) PublishVideo(ctx context.Context, c *app.RequestContext) {
-	userID := c.GetInt64("user_id")
+	userID := c.GetInt64(constants.ContextKeyUserID)
 	if userID == 0 {
 		c.JSON(401, hertz.Fail(401, "Unauthorized"))
 		return
@@ -310,7 +311,7 @@ func (h *VideoHandler) GetVideoCover(ctx context.Context, c *app.RequestContext)
 // @Failure 500 {object} ErrorResponse
 // @Router /video/list/published [get]
 func (h *VideoHandler) GetPublishedList(ctx context.Context, c *app.RequestContext) {
-	userID := c.GetInt64("user_id")
+	userID := c.GetInt64(constants.ContextKeyUserID)
 	if userID == 0 {
 		c.JSON(401, hertz.Fail(401, "Unauthorized"))
 		return
@@ -363,20 +364,13 @@ func (h *VideoHandler) GetPublishedList(ctx context.Context, c *app.RequestConte
 // @Failure 500 {object} ErrorResponse
 // @Router /video/upload/token [post]
 func (h *VideoHandler) GetUploadToken(ctx context.Context, c *app.RequestContext) {
-	userID := c.GetInt64("user_id")
+	userID := c.GetInt64(constants.ContextKeyUserID)
 	if userID == 0 {
 		c.JSON(401, hertz.Fail(401, "Unauthorized"))
 		return
 	}
 
-	var req UploadTokenRequest
-	if err := c.Bind(&req); err != nil {
-		hlog.Errorf("GetUploadToken: invalid request: %v", err)
-		c.JSON(400, hertz.Fail(400, "Invalid request body"))
-		return
-	}
-
-	resp, err := h.videoClient.GetUploadToken(ctx, req.Key, req.ExpireSeconds)
+	resp, err := h.videoClient.GetUploadToken(userID)
 	if err != nil {
 		hlog.Errorf("GetUploadToken: userID=%d failed: %v", userID, err)
 		c.JSON(500, hertz.Fail(500, "Failed to get upload token"))

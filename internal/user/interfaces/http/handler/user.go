@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	rpc "vicomova/internal/user/interfaces/grpc"
+	"vicomova/pkg/constants"
 	hertz "vicomova/pkg/infrastructure/hertz"
 
 	"github.com/cloudwego/hertz/pkg/app"
@@ -65,7 +66,7 @@ func (h *UserHandler) Login(ctx context.Context, c *app.RequestContext) {
 // @Failure 404 {object} ErrorResponse
 // @Router /user [get]
 func (h *UserHandler) GetUser(ctx context.Context, c *app.RequestContext) {
-	userID := c.GetInt64("user_id")
+	userID := c.GetInt64(constants.ContextKeyUserID)
 	if userID == 0 {
 		hlog.Error("GetUser: missing user_id from token")
 		c.JSON(401, hertz.Fail(401, "Unauthorized"))

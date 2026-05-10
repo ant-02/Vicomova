@@ -58,10 +58,6 @@ type CoverResponse struct {
 	CoverURL string `json:"cover_url"`
 }
 
-type UploadTokenRequest struct {
-	Key          string `json:"key" binding:"required"` // 文件名
-	ExpireSeconds int64  `json:"expire_seconds"`        // token 过期时间（秒），默认 3600
-}
 
 type UploadTokenResponse struct {
 	Token  string `json:"token"`

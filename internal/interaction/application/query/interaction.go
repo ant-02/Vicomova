@@ -4,31 +4,7 @@ import (
 	"context"
 
 	"vicomova/internal/interaction/domain/entity"
-	"vicomova/internal/interaction/domain/repository"
 )
-
-type ListResult struct {
-	Items interface{}
-	Total int64
-}
-
-type InteractionQueryService struct {
-	likeRepo     repository.LikeRepository
-	commentRepo  repository.CommentRepository
-	favoriteRepo repository.FavoriteRepository
-}
-
-func NewInteractionQueryService(
-	likeRepo repository.LikeRepository,
-	commentRepo repository.CommentRepository,
-	favoriteRepo repository.FavoriteRepository,
-) *InteractionQueryService {
-	return &InteractionQueryService{
-		likeRepo:     likeRepo,
-		commentRepo:  commentRepo,
-		favoriteRepo: favoriteRepo,
-	}
-}
 
 func (s *InteractionQueryService) ListLikes(ctx context.Context, userID int64, targetType string, page, size int) (*ListResult, error) {
 	likes, total, err := s.likeRepo.ListByUser(ctx, userID, targetType, page, size)
