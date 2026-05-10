@@ -40,15 +40,15 @@ func NewProvider() (*Provider, error) {
 
 	// 初始化 OSS（可选，未配置时跳过）
 	var ossClient oss.OSS
-	if cfg.OSS.Type != "" {
+	if cfg.OSS.Qiniu.AccessKey != "" {
 		ossCfg := &oss.OSSConfig{
-			AccessKey: cfg.OSS.AccessKey,
-			SecretKey: cfg.OSS.SecretKey,
-			Bucket:    cfg.OSS.Bucket,
-			Domain:    cfg.OSS.Domain,
+			AccessKey: cfg.OSS.Qiniu.AccessKey,
+			SecretKey: cfg.OSS.Qiniu.SecretKey,
+			Bucket:    cfg.OSS.Qiniu.Bucket,
+			Domain:    cfg.OSS.Qiniu.Domain,
 		}
 		var err error
-		ossClient, err = oss.NewOSS(oss.OSSType(cfg.OSS.Type), ossCfg)
+		ossClient, err = oss.NewOSS(oss.OSSTypeQiniu, ossCfg)
 		if err != nil {
 			return nil, err
 		}

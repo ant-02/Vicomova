@@ -5,16 +5,13 @@ import (
 	"fmt"
 	"time"
 
+	"vicomova/pkg/config"
+
 	"github.com/qiniu/go-sdk/v7/storagev2/credentials"
 	"github.com/qiniu/go-sdk/v7/storagev2/uptoken"
 )
 
-type OSSConfig struct {
-	AccessKey string `mapstructure:"access_key"`
-	SecretKey string `mapstructure:"secret_key"`
-	Bucket    string `mapstructure:"bucket"`
-	Domain    string `mapstructure:"domain"`
-}
+type OSSConfig = config.QiniuOSS
 
 type OSSQiniu struct {
 	credentials *credentials.Credentials

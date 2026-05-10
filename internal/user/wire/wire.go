@@ -6,11 +6,11 @@ import (
 	"vicomova/internal/user/domain/repository"
 	"vicomova/internal/user/domain/service"
 	internalEmail "vicomova/internal/user/infrastructure/external/email"
-	emailPkg "vicomova/pkg/infrastructure/email"
 	infraMysql "vicomova/internal/user/infrastructure/persistence/mysql"
 	infraRedis "vicomova/internal/user/infrastructure/persistence/redis"
 	usergrpc "vicomova/internal/user/interfaces/grpc"
 	"vicomova/pkg/config"
+	emailPkg "vicomova/pkg/infrastructure/email"
 	"vicomova/pkg/infrastructure/mysql"
 	"vicomova/pkg/infrastructure/redis"
 	"vicomova/pkg/log"
@@ -46,9 +46,9 @@ func NewProvider() (*Provider, error) {
 	emailCodeRepo := infraRedis.NewEmailCodeRepository(redisClient)
 
 	var pkgEmailSvc emailPkg.EmailService
-	if cfg.Email.AccountName != "" && cfg.Email.Region != "" {
+	if cfg.Email.Aliyun.AccessKey != "" {
 		var err error
-		pkgEmailSvc, err = emailPkg.NewEmailService(emailPkg.EmailTypeAliyun, &cfg.Email)
+		pkgEmailSvc, err = emailPkg.NewEmailService(emailPkg.EmailTypeAliyun, &cfg.Email.Aliyun)
 		if err != nil {
 			return nil, err
 		}

@@ -22,19 +22,20 @@ jwt:
   secret: "xxx"
 
 email:
-  access_key: "xxx"
-  access_secret: "xxx"
-  account_name: "mail.xhhx.xyz"
-  region: "cn-hangzhou"
-  api_url: "https://dm.aliyuncs.com/"
+  aliyun:
+    access-key: "xxx"
+    access-secret: "xxx"
+    account-name: "mail.xhhx.xyz"
+    region: "cn-hangzhou"
+    api-url: "https://dm.aliyuncs.com/"
 
 # OSS 配置（可选，用于前端直传）
 oss:
-  type: "qiniu"           # qiniu / aliyun / aws
-  access_key: "xxx"
-  secret_key: "xxx"
-  bucket: "your-bucket"
-  domain: "your-domain.com"
+  qiniu:
+    access-key: "xxx"
+    secret-key: "xxx"
+    bucket: "your-bucket"
+    domain: "your-domain.com"
 
 services:
   gateway:

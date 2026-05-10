@@ -29,20 +29,27 @@ type JWT struct {
 	Secret string `yaml:"secret"`
 }
 
-type Email struct {
-	AccessKey    string `yaml:"access_key"`
-	AccessSecret string `yaml:"access_secret"`
-	AccountName  string `yaml:"account_name"`
+type AliyunEmail struct {
+	AccessKey    string `yaml:"access-key"`
+	AccessSecret string `yaml:"access-secret"`
+	AccountName  string `yaml:"account-name"`
 	Region       string `yaml:"region"`
-	APIURL       string `yaml:"api_url"`
+	APIURL       string `yaml:"api-url"`
+}
+
+type Email struct {
+	Aliyun AliyunEmail `yaml:"aliyun"`
+}
+
+type QiniuOSS struct {
+	AccessKey string `yaml:"access-key"`
+	SecretKey string `yaml:"secret-key"`
+	Bucket    string `yaml:"bucket"`
+	Domain    string `yaml:"domain"`
 }
 
 type OSS struct {
-	Type       string `yaml:"type"` // qiniu, aliyun, aws
-	AccessKey  string `yaml:"access_key"`
-	SecretKey  string `yaml:"secret_key"`
-	Bucket     string `yaml:"bucket"`
-	Domain     string `yaml:"domain"`
+	Qiniu QiniuOSS `yaml:"qiniu"`
 }
 
 type Service struct {

@@ -18,7 +18,7 @@ type AliyunEmailService struct {
 	accountName string
 }
 
-func NewAliyunEmailService(cfg *config.Email) (*AliyunEmailService, error) {
+func NewAliyunEmailService(cfg *config.AliyunEmail) (*AliyunEmailService, error) {
 	credConfig := &credential.Config{
 		AccessKeyId:     tea.String(cfg.AccessKey),
 		AccessKeySecret: tea.String(cfg.AccessSecret),

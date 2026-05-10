@@ -15,7 +15,7 @@ const (
 func NewEmailService(emailType EmailType, cfg interface{}) (EmailService, error) {
 	switch emailType {
 	case EmailTypeAliyun:
-		aliyunCfg, ok := cfg.(*config.Email)
+		aliyunCfg, ok := cfg.(*config.AliyunEmail)
 		if !ok {
 			return nil, fmt.Errorf("invalid aliyun email config")
 		}
