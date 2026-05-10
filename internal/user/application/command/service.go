@@ -10,7 +10,7 @@ type UserCommandService struct {
 	userRepo         userRepo.UserRepository
 	refreshTokenRepo userRepo.RefreshTokenRepository
 	emailCodeRepo    userRepo.EmailCodeRepository
-	emailService     service.EmailService
+	emailService     userRepo.EmailService
 	tokenService     *service.TokenService
 	passwordHasher   utils.Hasher
 }
@@ -19,7 +19,7 @@ func NewUserCommandService(
 	userRepo userRepo.UserRepository,
 	refreshTokenRepo userRepo.RefreshTokenRepository,
 	emailCodeRepo userRepo.EmailCodeRepository,
-	emailService service.EmailService,
+	emailService userRepo.EmailService,
 	tokenService *service.TokenService,
 	passwordHasher utils.Hasher,
 ) *UserCommandService {

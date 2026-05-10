@@ -18,7 +18,7 @@ import (
 func newTestService(
 	userRepo userRepo.UserRepository,
 	emailCodeRepo userRepo.EmailCodeRepository,
-	emailService service.EmailService,
+	emailService userRepo.EmailService,
 ) *UserCommandService {
 	tokenSvc := service.NewTokenService("test-secret")
 	hasher := &utils.SHA256Hasher{}

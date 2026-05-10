@@ -29,3 +29,7 @@ type EmailCodeRepository interface {
 	Verify(ctx context.Context, email, code string) (bool, error)
 	Delete(ctx context.Context, email string) error
 }
+
+type EmailService interface {
+	SendVerificationCode(ctx context.Context, toEmail, code string) error
+}

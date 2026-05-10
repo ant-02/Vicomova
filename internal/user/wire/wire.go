@@ -3,6 +3,7 @@ package wire
 import (
 	"vicomova/internal/user/application/command"
 	"vicomova/internal/user/application/query"
+	"vicomova/internal/user/domain/repository"
 	"vicomova/internal/user/domain/service"
 	internalEmail "vicomova/internal/user/infrastructure/external/email"
 	emailPkg "vicomova/pkg/infrastructure/email"
@@ -40,7 +41,7 @@ func NewProvider() (*Provider, error) {
 		return nil, err
 	}
 
-	userRepo := infraMysql.NewUserRepository(mysqlClient)
+	userRepoImpl := infraMysql.NewUserRepository(mysqlClient)
 	refreshTokenRepo := infraRedis.NewRefreshTokenRepository(redisClient)
 	emailCodeRepo := infraRedis.NewEmailCodeRepository(redisClient)
 
@@ -53,7 +54,7 @@ func NewProvider() (*Provider, error) {
 		}
 	}
 
-	var emailService service.EmailService
+	var emailService repository.EmailService
 	if pkgEmailSvc != nil {
 		emailService = internalEmail.NewVerificationEmailService(pkgEmailSvc)
 	}
@@ -62,8 +63,8 @@ func NewProvider() (*Provider, error) {
 
 	hasher := &utils.SHA256Hasher{}
 
-	cmdSvc := command.NewUserCommandService(userRepo, refreshTokenRepo, emailCodeRepo, emailService, tokenSvc, hasher)
-	querySvc := query.NewUserQueryService(userRepo)
+	cmdSvc := command.NewUserCommandService(userRepoImpl, refreshTokenRepo, emailCodeRepo, emailService, tokenSvc, hasher)
+	querySvc := query.NewUserQueryService(userRepoImpl)
 
 	userHandler := usergrpc.NewUserHandler(cmdSvc, querySvc)
 
