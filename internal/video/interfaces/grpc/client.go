@@ -24,12 +24,33 @@ func NewVideoClient(serviceName, addr string) (*VideoClient, error) {
 	return &VideoClient{cli: cli}, nil
 }
 
-func (c *VideoClient) PublishVideo(ctx context.Context, userID int64, title, description string, categoryID int32, coverURL, videoURL string, duration int32) (*video.PublishVideoResponse, error) {
-	return c.cli.PublishVideo(ctx, &video.PublishVideoRequest{
+func (c *VideoClient) SaveVideo(ctx context.Context, videoID int64, userID int64, title, description, coverURL, videoURL string, duration int32) (*video.SaveVideoResponse, error) {
+	return c.cli.SaveVideo(ctx, &video.SaveVideoRequest{
+		VideoId:     videoID,
 		UserId:      userID,
 		Title:       title,
 		Description: description,
-		CategoryId:  categoryID,
+		CategoryId:  0, // TODO: add category_id param
+		CoverUrl:    coverURL,
+		VideoUrl:    videoURL,
+		Duration:    duration,
+	})
+}
+
+func (c *VideoClient) SubmitVideo(ctx context.Context, videoID int64, userID int64) (*video.SubmitVideoResponse, error) {
+	return c.cli.SubmitVideo(ctx, &video.SubmitVideoRequest{
+		VideoId: videoID,
+		UserId:  userID,
+	})
+}
+
+func (c *VideoClient) PublishVideo(ctx context.Context, userID int64, videoID int64, title, description, coverURL, videoURL string, duration int32) (*video.PublishVideoResponse, error) {
+	return c.cli.PublishVideo(ctx, &video.PublishVideoRequest{
+		VideoId:     videoID,
+		UserId:      userID,
+		Title:       title,
+		Description: description,
+		CategoryId:  0, // TODO: add category_id param
 		CoverUrl:    coverURL,
 		VideoUrl:    videoURL,
 		Duration:    duration,

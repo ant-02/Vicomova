@@ -5,6 +5,7 @@ import (
 
 	"vicomova/internal/video/domain/entity"
 	"vicomova/internal/video/domain/repository"
+	videoVO "vicomova/internal/video/domain/valueobject"
 	sharedMysql "vicomova/pkg/infrastructure/mysql"
 	"vicomova/pkg/log"
 
@@ -63,7 +64,7 @@ func (r *VideoRepository) ListByCategory(ctx context.Context, categoryID int, pa
 	var pos []VideoPO
 	var total int64
 
-	db := r.mysql.WithContext(ctx).Model(&VideoPO{}).Where("category_id = ? AND status = ?", categoryID, entity.VideoStatusPublished)
+	db := r.mysql.WithContext(ctx).Model(&VideoPO{}).Where("category_id = ? AND status = ?", categoryID, videoVO.VideoStatusPublished)
 	if err := db.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
@@ -105,7 +106,7 @@ func (r *VideoRepository) ListPublished(ctx context.Context, page, size int) ([]
 	var pos []VideoPO
 	var total int64
 
-	db := r.mysql.WithContext(ctx).Model(&VideoPO{}).Where("status = ?", entity.VideoStatusPublished)
+	db := r.mysql.WithContext(ctx).Model(&VideoPO{}).Where("status = ?", videoVO.VideoStatusPublished)
 	if err := db.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
@@ -162,7 +163,7 @@ func VideoToPO(v *entity.Video) *VideoPO {
 		LikeCount:    v.LikeCount,
 		CommentCount: v.CommentCount,
 		Duration:     v.Duration,
-		Status:       v.Status,
+		Status:       int8(v.Status),
 	}
 }
 
@@ -179,7 +180,7 @@ func POToVideo(po *VideoPO) *entity.Video {
 		LikeCount:    po.LikeCount,
 		CommentCount: po.CommentCount,
 		Duration:     po.Duration,
-		Status:       po.Status,
+		Status:       videoVO.VideoStatus(po.Status),
 		CreatedAt:    po.CreatedAt,
 		UpdatedAt:    po.UpdatedAt,
 	}

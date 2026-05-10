@@ -5,6 +5,8 @@ package video;
 option go_package = "vicomova/third_party/kitex_gen/video";
 
 service VideoService {
+    rpc SaveVideo(SaveVideoRequest) returns (SaveVideoResponse);
+    rpc SubmitVideo(SubmitVideoRequest) returns (SubmitVideoResponse);
     rpc PublishVideo(PublishVideoRequest) returns (PublishVideoResponse);
     rpc GetVideoStream(GetVideoStreamRequest) returns (GetVideoStreamResponse);
     rpc ListByCategory(ListByCategoryRequest) returns (ListByCategoryResponse);
@@ -14,14 +16,39 @@ service VideoService {
     rpc IncrementView(IncrementViewRequest) returns (IncrementViewResponse);
 }
 
+message SaveVideoRequest {
+    int64 video_id = 1; // 可选，有则更新，无则创建
+    int64 user_id = 2;
+    string title = 3;
+    string description = 4;
+    int32 category_id = 5;
+    string cover_url = 6;
+    string video_url = 7;
+    int32 duration = 8;
+}
+
+message SaveVideoResponse {
+    int64 video_id = 1;
+}
+
+message SubmitVideoRequest {
+    int64 video_id = 1;
+    int64 user_id = 2;
+}
+
+message SubmitVideoResponse {
+    int64 video_id = 1;
+}
+
 message PublishVideoRequest {
-    int64 user_id = 1;
-    string title = 2;
-    string description = 3;
-    int32 category_id = 4;
-    string cover_url = 5;
-    string video_url = 6;
-    int32 duration = 7;
+    int64 video_id = 1; // 可选，有则更新，无则创建
+    int64 user_id = 2;
+    string title = 3;
+    string description = 4;
+    int32 category_id = 5;
+    string cover_url = 6;
+    string video_url = 7;
+    int32 duration = 8;
 }
 
 message PublishVideoResponse {

@@ -147,16 +147,99 @@ func (h *VideoHandler) ListHotVideos(ctx context.Context, c *app.RequestContext)
 	}))
 }
 
-// @Summary 投稿视频
-// @Description 发布新视频（需要认证）
+// @Summary 保存视频草稿
+// @Description 创建或更新视频草稿，状态为编辑中（需要认证）
 // @Tags video
 // @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Param request body PublishVideoRequest true "投稿信息"
+// @Param request body SaveVideoRequest true "保存信息"
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} ErrorResponse
 // @Failure 401 {object} ErrorResponse
+// @Failure 403 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /video/save [post]
+func (h *VideoHandler) SaveVideo(ctx context.Context, c *app.RequestContext) {
+	userID := c.GetInt64("user_id")
+	if userID == 0 {
+		c.JSON(401, hertz.Fail(401, "Unauthorized"))
+		return
+	}
+
+	var req SaveVideoRequest
+	if err := c.Bind(&req); err != nil {
+		hlog.Errorf("SaveVideo: invalid request: %v", err)
+		c.JSON(400, hertz.Fail(400, "Invalid request body"))
+		return
+	}
+
+	resp, err := h.videoClient.SaveVideo(ctx, req.VideoID, userID, req.Title, req.Description, req.CoverUrl, req.VideoUrl, req.Duration)
+	if err != nil {
+		hlog.Errorf("SaveVideo: userID=%d failed: %v", userID, err)
+		c.JSON(500, hertz.Fail(500, "Failed to save video"))
+		return
+	}
+
+	hlog.Infof("SaveVideo: userID=%d success, videoID=%d", userID, resp.VideoId)
+	c.JSON(200, hertz.Success(map[string]interface{}{
+		"video_id": resp.VideoId,
+		"success":  true,
+	}))
+}
+
+// @Summary 提交审核
+// @Description 将草稿提交审核，状态从编辑中变为审核中（需要认证）
+// @Tags video
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body SubmitVideoRequest true "提交信息"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} ErrorResponse
+// @Failure 401 {object} ErrorResponse
+// @Failure 403 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /video/submit [post]
+func (h *VideoHandler) SubmitVideo(ctx context.Context, c *app.RequestContext) {
+	userID := c.GetInt64("user_id")
+	if userID == 0 {
+		c.JSON(401, hertz.Fail(401, "Unauthorized"))
+		return
+	}
+
+	var req SubmitVideoRequest
+	if err := c.Bind(&req); err != nil {
+		hlog.Errorf("SubmitVideo: invalid request: %v", err)
+		c.JSON(400, hertz.Fail(400, "Invalid request body"))
+		return
+	}
+
+	resp, err := h.videoClient.SubmitVideo(ctx, req.VideoID, userID)
+	if err != nil {
+		hlog.Errorf("SubmitVideo: userID=%d videoID=%d failed: %v", userID, req.VideoID, err)
+		c.JSON(500, hertz.Fail(500, "Failed to submit video"))
+		return
+	}
+
+	hlog.Infof("SubmitVideo: userID=%d videoID=%d success", userID, req.VideoID)
+	c.JSON(200, hertz.Success(map[string]interface{}{
+		"video_id": resp.VideoId,
+		"success":  true,
+	}))
+}
+
+// @Summary 发布视频
+// @Description 发布视频（需要认证），支持创建新视频或更新已有视频并发布
+// @Tags video
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body PublishVideoRequest true "发布信息"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} ErrorResponse
+// @Failure 401 {object} ErrorResponse
+// @Failure 403 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse
 // @Router /video/publish [post]
 func (h *VideoHandler) PublishVideo(ctx context.Context, c *app.RequestContext) {
@@ -173,7 +256,7 @@ func (h *VideoHandler) PublishVideo(ctx context.Context, c *app.RequestContext) 
 		return
 	}
 
-	resp, err := h.videoClient.PublishVideo(ctx, userID, req.Title, req.Description, req.CategoryId, req.CoverUrl, req.VideoUrl, req.Duration)
+	resp, err := h.videoClient.PublishVideo(ctx, userID, req.VideoID, req.Title, req.Description, req.CoverUrl, req.VideoUrl, req.Duration)
 	if err != nil {
 		hlog.Errorf("PublishVideo: userID=%d failed: %v", userID, err)
 		c.JSON(500, hertz.Fail(500, "Failed to publish video"))

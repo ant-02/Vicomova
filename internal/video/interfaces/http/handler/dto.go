@@ -5,7 +5,22 @@ type ErrorResponse struct {
 	Msg  string `json:"msg"`
 }
 
+type SaveVideoRequest struct {
+	VideoID     int64  `json:"video_id"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	CategoryId  int32  `json:"category_id"`
+	CoverUrl    string `json:"cover_url"`
+	VideoUrl    string `json:"video_url"`
+	Duration    int32  `json:"duration"`
+}
+
+type SubmitVideoRequest struct {
+	VideoID int64 `json:"video_id"`
+}
+
 type PublishVideoRequest struct {
+	VideoID     int64  `json:"video_id"`
 	Title       string `json:"title"`
 	Description string `json:"description"`
 	CategoryId  int32  `json:"category_id"`

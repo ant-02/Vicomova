@@ -1,6 +1,10 @@
 package entity
 
-import "time"
+import (
+	"time"
+
+	videoVO "vicomova/internal/video/domain/valueobject"
+)
 
 type Video struct {
 	ID           int64     `json:"id"`
@@ -14,17 +18,11 @@ type Video struct {
 	LikeCount    int64     `json:"like_count"`
 	CommentCount int64     `json:"comment_count"`
 	Duration     int       `json:"duration"`
-	Status       int8      `json:"status"`
+	Status       videoVO.VideoStatus `json:"status"`
 	CreatedAt    time.Time `json:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at"`
 }
 
-const (
-	VideoStatusPending   int8 = 0 // 审核中
-	VideoStatusPublished int8 = 1 // 已发布
-	VideoStatusRemoved   int8 = 2 // 下架
-)
-
 func (v *Video) IsPublished() bool {
-	return v.Status == VideoStatusPublished
+	return v.Status == videoVO.VideoStatusPublished
 }

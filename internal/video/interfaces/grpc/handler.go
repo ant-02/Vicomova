@@ -21,8 +21,43 @@ func NewVideoHandler(cmdSvc *command.VideoCommandService, qrySvc *query.VideoQue
 	}
 }
 
+func (h *VideoHandler) SaveVideo(ctx context.Context, req *video.SaveVideoRequest) (*video.SaveVideoResponse, error) {
+	cmd := &command.SaveVideoCommand{
+		VideoID:     req.VideoId,
+		UserID:      req.UserId,
+		Title:       req.Title,
+		Description: req.Description,
+		CategoryID:  int(req.CategoryId),
+		CoverURL:    req.CoverUrl,
+		VideoURL:    req.VideoUrl,
+		Duration:    int(req.Duration),
+	}
+
+	result, err := h.cmdSvc.Save(ctx, cmd)
+	if err != nil {
+		return nil, err
+	}
+
+	return &video.SaveVideoResponse{VideoId: result.VideoID}, nil
+}
+
+func (h *VideoHandler) SubmitVideo(ctx context.Context, req *video.SubmitVideoRequest) (*video.SubmitVideoResponse, error) {
+	cmd := &command.SubmitVideoCommand{
+		VideoID: req.VideoId,
+		UserID:  req.UserId,
+	}
+
+	result, err := h.cmdSvc.Submit(ctx, cmd)
+	if err != nil {
+		return nil, err
+	}
+
+	return &video.SubmitVideoResponse{VideoId: result.VideoID}, nil
+}
+
 func (h *VideoHandler) PublishVideo(ctx context.Context, req *video.PublishVideoRequest) (*video.PublishVideoResponse, error) {
 	cmd := &command.PublishVideoCommand{
+		VideoID:     req.VideoId,
 		UserID:      req.UserId,
 		Title:       req.Title,
 		Description: req.Description,
