@@ -45,7 +45,7 @@ func (r *VideoRepository) GetByID(ctx context.Context, id int64) (*entity.Video,
 
 func (r *VideoRepository) Update(ctx context.Context, v *entity.Video) error {
 	po := VideoToPO(v)
-	if err := r.mysql.WithContext(ctx).Save(po).Error; err != nil {
+	if err := r.mysql.WithContext(ctx).Select("user_id", "title", "description", "cover_url", "video_url", "category_id", "view_count", "like_count", "comment_count", "duration", "status").Updates(po).Error; err != nil {
 		log.Error.Printf("VideoRepository.Update: failed: %v", err)
 		return err
 	}

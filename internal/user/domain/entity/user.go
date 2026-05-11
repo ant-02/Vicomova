@@ -4,6 +4,8 @@ import (
 	"time"
 
 	"vicomova/internal/user/domain/valueobject"
+
+	"gorm.io/gorm"
 )
 
 type User struct {
@@ -11,8 +13,9 @@ type User struct {
 	Username  *valueobject.Username
 	Password  *valueobject.Password
 	Email     *valueobject.Email
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `json:"-"`
 }
 
 func NewUser(username *valueobject.Username, password *valueobject.Password, email *valueobject.Email) *User {

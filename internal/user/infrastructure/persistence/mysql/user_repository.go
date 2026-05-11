@@ -58,7 +58,7 @@ func (r *UserRepository) GetByUsername(ctx context.Context, username *userVO.Use
 
 func (r *UserRepository) Update(ctx context.Context, u *userEntity.User) error {
 	po := UserToPO(u)
-	if err := r.mysql.WithContext(ctx).Save(po).Error; err != nil {
+	if err := r.mysql.WithContext(ctx).Select("username", "password", "email").Save(po).Error; err != nil {
 		log.Error.Printf("UserRepository.Update: failed for userID=%d: %v", u.ID, err)
 		return err
 	}

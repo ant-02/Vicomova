@@ -4,6 +4,8 @@ import (
 	"time"
 
 	videoVO "vicomova/internal/video/domain/valueobject"
+
+	"gorm.io/gorm"
 )
 
 type Video struct {
@@ -21,6 +23,7 @@ type Video struct {
 	Status       videoVO.VideoStatus `json:"status"`
 	CreatedAt    time.Time           `json:"created_at"`
 	UpdatedAt    time.Time           `json:"updated_at"`
+	DeletedAt    gorm.DeletedAt      `json:"-"`
 }
 
 func (v *Video) IsPublished() bool {

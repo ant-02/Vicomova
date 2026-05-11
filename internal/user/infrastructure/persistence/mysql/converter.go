@@ -24,8 +24,6 @@ func UserToPO(u *userEntity.User) *UserPO {
 		Username:  username,
 		Password:  password,
 		Email:     email,
-		CreatedAt: u.CreatedAt,
-		UpdatedAt: u.UpdatedAt,
 	}
 }
 
