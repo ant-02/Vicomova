@@ -11,7 +11,6 @@ service VideoService {
     rpc GetVideoStream(GetVideoStreamRequest) returns (GetVideoStreamResponse);
     rpc ListByCategory(ListByCategoryRequest) returns (ListByCategoryResponse);
     rpc ListHotVideos(ListHotVideosRequest) returns (ListHotVideosResponse);
-    rpc GetVideoCover(GetVideoCoverRequest) returns (GetVideoCoverResponse);
     rpc GetPublishedList(GetPublishedListRequest) returns (GetPublishedListResponse);
     rpc IncrementView(IncrementViewRequest) returns (IncrementViewResponse);
     rpc GetUploadToken(GetUploadTokenRequest) returns (GetUploadTokenResponse);
@@ -61,8 +60,17 @@ message GetVideoStreamRequest {
 }
 
 message GetVideoStreamResponse {
-    string video_url = 1;
-    string title = 2;
+    int64 id = 1;
+    int64 user_id = 2;
+    string title = 3;
+    string description = 4;
+    string cover_url = 5;
+    string video_url = 6;
+    int32 category_id = 7;
+    int64 view_count = 8;
+    int64 like_count = 9;
+    int64 comment_count = 10;
+    int32 duration = 11;
 }
 
 message ListByCategoryRequest {
@@ -84,14 +92,6 @@ message ListHotVideosResponse {
     repeated Video videos = 1;
 }
 
-message GetVideoCoverRequest {
-    int64 video_id = 1;
-}
-
-message GetVideoCoverResponse {
-    string cover_url = 1;
-}
-
 message GetPublishedListRequest {
     int64 user_id = 1;
     int32 page = 2;
@@ -110,13 +110,15 @@ message IncrementViewRequest {
 message IncrementViewResponse {}
 
 message GetUploadTokenRequest {
-    int64 user_id = 1; // 从 JWT 解析的用户ID，由 HTTP handler 传入
+    int64 video_id = 1; // 视频ID，用于生成唯一的文件key
+    int32 upload_type = 2; // 上传类型：1=video, 2=cover
 }
 
 message GetUploadTokenResponse {
     string token = 1;
     string key = 2;          // 实际使用的 key
     string domain = 3;       // OSS domain，前端用于拼接完整 URL
+    string host = 4;         // 七牛云上传地址
 }
 
 message Video {

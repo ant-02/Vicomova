@@ -85,8 +85,17 @@ func (h *VideoHandler) GetVideoStream(ctx context.Context, req *video.GetVideoSt
 	}
 
 	return &video.GetVideoStreamResponse{
-		VideoUrl: v.Video.VideoURL,
-		Title:    v.Video.Title,
+		Id:           v.Video.ID,
+		UserId:       v.Video.UserID,
+		Title:        v.Video.Title,
+		Description:  v.Video.Description,
+		CoverUrl:     v.Video.CoverURL,
+		VideoUrl:     v.Video.VideoURL,
+		CategoryId:   int32(v.Video.CategoryID),
+		ViewCount:    v.Video.ViewCount,
+		LikeCount:    v.Video.LikeCount,
+		CommentCount: v.Video.CommentCount,
+		Duration:     int32(v.Video.Duration),
 	}, nil
 }
 
@@ -121,18 +130,6 @@ func (h *VideoHandler) ListHotVideos(ctx context.Context, req *video.ListHotVide
 	return &video.ListHotVideosResponse{Videos: protoVideos}, nil
 }
 
-func (h *VideoHandler) GetVideoCover(ctx context.Context, req *video.GetVideoCoverRequest) (*video.GetVideoCoverResponse, error) {
-	result, err := h.qrySvc.GetVideoByID(ctx, req.VideoId)
-	if err != nil {
-		return nil, err
-	}
-	if result == nil || result.Video == nil {
-		return nil, nil
-	}
-
-	return &video.GetVideoCoverResponse{CoverUrl: result.Video.CoverURL}, nil
-}
-
 func (h *VideoHandler) GetPublishedList(ctx context.Context, req *video.GetPublishedListRequest) (*video.GetPublishedListResponse, error) {
 	result, err := h.qrySvc.ListByUser(ctx, req.UserId, int(req.Page), int(req.Size))
 	if err != nil {
@@ -159,7 +156,7 @@ func (h *VideoHandler) IncrementView(ctx context.Context, req *video.IncrementVi
 }
 
 func (h *VideoHandler) GetUploadToken(ctx context.Context, req *video.GetUploadTokenRequest) (*video.GetUploadTokenResponse, error) {
-	result, err := h.qrySvc.GetUploadToken(ctx, req.UserId)
+	result, err := h.qrySvc.GetUploadToken(ctx, req.VideoId, req.UploadType)
 	if err != nil {
 		return nil, err
 	}
@@ -168,6 +165,7 @@ func (h *VideoHandler) GetUploadToken(ctx context.Context, req *video.GetUploadT
 		Token:  result.Token,
 		Key:    result.Key,
 		Domain: result.Domain,
+		Host:   result.Host,
 	}, nil
 }
 

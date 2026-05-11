@@ -36,6 +36,7 @@ oss:
     secret-key: "xxx"
     bucket: "your-bucket"
     domain: "your-domain.com"
+    upload-host: "https://up-z2.qiniup.com"
 
 services:
   gateway:

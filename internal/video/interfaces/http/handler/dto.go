@@ -30,8 +30,17 @@ type PublishVideoRequest struct {
 }
 
 type VideoStreamResponse struct {
-	VideoURL string `json:"video_url"`
-	Title    string `json:"title"`
+	ID           int64  `json:"id"`
+	UserID       int64  `json:"user_id"`
+	Title        string `json:"title"`
+	Description  string `json:"description"`
+	CoverURL     string `json:"cover_url"`
+	VideoURL     string `json:"video_url"`
+	CategoryID   int32  `json:"category_id"`
+	ViewCount    int64  `json:"view_count"`
+	LikeCount    int64  `json:"like_count"`
+	CommentCount int64  `json:"comment_count"`
+	Duration     int32  `json:"duration"`
 }
 
 type VideoItem struct {
@@ -54,13 +63,14 @@ type VideoListResponse struct {
 	Total  int64        `json:"total"`
 }
 
-type CoverResponse struct {
-	CoverURL string `json:"cover_url"`
+type UploadTokenRequest struct {
+	VideoID    int64 `json:"video_id" form:"video_id"`
+	UploadType int32 `json:"upload_type" form:"upload_type"` // 1=video, 2=cover
 }
-
 
 type UploadTokenResponse struct {
 	Token  string `json:"token"`
 	Key    string `json:"key"`
 	Domain string `json:"domain"`
+	Host   string `json:"host"` // 七牛云上传地址
 }

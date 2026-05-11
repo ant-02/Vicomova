@@ -77,12 +77,6 @@ func (c *VideoClient) ListHotVideos(ctx context.Context, limit int32) (*video.Li
 	})
 }
 
-func (c *VideoClient) GetVideoCover(ctx context.Context, videoID int64) (*video.GetVideoCoverResponse, error) {
-	return c.cli.GetVideoCover(ctx, &video.GetVideoCoverRequest{
-		VideoId: videoID,
-	})
-}
-
 func (c *VideoClient) GetPublishedList(ctx context.Context, userID int64, page, size int32) (*video.GetPublishedListResponse, error) {
 	return c.cli.GetPublishedList(ctx, &video.GetPublishedListRequest{
 		UserId: userID,
@@ -97,8 +91,9 @@ func (c *VideoClient) IncrementView(ctx context.Context, videoID int64) (*video.
 	})
 }
 
-func (c *VideoClient) GetUploadToken(ctx context.Context, userID int64) (*video.GetUploadTokenResponse, error) {
+func (c *VideoClient) GetUploadToken(ctx context.Context, videoID int64, uploadType int32) (*video.GetUploadTokenResponse, error) {
 	return c.cli.GetUploadToken(ctx, &video.GetUploadTokenRequest{
-		UserId: userID,
+		VideoId:    videoID,
+		UploadType: uploadType,
 	})
 }

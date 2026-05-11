@@ -7,8 +7,6 @@ import (
 
 	"vicomova/internal/video/domain/entity"
 	"vicomova/pkg/constants"
-
-	"github.com/google/uuid"
 )
 
 // GetVideoByID 根据 ID 获取已发布视频
@@ -29,7 +27,7 @@ func (s *VideoQueryService) GetVideoStream(ctx context.Context, videoID int64) (
 	if err != nil {
 		return nil, err
 	}
-	if video == nil || !video.IsPublished() {
+	if video == nil {
 		return nil, nil
 	}
 	return &GetVideoStreamResult{Video: video}, nil
@@ -63,28 +61,27 @@ func (s *VideoQueryService) IncrementView(ctx context.Context, videoID int64) er
 	return s.repo.IncrementView(ctx, videoID)
 }
 
-// GetVideoCover 获取视频封面
-func (s *VideoQueryService) GetVideoCover(ctx context.Context, videoID int64) (*GetVideoCoverResult, error) {
+// GetVideoCover 获取视频封面，供前端直传到 OSS（video_id 生成唯一 key）
+// key 格式：{video_id}/{upload_type}/{year}/{month}/{day}/{timestamp}
+// uploadType: 1=video, 2=cover
+func (s *VideoQueryService) GetUploadToken(ctx context.Context, videoID int64, uploadType int32) (*GetUploadTokenResult, error) {
+	// 检查视频是否存在
 	video, err := s.repo.GetByID(ctx, videoID)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get video: %w", err)
 	}
 	if video == nil {
-		return nil, nil
+		return nil, fmt.Errorf("video not found")
 	}
-	return &GetVideoCoverResult{CoverURL: video.CoverURL}, nil
-}
 
-// GetUploadToken 获取上传凭证，供前端直传到 OSS（key 和过期时间由后端生成）
-// key 格式：{user_id}/{year}/{month}/{day}/{uuid}
-func (s *VideoQueryService) GetUploadToken(ctx context.Context, userID int64) (*GetUploadTokenResult, error) {
-	// 生成 key：{user_id}/{year}/{month}/{uuid}
+	// 生成 key：{video_id}/{upload_type}/{year}/{month}/{day}/{timestamp}
 	now := time.Now()
-	key := fmt.Sprintf("%d/%d/%02d/%02d/%s", userID, now.Year(), now.Month(), now.Day(), uuid.New().String())
+	uploadTypeStr := map[int32]string{constants.UploadTokenTypeVideo: "video", constants.UploadTokenTypeCover: "cover"}[uploadType]
+	key := fmt.Sprintf("%d/%s/%d/%02d/%02d/%d", videoID, uploadTypeStr, now.Year(), now.Month(), now.Day(), now.Unix())
 
 	expire := constants.UploadTokenExpire * time.Second
 
-	token, domain, err := s.oss.GetUploadToken(ctx, key, expire)
+	token, host, domain, err := s.oss.GetUploadToken(ctx, key, expire)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get upload token: %w", err)
 	}
@@ -93,5 +90,6 @@ func (s *VideoQueryService) GetUploadToken(ctx context.Context, userID int64) (*
 		Token:  token,
 		Key:    key,
 		Domain: domain,
+		Host:   host,
 	}, nil
 }

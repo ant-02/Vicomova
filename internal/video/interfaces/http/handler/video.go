@@ -49,8 +49,17 @@ func (h *VideoHandler) GetVideoStream(ctx context.Context, c *app.RequestContext
 	}
 
 	c.JSON(200, hertz.Success(VideoStreamResponse{
-		VideoURL: resp.VideoUrl,
-		Title:    resp.Title,
+		ID:           resp.Id,
+		UserID:       resp.UserId,
+		Title:        resp.Title,
+		Description:  resp.Description,
+		CoverURL:     resp.CoverUrl,
+		VideoURL:     resp.VideoUrl,
+		CategoryID:   resp.CategoryId,
+		ViewCount:    resp.ViewCount,
+		LikeCount:    resp.LikeCount,
+		CommentCount: resp.CommentCount,
+		Duration:     resp.Duration,
 	}))
 }
 
@@ -271,34 +280,6 @@ func (h *VideoHandler) PublishVideo(ctx context.Context, c *app.RequestContext) 
 	}))
 }
 
-// @Summary 获取视频封面
-// @Description 获取视频封面地址
-// @Tags video
-// @Produce json
-// @Param video_id query int64 true "视频ID"
-// @Success 200 {object} CoverResponse
-// @Failure 400 {object} ErrorResponse
-// @Failure 500 {object} ErrorResponse
-// @Router /video/cover [get]
-func (h *VideoHandler) GetVideoCover(ctx context.Context, c *app.RequestContext) {
-	videoID, err := strconv.ParseInt(c.Query("video_id"), 10, 64)
-	if err != nil {
-		c.JSON(400, hertz.Fail(400, "Invalid video_id"))
-		return
-	}
-
-	resp, err := h.videoClient.GetVideoCover(ctx, videoID)
-	if err != nil {
-		hlog.Errorf("GetVideoCover: videoID=%d failed: %v", videoID, err)
-		c.JSON(500, hertz.Fail(500, "Failed to get video cover"))
-		return
-	}
-
-	c.JSON(200, hertz.Success(CoverResponse{
-		CoverURL: resp.CoverUrl,
-	}))
-}
-
 // @Summary 获取发布列表
 // @Description 获取用户发布的视频列表（需要认证）
 // @Tags video
@@ -352,13 +333,15 @@ func (h *VideoHandler) GetPublishedList(ctx context.Context, c *app.RequestConte
 }
 
 // @Summary 获取上传凭证
-// @Description 获取七牛云上传凭证，前端拿到 token 后直传（需要认证）
+// @Description 获取七牛云上传凭证，前端拿到 token 后直传到七牛云（需要认证），upload_type: 1=视频, 2=封面
 // @Tags video
 // @Accept json
 // @Produce json
 // @Security BearerAuth
+// @Param request body handler.UploadTokenRequest true "video_id 和 upload_type"
 // @Success 200 {object} UploadTokenResponse
 // @Failure 401 {object} ErrorResponse
+// @Failure 404 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse
 // @Router /video/upload/token [post]
 func (h *VideoHandler) GetUploadToken(ctx context.Context, c *app.RequestContext) {
@@ -368,9 +351,25 @@ func (h *VideoHandler) GetUploadToken(ctx context.Context, c *app.RequestContext
 		return
 	}
 
-	resp, err := h.videoClient.GetUploadToken(ctx, userID)
+	var req UploadTokenRequest
+	if err := c.Bind(&req); err != nil {
+		hlog.Errorf("GetUploadToken: invalid request: %v", err)
+		c.JSON(400, hertz.Fail(400, "Invalid request body"))
+		return
+	}
+
+	if req.VideoID == 0 {
+		c.JSON(400, hertz.Fail(400, "video_id is required"))
+		return
+	}
+	if req.UploadType != constants.UploadTokenTypeVideo && req.UploadType != constants.UploadTokenTypeCover {
+		c.JSON(400, hertz.Fail(400, "invalid upload_type"))
+		return
+	}
+
+	resp, err := h.videoClient.GetUploadToken(ctx, req.VideoID, req.UploadType)
 	if err != nil {
-		hlog.Errorf("GetUploadToken: userID=%d failed: %v", userID, err)
+		hlog.Errorf("GetUploadToken: userID=%d, videoID=%d, uploadType=%d failed: %v", userID, req.VideoID, req.UploadType, err)
 		c.JSON(500, hertz.Fail(500, "Failed to get upload token"))
 		return
 	}
@@ -379,5 +378,6 @@ func (h *VideoHandler) GetUploadToken(ctx context.Context, c *app.RequestContext
 		Token:  resp.Token,
 		Key:    resp.Key,
 		Domain: resp.Domain,
+		Host:   resp.Host,
 	}))
 }

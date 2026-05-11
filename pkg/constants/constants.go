@@ -72,6 +72,12 @@ const (
 	UploadTokenExpire = 3600
 )
 
+// 上传类型，用于区分视频和封面在 OSS 存储的路径
+const (
+	UploadTokenTypeVideo = 1
+	UploadTokenTypeCover = 2
+)
+
 // 数据库表名
 const (
 	TableVideos    = "videos"

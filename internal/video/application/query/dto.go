@@ -25,4 +25,5 @@ type GetUploadTokenResult struct {
 	Token  string
 	Key    string
 	Domain string
+	Host   string // 七牛云上传地址
 }

@@ -42,10 +42,11 @@ type Email struct {
 }
 
 type QiniuOSS struct {
-	AccessKey string `yaml:"access-key"`
-	SecretKey string `yaml:"secret-key"`
+	AccessKey  string `yaml:"access-key"`
+	SecretKey  string `yaml:"secret-key"`
 	Bucket    string `yaml:"bucket"`
 	Domain    string `yaml:"domain"`
+	UploadHost string `yaml:"upload-host"` // 七牛云上传地址，如 https://up-z2.qiniup.com
 }
 
 type OSS struct {

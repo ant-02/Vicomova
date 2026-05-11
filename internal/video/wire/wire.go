@@ -46,6 +46,7 @@ func NewProvider() (*Provider, error) {
 			SecretKey: cfg.OSS.Qiniu.SecretKey,
 			Bucket:    cfg.OSS.Qiniu.Bucket,
 			Domain:    cfg.OSS.Qiniu.Domain,
+			UploadHost: cfg.OSS.Qiniu.UploadHost,
 		}
 		var err error
 		ossClient, err = oss.NewOSS(oss.OSSTypeQiniu, ossCfg)
