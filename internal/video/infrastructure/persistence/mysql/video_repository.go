@@ -151,7 +151,7 @@ func (r *VideoRepository) UpdateCounts(ctx context.Context, id int64, likeDelta,
 }
 
 func VideoToPO(v *entity.Video) *VideoPO {
-	return &VideoPO{
+	po := &VideoPO{
 		ID:           v.ID,
 		UserID:       v.UserID,
 		Title:        v.Title,
@@ -165,10 +165,15 @@ func VideoToPO(v *entity.Video) *VideoPO {
 		Duration:     v.Duration,
 		Status:       int8(v.Status),
 	}
+	// 已有记录时保护 CreatedAt，让 GORM 自动管理 UpdatedAt
+	if v.ID != 0 {
+		po.CreatedAt = v.CreatedAt
+	}
+	return po
 }
 
 func POToVideo(po *VideoPO) *entity.Video {
-	return &entity.Video{
+	v := &entity.Video{
 		ID:           po.ID,
 		UserID:       po.UserID,
 		Title:        po.Title,
@@ -181,7 +186,10 @@ func POToVideo(po *VideoPO) *entity.Video {
 		CommentCount: po.CommentCount,
 		Duration:     po.Duration,
 		Status:       videoVO.VideoStatus(po.Status),
-		CreatedAt:    po.CreatedAt,
-		UpdatedAt:    po.UpdatedAt,
 	}
+	if !po.CreatedAt.IsZero() {
+		v.CreatedAt = po.CreatedAt
+		v.UpdatedAt = po.UpdatedAt
+	}
+	return v
 }
