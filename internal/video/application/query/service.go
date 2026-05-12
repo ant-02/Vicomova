@@ -1,8 +1,6 @@
 package query
 
 import (
-	"context"
-
 	"vicomova/internal/video/domain/repository"
 	"vicomova/internal/video/domain/service"
 	"vicomova/pkg/infrastructure/oss"
@@ -30,11 +28,4 @@ func NewVideoQueryService(
 		oss:               ossClient,
 		viewCountService:  viewCountService,
 	}
-}
-
-func (s *VideoQueryService) IncrementView(ctx context.Context, videoID int64) error {
-	if s.viewCountService == nil {
-		return nil
-	}
-	return s.viewCountService.Record(ctx, videoID)
 }

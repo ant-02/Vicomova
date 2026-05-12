@@ -45,7 +45,9 @@ func (s *VideoQueryService) GetVideoStream(ctx context.Context, videoID int64) (
 	}
 
 	// 触发播放量统计（只生产一次）
-	s.IncrementView(ctx, videoID)
+	if s.viewCountService != nil {
+		s.viewCountService.Record(ctx, videoID)
+	}
 
 	return &GetVideoStreamResult{Video: video}, nil
 }

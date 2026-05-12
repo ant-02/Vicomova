@@ -84,7 +84,7 @@ func NewProvider() (*Provider, error) {
 	cmdSvc := command.NewVideoCommandService(videoRepo, videoCache, ossClient)
 	querySvc := query.NewVideoQueryService(videoRepo, videoCache, hotAlgo, ossClient, viewCountService)
 
-	videoHandler := grpc.NewVideoHandler(cmdSvc, querySvc)
+	videoHandler := grpc.NewVideoHandler(cmdSvc, querySvc, viewCountService)
 
 	config.RegisterCallback(func(newCfg *config.Config) {
 		if err := mysql.Reload(&newCfg.Database); err != nil {
