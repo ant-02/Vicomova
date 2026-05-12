@@ -7,29 +7,46 @@ import (
 
 	"vicomova/internal/video/domain/entity"
 	"vicomova/pkg/constants"
+	videoErr "vicomova/pkg/errors"
 )
 
-// GetVideoByID 根据 ID 获取已发布视频
-func (s *VideoQueryService) GetVideoByID(ctx context.Context, videoID int64) (*GetVideoResult, error) {
-	video, err := s.repo.GetByID(ctx, videoID)
-	if err != nil {
-		return nil, err
-	}
-	if video == nil || !video.IsPublished() {
-		return nil, nil
-	}
-	return &GetVideoResult{Video: video}, nil
-}
-
-// GetVideoStream 获取视频流信息
+// GetVideoStream 获取视频流信息（同时触发播放量统计）
 func (s *VideoQueryService) GetVideoStream(ctx context.Context, videoID int64) (*GetVideoStreamResult, error) {
-	video, err := s.repo.GetByID(ctx, videoID)
-	if err != nil {
-		return nil, err
+	// 先查缓存，命中则刷新TTL
+	var video *entity.Video
+	if s.cache != nil {
+		cached, err := s.cache.GetAndRefresh(ctx, videoID)
+		if err == nil && cached != nil {
+			if !cached.IsPublished() {
+				return nil, videoErr.ErrVideoNotPublished
+			}
+			video = cached
+		}
 	}
+
+	// 缓存未命中，查数据库
 	if video == nil {
-		return nil, nil
+		var err error
+		video, err = s.repo.GetByID(ctx, videoID)
+		if err != nil {
+			return nil, err
+		}
+		if video == nil {
+			return nil, videoErr.ErrVideoNotFound
+		}
+		if !video.IsPublished() {
+			return nil, videoErr.ErrVideoNotPublished
+		}
+
+		// 写入缓存
+		if s.cache != nil {
+			s.cache.Set(ctx, video)
+		}
 	}
+
+	// 触发播放量统计（只生产一次）
+	s.IncrementView(ctx, videoID)
+
 	return &GetVideoStreamResult{Video: video}, nil
 }
 
@@ -56,12 +73,7 @@ func (s *VideoQueryService) ListHot(ctx context.Context, limit int) ([]*entity.V
 	return s.hotAlgo.GetHotVideos(ctx, limit)
 }
 
-// IncrementView 增加视频浏览量
-func (s *VideoQueryService) IncrementView(ctx context.Context, videoID int64) error {
-	return s.repo.IncrementView(ctx, videoID)
-}
-
-// GetVideoCover 获取视频封面，供前端直传到 OSS（video_id 生成唯一 key）
+// GetUploadToken 获取视频封面，供前端直传到 OSS（video_id 生成唯一 key）
 // key 格式：{video_id}/{upload_type}/{year}/{month}/{day}/{timestamp}
 // uploadType: 1=video, 2=cover
 func (s *VideoQueryService) GetUploadToken(ctx context.Context, videoID int64, uploadType int32) (*GetUploadTokenResult, error) {

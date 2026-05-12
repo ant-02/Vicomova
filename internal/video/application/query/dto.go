@@ -10,7 +10,7 @@ type GetVideoResult struct {
 
 type ListVideoResult struct {
 	Videos []*entity.Video
-	Total   int64
+	Total  int64
 }
 
 type GetVideoStreamResult struct {

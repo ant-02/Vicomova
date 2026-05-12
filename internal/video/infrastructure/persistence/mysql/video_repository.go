@@ -54,7 +54,7 @@ func (r *VideoRepository) Update(ctx context.Context, v *entity.Video) error {
 
 func (r *VideoRepository) Delete(ctx context.Context, id int64) error {
 	if err := r.mysql.WithContext(ctx).Delete(&VideoPO{}, id).Error; err != nil {
-		log.Error.Printf("VideoRepository.Delete: failed: %v", err)
+		log.Error.Printf("VideoRepository.Delete: failed for id=%d: %v", id, err)
 		return err
 	}
 	return nil
@@ -127,6 +127,16 @@ func (r *VideoRepository) IncrementView(ctx context.Context, id int64) error {
 	if err := r.mysql.WithContext(ctx).Model(&VideoPO{}).Where("id = ?", id).
 		Update("view_count", gorm.Expr("view_count + 1")).Error; err != nil {
 		log.Error.Printf("VideoRepository.IncrementView: failed: %v", err)
+		return err
+	}
+	return nil
+}
+
+// IncrementViewBatch 批量增加播放量（用于 Redis 同步）
+func (r *VideoRepository) IncrementViewBatch(ctx context.Context, id int64, delta int64) error {
+	if err := r.mysql.WithContext(ctx).Model(&VideoPO{}).Where("id = ?", id).
+		Update("view_count", gorm.Expr("view_count + ?", delta)).Error; err != nil {
+		log.Error.Printf("VideoRepository.IncrementViewBatch: failed: %v", err)
 		return err
 	}
 	return nil

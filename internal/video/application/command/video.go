@@ -23,19 +23,20 @@ func (s *VideoCommandService) Save(ctx context.Context, cmd *SaveVideoCommand) (
 		if v.UserID != cmd.UserID {
 			return nil, errors.ErrForbidden
 		}
-		// 只允许编辑中状态的视频修改
-		if v.Status != videoVO.VideoStatusEditing {
-			return nil, errors.ErrVideoStatusInvalid
-		}
 		v.Title = cmd.Title
 		v.Description = cmd.Description
 		v.CategoryID = cmd.CategoryID
 		v.CoverURL = cmd.CoverURL
 		v.VideoURL = cmd.VideoURL
 		v.Duration = cmd.Duration
+		v.Status = videoVO.VideoStatusEditing
 		if err := s.repo.Update(ctx, v); err != nil {
 			log.Error.Printf("VideoCommandService.Save: Update failed: %v", err)
 			return nil, errors.ErrInternalServer
+		}
+		// 更新后删除缓存
+		if s.cache != nil {
+			s.cache.Del(ctx, v.ID)
 		}
 		return &SaveVideoResult{VideoID: v.ID}, nil
 	}
@@ -83,46 +84,24 @@ func (s *VideoCommandService) Submit(ctx context.Context, cmd *SubmitVideoComman
 
 // Publish 发布视频（管理员审核通过），状态从 pending 变为 published
 func (s *VideoCommandService) Publish(ctx context.Context, cmd *PublishVideoCommand) (*PublishVideoResult, error) {
-	// 如果传了 VideoID，则更新已有视频并发布
-	if cmd.VideoID != 0 {
-		v, err := s.repo.GetByID(ctx, cmd.VideoID)
-		if err != nil {
-			return nil, errors.ErrInternalServer
-		}
-		if v == nil {
-			return nil, errors.ErrVideoNotFound
-		}
-		if v.Status != videoVO.VideoStatusPending && v.Status != videoVO.VideoStatusEditing {
-			return nil, errors.ErrVideoStatusInvalid
-		}
-		v.Title = cmd.Title
-		v.Description = cmd.Description
-		v.CategoryID = cmd.CategoryID
-		v.CoverURL = cmd.CoverURL
-		v.VideoURL = cmd.VideoURL
-		v.Duration = cmd.Duration
-		v.Status = videoVO.VideoStatusPublished
-		if err := s.repo.Update(ctx, v); err != nil {
-			log.Error.Printf("VideoCommandService.Publish: Update failed: %v", err)
-			return nil, errors.ErrInternalServer
-		}
-		return &PublishVideoResult{VideoID: v.ID}, nil
-	}
-
-	// 无 VideoID，创建新视频并直接发布
-	v := &entity.Video{
-		UserID:      cmd.UserID,
-		Title:       cmd.Title,
-		Description: cmd.Description,
-		CategoryID:  cmd.CategoryID,
-		CoverURL:    cmd.CoverURL,
-		VideoURL:    cmd.VideoURL,
-		Duration:    cmd.Duration,
-		Status:      videoVO.VideoStatusPublished,
-	}
-	if err := s.repo.Create(ctx, v); err != nil {
-		log.Error.Printf("VideoCommandService.Publish: Create failed: %v", err)
+	v, err := s.repo.GetByID(ctx, cmd.VideoID)
+	if err != nil {
 		return nil, errors.ErrInternalServer
+	}
+	if v == nil {
+		return nil, errors.ErrVideoNotFound
+	}
+	if v.Status != videoVO.VideoStatusPending {
+		return nil, errors.ErrVideoStatusInvalid
+	}
+	v.Status = videoVO.VideoStatusPublished
+	if err := s.repo.Update(ctx, v); err != nil {
+		log.Error.Printf("VideoCommandService.Publish: Update failed: %v", err)
+		return nil, errors.ErrInternalServer
+	}
+	// 删除缓存
+	if s.cache != nil {
+		s.cache.Del(ctx, v.ID)
 	}
 	return &PublishVideoResult{VideoID: v.ID}, nil
 }

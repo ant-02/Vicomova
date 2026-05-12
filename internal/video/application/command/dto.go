@@ -19,14 +19,7 @@ type SubmitVideoCommand struct {
 }
 
 type PublishVideoCommand struct {
-	VideoID     int64 // 可选，有则更新，无则创建
-	UserID      int64
-	Title       string
-	Description string
-	CategoryID  int
-	CoverURL    string
-	VideoURL    string
-	Duration    int
+	VideoID int64
 }
 
 // Result DTOs

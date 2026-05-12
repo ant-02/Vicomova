@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"strconv"
+	"strings"
 
 	videoRpc "vicomova/internal/video/interfaces/grpc"
 	"vicomova/pkg/constants"
@@ -11,6 +12,41 @@ import (
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 )
+
+// BizError 简化版，用于解析 gRPC 返回的错误
+type BizError struct {
+	Code int32
+	Msg  string
+}
+
+// parseBizError 从 gRPC 错误中解析 BizError
+// gRPC 错误格式: "biz error: code: 403, msg: Video not published"
+func parseBizError(err error) *BizError {
+	if err == nil {
+		return nil
+	}
+	msg := err.Error()
+	if !strings.Contains(msg, "biz error:") {
+		return nil
+	}
+
+	// 提取 code
+	codeIdx := strings.Index(msg, "code: ")
+	if codeIdx == -1 {
+		return nil
+	}
+	codeStr := msg[codeIdx+6:]
+	code, _ := strconv.ParseInt(codeStr[:strings.Index(codeStr, ",")], 10, 32)
+
+	// 提取 msg
+	msgIdx := strings.Index(msg, "msg: ")
+	if msgIdx == -1 {
+		return nil
+	}
+	msgStr := msg[msgIdx+5:]
+
+	return &BizError{Code: int32(code), Msg: msgStr}
+}
 
 type VideoHandler struct {
 	videoClient *videoRpc.VideoClient
@@ -36,14 +72,14 @@ func (h *VideoHandler) GetVideoStream(ctx context.Context, c *app.RequestContext
 		return
 	}
 
-	// Increment view count
-	go func() {
-		_, _ = h.videoClient.IncrementView(context.Background(), videoID)
-	}()
-
 	resp, err := h.videoClient.GetVideoStream(ctx, videoID)
 	if err != nil {
 		hlog.Errorf("GetVideoStream: videoID=%d failed: %v", videoID, err)
+		// 尝试解析 BizError
+		if bizErr := parseBizError(err); bizErr != nil {
+			c.JSON(int(bizErr.Code), hertz.Fail(bizErr.Code, bizErr.Msg))
+			return
+		}
 		c.JSON(500, hertz.Fail(500, "Failed to get video stream"))
 		return
 	}
@@ -184,7 +220,7 @@ func (h *VideoHandler) SaveVideo(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	resp, err := h.videoClient.SaveVideo(ctx, req.VideoID, userID, req.Title, req.Description, req.CoverUrl, req.VideoUrl, req.Duration)
+	resp, err := h.videoClient.SaveVideo(ctx, req.VideoID, userID, req.Title, req.Description, req.CoverUrl, req.VideoUrl, req.Duration, req.CategoryId)
 	if err != nil {
 		hlog.Errorf("SaveVideo: userID=%d failed: %v", userID, err)
 		c.JSON(500, hertz.Fail(500, "Failed to save video"))
@@ -253,12 +289,6 @@ func (h *VideoHandler) SubmitVideo(ctx context.Context, c *app.RequestContext) {
 // @Failure 500 {object} ErrorResponse
 // @Router /video/publish [post]
 func (h *VideoHandler) PublishVideo(ctx context.Context, c *app.RequestContext) {
-	userID := c.GetInt64(constants.ContextKeyUserID)
-	if userID == 0 {
-		c.JSON(401, hertz.Fail(401, "Unauthorized"))
-		return
-	}
-
 	var req PublishVideoRequest
 	if err := c.Bind(&req); err != nil {
 		hlog.Errorf("PublishVideo: invalid request: %v", err)
@@ -266,14 +296,14 @@ func (h *VideoHandler) PublishVideo(ctx context.Context, c *app.RequestContext) 
 		return
 	}
 
-	resp, err := h.videoClient.PublishVideo(ctx, userID, req.VideoID, req.Title, req.Description, req.CoverUrl, req.VideoUrl, req.Duration)
+	resp, err := h.videoClient.PublishVideo(ctx, req.VideoID)
 	if err != nil {
-		hlog.Errorf("PublishVideo: userID=%d failed: %v", userID, err)
+		hlog.Errorf("PublishVideo: videoID=%d failed: %v", req.VideoID, err)
 		c.JSON(500, hertz.Fail(500, "Failed to publish video"))
 		return
 	}
 
-	hlog.Infof("PublishVideo: userID=%d success, videoID=%d", userID, resp.VideoId)
+	hlog.Infof("PublishVideo: videoID=%d success", req.VideoID)
 	c.JSON(200, hertz.Success(map[string]interface{}{
 		"video_id": resp.VideoId,
 		"success":  true,

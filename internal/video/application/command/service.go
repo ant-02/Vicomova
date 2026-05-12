@@ -6,13 +6,15 @@ import (
 )
 
 type VideoCommandService struct {
-	repo repository.VideoRepository
-	oss  oss.OSS
+	repo  repository.VideoRepository
+	cache repository.VideoCache
+	oss   oss.OSS
 }
 
-func NewVideoCommandService(repo repository.VideoRepository, oss oss.OSS) *VideoCommandService {
+func NewVideoCommandService(repo repository.VideoRepository, cache repository.VideoCache, ossClient oss.OSS) *VideoCommandService {
 	return &VideoCommandService{
-		repo: repo,
-		oss:  oss,
+		repo:  repo,
+		cache: cache,
+		oss:   ossClient,
 	}
 }

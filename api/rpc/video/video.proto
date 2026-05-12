@@ -41,14 +41,7 @@ message SubmitVideoResponse {
 }
 
 message PublishVideoRequest {
-    int64 video_id = 1; // 可选，有则更新，无则创建
-    int64 user_id = 2;
-    string title = 3;
-    string description = 4;
-    int32 category_id = 5;
-    string cover_url = 6;
-    string video_url = 7;
-    int32 duration = 8;
+    int64 video_id = 1;
 }
 
 message PublishVideoResponse {

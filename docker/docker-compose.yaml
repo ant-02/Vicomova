@@ -68,6 +68,22 @@ services:
     depends_on:
       - etcd
 
+  kafka:
+    image: docker.io/apache/kafka:3.8.0
+    container_name: vicomova-kafka
+    restart: unless-stopped
+    env_file:
+      - ./env/kafka.env
+    ports:
+      - "9092:9092"
+    volumes:
+      - ./data/kafka:/var/lib/kafka/data
+      - ./env/kafka-jaas.conf:/etc/kafka/kafka-jaas.conf
+    networks:
+      - vicomova
+    depends_on:
+      - etcd
+
 networks:
   vicomova:
     driver: bridge

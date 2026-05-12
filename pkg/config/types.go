@@ -20,9 +20,23 @@ type Redis struct {
 	DB       int    `yaml:"db"`
 }
 
+type SASL struct {
+	Username string `yaml:"username"`
+	Password string `yaml:"password"`
+}
+
+type KafkaTopic struct {
+	Name          string `yaml:"name"`
+	Group         string `yaml:"group"`
+	Partitions    int    `yaml:"partitions"`
+	Replication   int    `yaml:"replication"`
+	RetentionHours int   `yaml:"retention_hours"`
+}
+
 type Kafka struct {
-	Brokers []string `yaml:"brokers"`
-	Topic   string   `yaml:"topic"`
+	Brokers []string             `yaml:"brokers"`
+	SASL    SASL                 `yaml:"sasl"`
+	Topics  map[string]KafkaTopic `yaml:"topics"`
 }
 
 type JWT struct {
@@ -44,8 +58,8 @@ type Email struct {
 type QiniuOSS struct {
 	AccessKey  string `yaml:"access-key"`
 	SecretKey  string `yaml:"secret-key"`
-	Bucket    string `yaml:"bucket"`
-	Domain    string `yaml:"domain"`
+	Bucket     string `yaml:"bucket"`
+	Domain     string `yaml:"domain"`
 	UploadHost string `yaml:"upload-host"` // 七牛云上传地址，如 https://up-z2.qiniup.com
 }
 
