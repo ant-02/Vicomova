@@ -57,14 +57,7 @@ func (h *VideoHandler) SubmitVideo(ctx context.Context, req *video.SubmitVideoRe
 
 func (h *VideoHandler) PublishVideo(ctx context.Context, req *video.PublishVideoRequest) (*video.PublishVideoResponse, error) {
 	cmd := &command.PublishVideoCommand{
-		VideoID:     req.VideoId,
-		UserID:      req.UserId,
-		Title:       req.Title,
-		Description: req.Description,
-		CategoryID:  int(req.CategoryId),
-		CoverURL:    req.CoverUrl,
-		VideoURL:    req.VideoUrl,
-		Duration:    int(req.Duration),
+		VideoID: req.VideoId,
 	}
 
 	result, err := h.cmdSvc.Publish(ctx, cmd)

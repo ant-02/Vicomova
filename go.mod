@@ -3,7 +3,6 @@ module vicomova
 go 1.25.0
 
 require (
-	github.com/IBM/sarama v1.47.0
 	github.com/alibabacloud-go/darabonba-openapi/v2 v2.1.16
 	github.com/alibabacloud-go/dm-20151123/v2 v2.9.0
 	github.com/alibabacloud-go/tea v1.4.0
@@ -16,6 +15,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/qiniu/go-sdk/v7 v7.26.10
 	github.com/redis/go-redis/v9 v9.18.0
+	github.com/segmentio/kafka-go v0.4.51
 	github.com/swaggo/swag v1.16.6
 	go.etcd.io/etcd/client/v3 v3.6.10
 	gopkg.in/yaml.v3 v3.0.1
@@ -48,8 +48,6 @@ require (
 	github.com/coreos/go-systemd/v22 v22.5.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
-	github.com/eapache/go-resiliency v1.7.0 // indirect
-	github.com/eapache/queue v1.1.0 // indirect
 	github.com/fatih/structtag v1.2.0 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
 	github.com/go-openapi/jsonpointer v0.23.1 // indirect
@@ -69,13 +67,7 @@ require (
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/pprof v0.0.0-20240727154555-813a5fbdbec8 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.26.3 // indirect
-	github.com/hashicorp/go-uuid v1.0.3 // indirect
 	github.com/iancoleman/strcase v0.3.0 // indirect
-	github.com/jcmturner/aescts/v2 v2.0.0 // indirect
-	github.com/jcmturner/dnsutils/v2 v2.0.0 // indirect
-	github.com/jcmturner/gofork v1.7.6 // indirect
-	github.com/jcmturner/gokrb5/v8 v8.4.4 // indirect
-	github.com/jcmturner/rpc/v2 v2.0.3 // indirect
 	github.com/jhump/protoreflect v1.8.2 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
@@ -86,7 +78,6 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pierrec/lz4/v4 v4.1.25 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
-	github.com/rcrowley/go-metrics v0.0.0-20250401214520-65e299d6c5c9 // indirect
 	github.com/stretchr/testify v1.11.1 // indirect
 	github.com/tidwall/gjson v1.17.3 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
@@ -102,7 +93,6 @@ require (
 	go.uber.org/zap v1.27.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/arch v0.14.0 // indirect
-	golang.org/x/crypto v0.50.0 // indirect
 	golang.org/x/mod v0.35.0 // indirect
 	golang.org/x/net v0.53.0 // indirect
 	golang.org/x/sync v0.20.0 // indirect

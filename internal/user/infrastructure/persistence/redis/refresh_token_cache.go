@@ -8,11 +8,7 @@ import (
 	userRepo "vicomova/internal/user/domain/repository"
 	sharedRedis "vicomova/pkg/infrastructure/redis"
 	"vicomova/pkg/log"
-
-	"github.com/redis/go-redis/v9"
 )
-
-const refreshTokenPrefix = "refresh_token:"
 
 type RefreshTokenRepository struct {
 	redis *sharedRedis.Client
@@ -81,7 +77,7 @@ type RefreshTokenData struct {
 }
 
 func SetRefreshToken(ctx context.Context, client *sharedRedis.Client, token string, data *RefreshTokenData, ttl time.Duration) error {
-	key := refreshTokenPrefix + token
+	key := RefreshTokenPrefix + token
 	jsonData, err := json.Marshal(data)
 	if err != nil {
 		return err
@@ -90,10 +86,10 @@ func SetRefreshToken(ctx context.Context, client *sharedRedis.Client, token stri
 }
 
 func GetRefreshToken(ctx context.Context, client *sharedRedis.Client, token string) (*RefreshTokenData, error) {
-	key := refreshTokenPrefix + token
+	key := RefreshTokenPrefix + token
 	val, err := client.Get(ctx, key).Result()
 	if err != nil {
-		if err == redis.Nil {
+		if err.Error() == "redis: nil" {
 			return nil, nil
 		}
 		return nil, err
@@ -107,7 +103,7 @@ func GetRefreshToken(ctx context.Context, client *sharedRedis.Client, token stri
 }
 
 func DeleteRefreshToken(ctx context.Context, client *sharedRedis.Client, token string) error {
-	key := refreshTokenPrefix + token
+	key := RefreshTokenPrefix + token
 	log.Debug.Printf("DeleteRefreshToken: deleting key=%s", key)
 	err := client.Del(ctx, key).Err()
 	log.Debug.Printf("DeleteRefreshToken: result=%v", err)
@@ -115,7 +111,7 @@ func DeleteRefreshToken(ctx context.Context, client *sharedRedis.Client, token s
 }
 
 func DeleteUserRefreshTokens(ctx context.Context, client *sharedRedis.Client, userID int64) error {
-	pattern := refreshTokenPrefix + "*"
+	pattern := RefreshTokenPrefix + "*"
 	iter := client.Scan(ctx, 0, pattern, 0).Iterator()
 	for iter.Next(ctx) {
 		key := iter.Val()

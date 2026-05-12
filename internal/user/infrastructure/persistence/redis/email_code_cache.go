@@ -8,11 +8,7 @@ import (
 	userRepo "vicomova/internal/user/domain/repository"
 	sharedRedis "vicomova/pkg/infrastructure/redis"
 	"vicomova/pkg/log"
-
-	"github.com/redis/go-redis/v9"
 )
-
-const emailCodePrefix = "email_code:"
 
 var ErrCodeNotFound = errors.New("verification code not found")
 
@@ -29,7 +25,7 @@ func (r *EmailCodeRepository) Store(ctx context.Context, email, code string, ttl
 		log.Error.Printf("EmailCodeRepository.Store: code is empty for %s", email)
 		return errors.New("code cannot be empty")
 	}
-	key := emailCodePrefix + email
+	key := EmailCodePrefix + email
 	if err := r.redis.Set(ctx, key, code, ttl).Err(); err != nil {
 		log.Error.Printf("EmailCodeRepository.Store: failed for %s: %v", email, err)
 		return err
@@ -39,10 +35,10 @@ func (r *EmailCodeRepository) Store(ctx context.Context, email, code string, ttl
 }
 
 func (r *EmailCodeRepository) Verify(ctx context.Context, email, code string) (bool, error) {
-	key := emailCodePrefix + email
+	key := EmailCodePrefix + email
 	storedCode, err := r.redis.Get(ctx, key).Result()
 	if err != nil {
-		if errors.Is(err, redis.Nil) {
+		if err.Error() == "redis: nil" {
 			log.Warn.Printf("EmailCodeRepository.Verify: code not found for %s", email)
 			return false, nil
 		}
@@ -58,7 +54,7 @@ func (r *EmailCodeRepository) Verify(ctx context.Context, email, code string) (b
 }
 
 func (r *EmailCodeRepository) Delete(ctx context.Context, email string) error {
-	key := emailCodePrefix + email
+	key := EmailCodePrefix + email
 	if err := r.redis.Del(ctx, key).Err(); err != nil {
 		log.Error.Printf("EmailCodeRepository.Delete: failed for %s: %v", email, err)
 		return err

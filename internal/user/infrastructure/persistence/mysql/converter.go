@@ -20,10 +20,10 @@ func UserToPO(u *userEntity.User) *UserPO {
 		email = u.Email.String()
 	}
 	return &UserPO{
-		ID:        u.ID,
-		Username:  username,
-		Password:  password,
-		Email:     email,
+		ID:       u.ID,
+		Username: username,
+		Password: password,
+		Email:    email,
 	}
 }
 

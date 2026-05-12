@@ -36,6 +36,10 @@ func (c *Client) Scan(ctx context.Context, cursor uint64, match string, count in
 	return c.rdb.Scan(ctx, cursor, match, count)
 }
 
+func (c *Client) Incr(ctx context.Context, key string) *redis.IntCmd {
+	return c.rdb.Incr(ctx, key)
+}
+
 func (c *Client) Ping(ctx context.Context) error {
 	return c.rdb.Ping(ctx).Err()
 }
