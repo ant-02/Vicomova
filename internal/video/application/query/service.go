@@ -1,6 +1,7 @@
 package query
 
 import (
+	usergrpc "vicomova/internal/user/interfaces/grpc"
 	"vicomova/internal/video/domain/repository"
 	"vicomova/internal/video/domain/service"
 	"vicomova/pkg/infrastructure/oss"
@@ -11,7 +12,9 @@ type VideoQueryService struct {
 	cache             repository.VideoCache
 	hotAlgo           service.HotAlgorithm
 	oss               oss.OSS
-	viewCountService  service.ViewCountService
+	viewCountProducer repository.ViewCountProducer
+	hotCache          repository.HotVideoCache
+	userClient        *usergrpc.UserClient
 }
 
 func NewVideoQueryService(
@@ -19,13 +22,17 @@ func NewVideoQueryService(
 	cache repository.VideoCache,
 	hotAlgo service.HotAlgorithm,
 	ossClient oss.OSS,
-	viewCountService service.ViewCountService,
+	viewCountProducer repository.ViewCountProducer,
+	hotCache repository.HotVideoCache,
+	userClient *usergrpc.UserClient,
 ) *VideoQueryService {
 	return &VideoQueryService{
 		repo:              repo,
 		cache:             cache,
 		hotAlgo:           hotAlgo,
 		oss:               ossClient,
-		viewCountService:  viewCountService,
+		viewCountProducer: viewCountProducer,
+		hotCache:          hotCache,
+		userClient:        userClient,
 	}
 }

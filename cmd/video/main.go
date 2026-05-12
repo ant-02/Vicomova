@@ -34,14 +34,6 @@ func main() {
 		log.Error.Fatalf("Failed to init provider: %v", err)
 	}
 
-	// 启动消费者
-	if p.Consumer != nil {
-		if err := p.Consumer.Start(); err != nil {
-			log.Error.Fatalf("Failed to start consumer: %v", err)
-		}
-		log.Info.Printf("View count consumer started")
-	}
-
 	tcpAddr, _ := net.ResolveTCPAddr("tcp", addr)
 	svr := videoservice.NewServer(p.VideoHandler, server.WithServiceAddr(tcpAddr))
 
@@ -66,9 +58,9 @@ func main() {
 	<-sigCh
 
 	// 停止消费者
-	if p.Consumer != nil {
-		p.Consumer.Stop()
-		log.Info.Printf("View count consumer stopped")
+	if p.ConsumerManager != nil {
+		p.ConsumerManager.StopAll()
+		log.Info.Printf("Consumer manager stopped")
 	}
 
 	svr.Stop()

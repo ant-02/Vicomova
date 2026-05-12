@@ -136,3 +136,23 @@ func (h *UserHandler) Logout(ctx context.Context, req *user.LogoutRequest) (*use
 		Success: true,
 	}, nil
 }
+
+func (h *UserHandler) BatchGetUsers(ctx context.Context, req *user.BatchGetUsersRequest) (*user.BatchGetUsersResponse, error) {
+	query := &appQuery.BatchGetUsersQuery{
+		UserIDs: req.UserIds,
+	}
+	results, err := h.querySvc.BatchGetUsers(ctx, query)
+	if err != nil {
+		klog.Errorf("BatchGetUsers: failed: %v", err)
+		return nil, err
+	}
+	users := make([]*user.User, 0, len(results))
+	for _, r := range results {
+		users = append(users, &user.User{
+			UserId:   r.UserID,
+			Username: r.Username,
+			Email:    r.Email,
+		})
+	}
+	return &user.BatchGetUsersResponse{Users: users}, nil
+}

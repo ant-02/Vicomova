@@ -6,21 +6,21 @@ import (
 	"vicomova/internal/video/application/command"
 	"vicomova/internal/video/application/query"
 	"vicomova/internal/video/domain/entity"
-	"vicomova/internal/video/domain/service"
+	"vicomova/internal/video/domain/repository"
 	video "vicomova/third_party/kitex_gen/video"
 )
 
 type VideoHandler struct {
-	cmdSvc          *command.VideoCommandService
-	qrySvc          *query.VideoQueryService
-	viewCountSvc    service.ViewCountService
+	cmdSvc            *command.VideoCommandService
+	qrySvc            *query.VideoQueryService
+	viewCountProducer repository.ViewCountProducer
 }
 
-func NewVideoHandler(cmdSvc *command.VideoCommandService, qrySvc *query.VideoQueryService, viewCountSvc service.ViewCountService) *VideoHandler {
+func NewVideoHandler(cmdSvc *command.VideoCommandService, qrySvc *query.VideoQueryService, viewCountProducer repository.ViewCountProducer) *VideoHandler {
 	return &VideoHandler{
-		cmdSvc:       cmdSvc,
-		qrySvc:       qrySvc,
-		viewCountSvc: viewCountSvc,
+		cmdSvc:            cmdSvc,
+		qrySvc:            qrySvc,
+		viewCountProducer: viewCountProducer,
 	}
 }
 
@@ -144,8 +144,8 @@ func (h *VideoHandler) GetPublishedList(ctx context.Context, req *video.GetPubli
 }
 
 func (h *VideoHandler) IncrementView(ctx context.Context, req *video.IncrementViewRequest) (*video.IncrementViewResponse, error) {
-	if h.viewCountSvc != nil {
-		h.viewCountSvc.Record(ctx, req.VideoId)
+	if h.viewCountProducer != nil {
+		h.viewCountProducer.Record(ctx, req.VideoId)
 	}
 	return &video.IncrementViewResponse{}, nil
 }

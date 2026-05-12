@@ -11,18 +11,11 @@ import (
 	"vicomova/pkg/log"
 )
 
-const (
-	// 窗口刷新间隔
-	flushInterval = FlushInterval
-	// 窗口消息数量阈值
-	flushThreshold = FlushThreshold
-)
-
 type ViewCountConsumer struct {
-	consumer  *pkgKafka.Consumer
-	topic     string
-	groupID   string
-	repo      repository.VideoRepository
+	consumer *pkgKafka.Consumer
+	topic    string
+	groupID  string
+	repo     repository.VideoRepository
 
 	// 窗口累积
 	mu      sync.Mutex
@@ -85,7 +78,7 @@ func (c *ViewCountConsumer) onMessage(msg *pkgKafka.Message) error {
 	c.mu.Lock()
 	c.counter[videoID]++
 	count := c.counter[videoID]
-	shouldFlush := len(c.counter) >= flushThreshold
+	shouldFlush := len(c.counter) >= FlushThreshold
 	c.mu.Unlock()
 
 	log.Debug.Printf("ViewCountConsumer: received videoID=%d, accumulative_count=%d", videoID, count)
@@ -100,7 +93,7 @@ func (c *ViewCountConsumer) onMessage(msg *pkgKafka.Message) error {
 
 // flushLoop 定时刷新
 func (c *ViewCountConsumer) flushLoop() {
-	ticker := time.NewTicker(flushInterval)
+	ticker := time.NewTicker(FlushInterval)
 	defer ticker.Stop()
 
 	for {

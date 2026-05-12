@@ -26,16 +26,16 @@ type SASL struct {
 }
 
 type KafkaTopic struct {
-	Name          string `yaml:"name"`
-	Group         string `yaml:"group"`
-	Partitions    int    `yaml:"partitions"`
-	Replication   int    `yaml:"replication"`
-	RetentionHours int   `yaml:"retention_hours"`
+	Name           string `yaml:"name"`
+	Group          string `yaml:"group"`
+	Partitions     int    `yaml:"partitions"`
+	Replication    int    `yaml:"replication"`
+	RetentionHours int    `yaml:"retention_hours"`
 }
 
 type Kafka struct {
-	Brokers []string             `yaml:"brokers"`
-	SASL    SASL                 `yaml:"sasl"`
+	Brokers []string              `yaml:"brokers"`
+	SASL    SASL                  `yaml:"sasl"`
 	Topics  map[string]KafkaTopic `yaml:"topics"`
 }
 

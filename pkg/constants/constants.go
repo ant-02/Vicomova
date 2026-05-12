@@ -34,6 +34,18 @@ const (
 	KafkaProducerRetryMax = 3
 )
 
+// Kafka Topic 名称
+const (
+	// KafkaTopicVideoView 视频播放量 topic
+	KafkaTopicVideoView = "video-view"
+)
+
+// 服务配置 key
+const (
+	// ServiceKeyUser 用户服务配置 key
+	ServiceKeyUser = "user"
+)
+
 // 服务名称
 const (
 	ServiceUser        = "user"
@@ -85,4 +97,11 @@ const (
 	TableLikes     = "likes"
 	TableComments  = "comments"
 	TableFavorites = "favorites"
+)
+
+// 热门视频相关
+const (
+	DefaultHotVideoLimit = 20
+	MaxHotVideoLimit     = 100
+	WilsonZ              = 1.96 // Wilson 算法置信度参数
 )

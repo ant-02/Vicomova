@@ -10,3 +10,7 @@ type UserResult struct {
 	Username string
 	Email    string
 }
+
+type BatchGetUsersQuery struct {
+	UserIDs []int64
+}

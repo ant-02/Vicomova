@@ -68,3 +68,17 @@ func (c *UserClient) VerifyAndRegister(ctx context.Context, username, password, 
 		Code:     code,
 	})
 }
+
+func (c *UserClient) BatchGetUsers(ctx context.Context, userIDs []int64) (map[int64]*user.User, error) {
+	resp, err := c.cli.BatchGetUsers(ctx, &user.BatchGetUsersRequest{
+		UserIds: userIDs,
+	})
+	if err != nil {
+		return nil, err
+	}
+	result := make(map[int64]*user.User, len(resp.Users))
+	for _, u := range resp.Users {
+		result[u.UserId] = u
+	}
+	return result, nil
+}

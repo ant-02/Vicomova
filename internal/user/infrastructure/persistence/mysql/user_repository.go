@@ -43,6 +43,23 @@ func (r *UserRepository) GetByID(ctx context.Context, id int64) (*userEntity.Use
 	return POToUser(&po), nil
 }
 
+func (r *UserRepository) GetByIDs(ctx context.Context, ids []int64) ([]*userEntity.User, error) {
+	if len(ids) == 0 {
+		return nil, nil
+	}
+	var pos []UserPO
+	err := r.mysql.WithContext(ctx).Where("id IN ?", ids).Find(&pos).Error
+	if err != nil {
+		log.Error.Printf("UserRepository.GetByIDs: failed for ids=%v: %v", ids, err)
+		return nil, err
+	}
+	users := make([]*userEntity.User, 0, len(pos))
+	for i := range pos {
+		users = append(users, POToUser(&pos[i]))
+	}
+	return users, nil
+}
+
 func (r *UserRepository) GetByUsername(ctx context.Context, username *userVO.Username) (*userEntity.User, error) {
 	var po UserPO
 	err := r.mysql.WithContext(ctx).Where("username = ?", username.String()).First(&po).Error

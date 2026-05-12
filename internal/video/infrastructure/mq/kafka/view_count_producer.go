@@ -13,14 +13,14 @@ type ViewCountProducer struct {
 	topic  string
 }
 
-func NewViewCountProducer(topic string) *ViewCountProducer {
+func NewViewCountProducer(sender *pkgKafka.Sender, topic string) *ViewCountProducer {
 	return &ViewCountProducer{
-		sender: pkgKafka.NewSender(),
+		sender: sender,
 		topic:  topic,
 	}
 }
 
-func (p *ViewCountProducer) SendIncrement(ctx context.Context, videoID int64) error {
+func (p *ViewCountProducer) Record(ctx context.Context, videoID int64) error {
 	data := make([]byte, 8)
 	n := binary.PutVarint(data, videoID)
 	data = data[:n]
@@ -37,7 +37,7 @@ func (p *ViewCountProducer) SendIncrement(ctx context.Context, videoID int64) er
 	return nil
 }
 
-func (p *ViewCountProducer) SendIncrements(ctx context.Context, videoIDs []int64) error {
+func (p *ViewCountProducer) RecordBatch(ctx context.Context, videoIDs []int64) error {
 	if len(videoIDs) == 0 {
 		return nil
 	}

@@ -46,3 +46,23 @@ func (s *UserQueryService) GetUser(ctx context.Context, query *GetUserQuery) (*U
 		Email:    u.Email.String(),
 	}, nil
 }
+
+func (s *UserQueryService) BatchGetUsers(ctx context.Context, query *BatchGetUsersQuery) ([]*UserResult, error) {
+	if len(query.UserIDs) == 0 {
+		return nil, nil
+	}
+	users, err := s.userRepo.GetByIDs(ctx, query.UserIDs)
+	if err != nil {
+		log.Error.Printf("BatchGetUsers: GetByIDs failed: %v", err)
+		return nil, errors.ErrInternalServer
+	}
+	results := make([]*UserResult, 0, len(users))
+	for _, u := range users {
+		results = append(results, &UserResult{
+			UserID:   u.ID,
+			Username: u.Username.String(),
+			Email:    u.Email.String(),
+		})
+	}
+	return results, nil
+}

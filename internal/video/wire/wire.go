@@ -1,15 +1,17 @@
 package wire
 
 import (
+	usergrpc "vicomova/internal/user/interfaces/grpc"
 	"vicomova/internal/video/application/command"
 	"vicomova/internal/video/application/query"
-	domainService "vicomova/internal/video/domain/service"
+	"vicomova/internal/video/domain/repository"
 	infraKafka "vicomova/internal/video/infrastructure/mq/kafka"
 	infraMysql "vicomova/internal/video/infrastructure/persistence/mysql"
 	redisCache "vicomova/internal/video/infrastructure/persistence/redis"
 	infraService "vicomova/internal/video/infrastructure/service"
-	"vicomova/internal/video/interfaces/grpc"
+	videogrpc "vicomova/internal/video/interfaces/grpc"
 	"vicomova/pkg/config"
+	"vicomova/pkg/constants"
 	"vicomova/pkg/infrastructure/kafka"
 	"vicomova/pkg/infrastructure/mysql"
 	"vicomova/pkg/infrastructure/oss"
@@ -18,10 +20,10 @@ import (
 )
 
 type Provider struct {
-	MySQL        *mysql.Client
-	Redis        *redis.Client
-	VideoHandler *grpc.VideoHandler
-	Consumer     *infraKafka.ViewCountConsumer
+	MySQL           *mysql.Client
+	Redis           *redis.Client
+	VideoHandler    *videogrpc.VideoHandler
+	ConsumerManager *infraKafka.ConsumerManager
 }
 
 func NewProvider() (*Provider, error) {
@@ -43,24 +45,45 @@ func NewProvider() (*Provider, error) {
 	}
 
 	videoCache := redisCache.NewVideoCache(redisClient)
+	hotVideoCache := redisCache.NewHotVideoCache(redisClient)
 	videoRepo := infraMysql.NewVideoRepository(mysqlClient)
 
 	hotAlgo := infraService.NewWilsonHotAlgorithm(videoRepo)
 
+	// User Service 客户端
+	var userClient *usergrpc.UserClient
+	if userCfg, ok := cfg.Services[constants.ServiceKeyUser]; ok && userCfg.Addr != "" {
+		var err error
+		userClient, err = usergrpc.NewUserClient(userCfg.Name, userCfg.Addr)
+		if err != nil {
+			log.Warn.Printf("failed to create user client: %v", err)
+		}
+	}
+
 	// Kafka 播放量组件
-	var viewCountService domainService.ViewCountService
-	var viewCountConsumer *infraKafka.ViewCountConsumer
+	var viewCountProducer repository.ViewCountProducer
+	var consumerManager *infraKafka.ConsumerManager
 
 	if len(cfg.Kafka.Brokers) > 0 && len(cfg.Kafka.Topics) > 0 {
 		if err := kafka.Init(cfg.Kafka.Brokers, cfg.Kafka.SASL.Username, cfg.Kafka.SASL.Password); err != nil {
 			return nil, err
 		}
 
+		var consumers []infraKafka.Consumer
+
 		// 从配置获取 video-view topic
-		if topicCfg, ok := cfg.Kafka.Topics["video-view"]; ok {
-			producer := infraKafka.NewViewCountProducer(topicCfg.Name)
-			viewCountService = infraKafka.NewViewCountService(producer)
-			viewCountConsumer = infraKafka.NewViewCountConsumer(topicCfg.Name, topicCfg.Group, videoRepo)
+		if topicCfg, ok := cfg.Kafka.Topics[constants.KafkaTopicVideoView]; ok {
+			sender := kafka.GetSender()
+			producer := infraKafka.NewViewCountProducer(sender, topicCfg.Name)
+			viewCountProducer = producer
+
+			consumer := infraKafka.NewViewCountConsumer(topicCfg.Name, topicCfg.Group, videoRepo)
+			consumers = append(consumers, consumer)
+		}
+
+		consumerManager = infraKafka.NewConsumerManager(consumers...)
+		if err := consumerManager.StartAll(); err != nil {
+			return nil, err
 		}
 	}
 
@@ -82,9 +105,9 @@ func NewProvider() (*Provider, error) {
 	}
 
 	cmdSvc := command.NewVideoCommandService(videoRepo, videoCache, ossClient)
-	querySvc := query.NewVideoQueryService(videoRepo, videoCache, hotAlgo, ossClient, viewCountService)
+	querySvc := query.NewVideoQueryService(videoRepo, videoCache, hotAlgo, ossClient, viewCountProducer, hotVideoCache, userClient)
 
-	videoHandler := grpc.NewVideoHandler(cmdSvc, querySvc, viewCountService)
+	videoHandler := videogrpc.NewVideoHandler(cmdSvc, querySvc, viewCountProducer)
 
 	config.RegisterCallback(func(newCfg *config.Config) {
 		if err := mysql.Reload(&newCfg.Database); err != nil {
@@ -96,9 +119,9 @@ func NewProvider() (*Provider, error) {
 	})
 
 	return &Provider{
-		MySQL:        mysqlClient,
-		Redis:        redis.GetClient(),
-		VideoHandler: videoHandler,
-		Consumer:     viewCountConsumer,
+		MySQL:           mysqlClient,
+		Redis:           redis.GetClient(),
+		VideoHandler:    videoHandler,
+		ConsumerManager: consumerManager,
 	}, nil
 }

@@ -77,3 +77,16 @@ func (m *MockUserRepository) Delete(ctx context.Context, id int64) error {
 	}
 	return nil
 }
+
+func (m *MockUserRepository) GetByIDs(ctx context.Context, ids []int64) ([]*userEntity.User, error) {
+	var result []*userEntity.User
+	for _, u := range m.Users {
+		for _, id := range ids {
+			if u.ID == id {
+				result = append(result, u)
+				break
+			}
+		}
+	}
+	return result, nil
+}

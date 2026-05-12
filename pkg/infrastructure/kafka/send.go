@@ -46,7 +46,7 @@ func (s *Sender) GetWriter(brokers []string, topic string) *kafka.Writer {
 		Balancer:               &kafka.RoundRobin{},
 		MaxAttempts:            3,
 		RequiredAcks:           kafka.RequireOne,
-		AllowAutoTopicCreation: true,
+		AllowAutoTopicCreation: false,
 		ErrorLogger:            log.Error,
 		Transport:              getTransport(),
 	}
@@ -90,6 +90,18 @@ func (s *Sender) CloseWriter(topic string) error {
 	}
 
 	return nil
+}
+
+var (
+	senderOnce sync.Once
+	sender     *Sender
+)
+
+func GetSender() *Sender {
+	senderOnce.Do(func() {
+		sender = NewSender()
+	})
+	return sender
 }
 
 // CloseAllWriter 关闭所有 writer
