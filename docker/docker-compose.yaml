@@ -78,16 +78,22 @@ services:
       - "9092:9092"
     volumes:
       - ./data/kafka:/var/lib/kafka/data
-      - ./env/kafka-jaas.conf:/etc/kafka/kafka-jaas.conf
-      - ./script/kafka-init.sh:/opt/kafka-init.sh
+      - ./config/kafka-jaas.conf:/etc/kafka/kafka-jaas.conf:ro
     networks:
       - vicomova
-    depends_on:
-      - etcd
-    command: >
-      bash -c "chmod +x /opt/kafka-init.sh &&
-               /opt/kafka-init.sh &&
-               /etc/confluent/docker/run"
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: vicomova-kafka-ui
+    restart: unless-stopped
+    env_file:
+      - ./env/kafka-ui.env
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./config/kafka-jaas.conf:/etc/kafka/kafka_jaas.conf:ro
+    networks:
+      - vicomova
 
 networks:
   vicomova:
