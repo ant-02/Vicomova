@@ -36,7 +36,7 @@ func NewClient(endpoints []string, username, password, namespace string) (*Clien
 func (c *Client) Close() error {
 	c.watcherMu.Lock()
 	if c.watcher != nil {
-		c.watcher.Close()
+		_ = c.watcher.Close()
 	}
 	c.watcherMu.Unlock()
 	return c.cli.Close()
@@ -70,7 +70,7 @@ func (c *Client) Watch(ctx context.Context, prefix string, opts ...clientv3.OpOp
 	defer c.watcherMu.Unlock()
 
 	if c.watcher != nil {
-		c.watcher.Close()
+		_ = c.watcher.Close()
 	}
 	c.watcher = clientv3.NewWatcher(c.cli)
 

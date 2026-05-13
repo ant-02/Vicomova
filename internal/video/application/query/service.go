@@ -68,11 +68,8 @@ func (s *VideoQueryService) runHotCacheRefresh() {
 	ticker := time.NewTicker(constants.HotCacheRefreshInterval)
 	defer ticker.Stop()
 
-	for {
-		select {
-		case <-ticker.C:
-			s.rebuildHotCache(context.Background())
-		}
+	for range ticker.C {
+		s.rebuildHotCache(context.Background())
 	}
 }
 

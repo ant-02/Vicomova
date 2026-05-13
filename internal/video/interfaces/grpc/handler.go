@@ -5,7 +5,6 @@ import (
 
 	"vicomova/internal/video/application/command"
 	"vicomova/internal/video/application/query"
-	"vicomova/internal/video/domain/entity"
 	"vicomova/internal/video/domain/repository"
 	video "vicomova/third_party/kitex_gen/video"
 )
@@ -183,7 +182,7 @@ func (h *VideoHandler) GetPublishedList(ctx context.Context, req *video.GetPubli
 
 func (h *VideoHandler) IncrementView(ctx context.Context, req *video.IncrementViewRequest) (*video.IncrementViewResponse, error) {
 	if h.viewCountProducer != nil {
-		h.viewCountProducer.Record(ctx, req.VideoId)
+		_ = h.viewCountProducer.Record(ctx, req.VideoId)
 	}
 	return &video.IncrementViewResponse{}, nil
 }
@@ -200,21 +199,4 @@ func (h *VideoHandler) GetUploadToken(ctx context.Context, req *video.GetUploadT
 		Domain: result.Domain,
 		Host:   result.Host,
 	}, nil
-}
-
-func toProtoVideo(v *entity.Video) *video.Video {
-	return &video.Video{
-		Id:           v.ID,
-		UserId:       v.UserID,
-		Title:        v.Title,
-		Description:  v.Description,
-		CoverUrl:     v.CoverURL,
-		VideoUrl:     v.VideoURL,
-		CategoryId:   int32(v.CategoryID),
-		ViewCount:    v.ViewCount,
-		LikeCount:    v.LikeCount,
-		CommentCount: v.CommentCount,
-		Duration:     int32(v.Duration),
-		CreatedAt:    v.CreatedAt.Unix(),
-	}
 }

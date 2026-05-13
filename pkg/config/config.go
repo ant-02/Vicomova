@@ -149,7 +149,7 @@ func Close() {
 		close(closeChan)
 	}
 	if client != nil {
-		client.Close()
+		_ = client.Close()
 	}
 }
 

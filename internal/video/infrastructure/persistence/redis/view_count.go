@@ -47,7 +47,7 @@ func GetPendingViewCounts(ctx context.Context) (map[int64]int64, error) {
 				continue
 			}
 			var videoID int64
-			fmt.Sscanf(key, "video:%d:views", &videoID)
+			_, _ = fmt.Sscanf(key, "video:%d:views", &videoID)
 			if videoID > 0 {
 				result[videoID] = count
 			}
