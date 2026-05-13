@@ -4,3 +4,4 @@
 docker/mysql
 docker/redis
 bin/
+.claude/
