@@ -20,6 +20,7 @@ type VideoQueryService struct {
 	repo              repository.VideoRepository
 	cache             repository.VideoCache
 	hotCache          repository.HotVideoCache
+	categoryCache     repository.CategoryVideoCache
 	oss               oss.OSS
 	viewCountProducer repository.ViewCountProducer
 	userClient        *usergrpc.UserClient
@@ -32,12 +33,14 @@ func NewVideoQueryService(
 	ossClient oss.OSS,
 	viewCountProducer repository.ViewCountProducer,
 	hotCache repository.HotVideoCache,
+	categoryCache repository.CategoryVideoCache,
 	userClient *usergrpc.UserClient,
 ) *VideoQueryService {
 	return &VideoQueryService{
 		repo:              repo,
 		cache:             cache,
 		hotCache:          hotCache,
+		categoryCache:     categoryCache,
 		oss:               ossClient,
 		viewCountProducer: viewCountProducer,
 		userClient:        userClient,

@@ -64,3 +64,17 @@ type PublishedVideosResult struct {
 	NextCursor string
 	HasMore    bool
 }
+
+// CategoryVideosQuery 分类视频查询
+type CategoryVideosQuery struct {
+	Cursor     string
+	Limit      int
+	CategoryID int
+}
+
+// CategoryVideosResult 分类视频结果
+type CategoryVideosResult struct {
+	Videos     []*HotVideoItem
+	NextCursor string
+	HasMore    bool
+}

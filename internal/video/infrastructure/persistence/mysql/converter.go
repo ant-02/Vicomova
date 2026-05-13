@@ -48,3 +48,29 @@ func POToVideo(po *VideoPO) *entity.Video {
 		UpdatedAt:    po.UpdatedAt,
 	}
 }
+
+func CategoryToPO(c *entity.Category) *CategoryPO {
+	if c == nil {
+		return nil
+	}
+	return &CategoryPO{
+		ID:        c.ID,
+		Name:      c.Name,
+		ParentID:  c.ParentID,
+		SortOrder: c.SortOrder,
+	}
+}
+
+func POToCategory(po *CategoryPO) *entity.Category {
+	if po == nil {
+		return nil
+	}
+	return &entity.Category{
+		ID:        po.ID,
+		Name:      po.Name,
+		ParentID:  po.ParentID,
+		SortOrder: po.SortOrder,
+		CreatedAt: po.CreatedAt,
+		UpdatedAt: po.UpdatedAt,
+	}
+}

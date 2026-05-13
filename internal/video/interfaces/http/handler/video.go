@@ -99,55 +99,50 @@ func (h *VideoHandler) GetVideoStream(ctx context.Context, c *app.RequestContext
 	}))
 }
 
-// @Summary 按类别获取视频列表
-// @Description 分页获取指定类别的视频列表
+// @Summary 获取分类视频
+// @Description 获取指定分类的视频列表，支持游标分页
 // @Tags video
 // @Produce json
-// @Param category_id query int32 true "分类ID"
-// @Param page query int32 false "页码" default(1)
-// @Param size query int32 false "每页数量" default(10)
-// @Success 200 {object} VideoListResponse
+// @Param id path int true "分类ID"
+// @Param limit query int32 false "返回数量" default(10)
+// @Param cursor query string false "游标分页（首次不传）" default("")
+// @Success 200 {object} SuccessResponse{data=HotVideoListResponse}
 // @Failure 400 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse
-// @Router /video/list [get]
-func (h *VideoHandler) ListByCategory(ctx context.Context, c *app.RequestContext) {
-	categoryID, err := strconv.ParseInt(c.Query("category_id"), 10, 64)
-	if err != nil {
+// @Router /video/category/{id}/list [get]
+func (h *VideoHandler) ListCategoryVideos(ctx context.Context, c *app.RequestContext) {
+	categoryID, err := strconv.ParseInt(c.Param("id"), 10, 32)
+	if err != nil || categoryID <= 0 {
 		c.JSON(400, hertz.Fail(400, "Invalid category_id"))
 		return
 	}
 
-	page, _ := strconv.ParseInt(c.DefaultQuery("page", "1"), 10, 32)
-	size, _ := strconv.ParseInt(c.DefaultQuery("size", "10"), 10, 32)
+	limit, _ := strconv.ParseInt(c.DefaultQuery("limit", "10"), 10, 32)
+	cursor := c.Query("cursor")
 
-	resp, err := h.videoClient.ListByCategory(ctx, int32(categoryID), int32(page), int32(size))
+	resp, err := h.videoClient.ListCategoryVideos(ctx, int32(categoryID), int32(limit), cursor)
 	if err != nil {
-		hlog.Errorf("ListByCategory: categoryID=%d failed: %v", categoryID, err)
-		c.JSON(500, hertz.Fail(500, "Failed to get video list"))
+		hlog.Errorf("ListCategoryVideos: categoryID=%d failed: %v", categoryID, err)
+		c.JSON(500, hertz.Fail(500, "Failed to get category videos"))
 		return
 	}
 
-	videos := make([]*VideoItem, 0, len(resp.Videos))
+	videos := make([]*HotVideoItem, 0, len(resp.Videos))
 	for _, v := range resp.Videos {
-		videos = append(videos, &VideoItem{
+		videos = append(videos, &HotVideoItem{
 			ID:           v.Id,
-			UserID:       v.UserId,
 			Title:        v.Title,
-			Description:  v.Description,
 			CoverURL:     v.CoverUrl,
-			VideoURL:     v.VideoUrl,
-			CategoryID:   v.CategoryId,
+			Duration:     int(v.Duration),
 			ViewCount:    v.ViewCount,
-			LikeCount:    v.LikeCount,
 			CommentCount: v.CommentCount,
-			Duration:     v.Duration,
-			CreatedAt:    v.CreatedAt,
 		})
 	}
 
-	c.JSON(200, hertz.Success(VideoListResponse{
-		Videos: videos,
-		Total:  resp.Total,
+	c.JSON(200, hertz.Success(HotVideoListResponse{
+		Videos:     videos,
+		NextCursor: resp.NextCursor,
+		HasMore:    resp.HasMore,
 	}))
 }
 

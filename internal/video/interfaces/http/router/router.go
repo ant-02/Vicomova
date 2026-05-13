@@ -11,9 +11,9 @@ func RegisterRoutes(h *server.Hertz, videoHandler *handler.VideoHandler) {
 
 	// Public routes (no auth required)
 	video.GET("/stream", videoHandler.GetVideoStream)
-	video.GET("/list", videoHandler.ListByCategory)
 	video.GET("/hot", videoHandler.ListHotVideos)
 	video.GET("/list/published", videoHandler.GetPublishedList)
+	video.GET("/category/:id/list", videoHandler.ListCategoryVideos)
 
 	// Protected routes (auth required)
 	videoAuth := video.Group("/", videoAuthMw()...)

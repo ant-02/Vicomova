@@ -56,24 +56,6 @@ func (s *VideoQueryService) GetVideoStream(ctx context.Context, videoID int64) (
 	return &GetVideoStreamResult{Video: video}, nil
 }
 
-// ListByCategory 按分类列出视频
-func (s *VideoQueryService) ListByCategory(ctx context.Context, categoryID, page, size int) (*ListVideoResult, error) {
-	videos, total, err := s.repo.ListByCategory(ctx, categoryID, page, size)
-	if err != nil {
-		return nil, err
-	}
-	return &ListVideoResult{Videos: videos, Total: total}, nil
-}
-
-// ListByUser 列出用户发布的视频
-func (s *VideoQueryService) ListByUser(ctx context.Context, userID int64, page, size int) (*ListVideoResult, error) {
-	videos, total, err := s.repo.ListByUser(ctx, userID, page, size)
-	if err != nil {
-		return nil, err
-	}
-	return &ListVideoResult{Videos: videos, Total: total}, nil
-}
-
 // ListPublishedVideos 获取用户发布的视频（游标分页）
 func (s *VideoQueryService) ListPublishedVideos(ctx context.Context, userID int64, q *PublishedVideosQuery) (*PublishedVideosResult, error) {
 	limit := q.Limit
@@ -119,6 +101,139 @@ func (s *VideoQueryService) ListPublishedVideos(ctx context.Context, userID int6
 		NextCursor: nextCursor,
 		HasMore:    hasMore,
 	}, nil
+}
+
+// ListCategoryVideos 获取分类视频（游标分页，支持缓存）
+func (s *VideoQueryService) ListCategoryVideos(ctx context.Context, q *CategoryVideosQuery) (*CategoryVideosResult, error) {
+	limit := q.Limit
+	if limit <= 0 {
+		limit = 10
+	}
+
+	offset := int64(0)
+	if q.Cursor != "" {
+		var err error
+		offset, err = strconv.ParseInt(q.Cursor, 10, 64)
+		if err != nil || offset < 0 {
+			offset = 0
+		}
+	}
+
+	// 1. 从缓存获取分类视频 ID 列表
+	scores, err := s.categoryCache.GetVideoIDs(ctx, q.CategoryID, offset, int64(limit))
+	if err != nil {
+		log.Error.Printf("ListCategoryVideos: GetVideoIDs failed: %v", err)
+	}
+
+	// 2. 缓存未命中，从数据库查询并回填缓存
+	if len(scores) == 0 {
+		videos, _, err := s.repo.ListByCategory(ctx, q.CategoryID, int(offset/int64(limit))+1, limit)
+		if err != nil {
+			return nil, err
+		}
+
+		// 异步回填缓存
+		if s.categoryCache != nil && len(videos) > 0 {
+			go func() {
+				if err := s.categoryCache.SetVideoIDs(context.Background(), q.CategoryID, videos); err != nil {
+					log.Error.Printf("ListCategoryVideos: SetVideoIDs failed: %v", err)
+				}
+			}()
+		}
+
+		items := s.buildHotVideoItems(ctx, videos, offset)
+		return &CategoryVideosResult{
+			Videos:     items,
+			NextCursor: "",
+			HasMore:    false,
+		}, nil
+	}
+
+	// 3. 提取视频 ID
+	videoIDs := make([]int64, len(scores))
+	for i, score := range scores {
+		videoIDs[i] = score.VideoID
+	}
+
+	// 4. 批量获取视频元数据
+	metas, missIDs, err := s.getCategoryVideoMetas(ctx, videoIDs)
+	if err != nil {
+		log.Error.Printf("ListCategoryVideos: getCategoryVideoMetas failed: %v", err)
+		return nil, err
+	}
+
+	// 5. 缓存未命中时从数据库加载并缓存
+	if len(missIDs) > 0 {
+		for _, id := range missIDs {
+			v, err := s.repo.GetByID(ctx, id)
+			if err != nil || v == nil || !v.IsPublished() {
+				continue
+			}
+			meta := &entity.HotVideoMeta{}
+			meta.FromVideo(v)
+			metas[id] = meta
+			// 异步缓存
+			go func(videoID int64, m *entity.HotVideoMeta) {
+				s.categoryCache.SetVideoMeta(context.Background(), videoID, m)
+			}(id, meta)
+		}
+	}
+
+	// 6. 组装结果
+	items := make([]*HotVideoItem, 0, len(videoIDs))
+	for _, videoID := range videoIDs {
+		meta := metas[videoID]
+		if meta == nil {
+			continue
+		}
+		items = append(items, &HotVideoItem{
+			VideoID:      meta.VideoID,
+			Title:        meta.Title,
+			CoverURL:     meta.CoverURL,
+			Duration:     meta.Duration,
+			ViewCount:    meta.ViewCount,
+			CommentCount: meta.CommentCount,
+		})
+	}
+
+	// 7. 计算下一页游标
+	total, err := s.categoryCache.GetVideoCount(ctx, q.CategoryID)
+	if err != nil {
+		log.Error.Printf("ListCategoryVideos: GetVideoCount failed: %v", err)
+	}
+
+	nextOffset := offset + int64(len(videoIDs))
+	var nextCursor string
+	hasMore := nextOffset < total
+	if hasMore {
+		nextCursor = strconv.FormatInt(nextOffset, 10)
+	}
+
+	return &CategoryVideosResult{
+		Videos:     items,
+		NextCursor: nextCursor,
+		HasMore:    hasMore,
+	}, nil
+}
+
+// getCategoryVideoMetas 批量获取分类视频元数据
+func (s *VideoQueryService) getCategoryVideoMetas(ctx context.Context, videoIDs []int64) (map[int64]*entity.HotVideoMeta, []int64, error) {
+	metas := make(map[int64]*entity.HotVideoMeta)
+	var missIDs []int64
+
+	for _, id := range videoIDs {
+		if s.categoryCache == nil {
+			continue
+		}
+		meta, err := s.categoryCache.GetVideoMeta(ctx, id)
+		if err != nil || meta == nil {
+			missIDs = append(missIDs, id)
+		} else {
+			metas[id] = meta
+		}
+	}
+
+	return metas, missIDs, nil
 }
 
 // GetUploadToken 获取视频封面，供前端直传到 OSS（video_id 生成唯一 key）

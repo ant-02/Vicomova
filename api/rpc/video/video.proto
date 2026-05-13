@@ -9,7 +9,7 @@ service VideoService {
     rpc SubmitVideo(SubmitVideoRequest) returns (SubmitVideoResponse);
     rpc PublishVideo(PublishVideoRequest) returns (PublishVideoResponse);
     rpc GetVideoStream(GetVideoStreamRequest) returns (GetVideoStreamResponse);
-    rpc ListByCategory(ListByCategoryRequest) returns (ListByCategoryResponse);
+    rpc ListCategoryVideos(ListCategoryVideosRequest) returns (ListCategoryVideosResponse);
     rpc ListHotVideos(ListHotVideosRequest) returns (ListHotVideosResponse);
     rpc GetPublishedList(GetPublishedListRequest) returns (GetPublishedListResponse);
     rpc IncrementView(IncrementViewRequest) returns (IncrementViewResponse);
@@ -66,15 +66,16 @@ message GetVideoStreamResponse {
     int32 duration = 11;
 }
 
-message ListByCategoryRequest {
+message ListCategoryVideosRequest {
     int32 category_id = 1;
-    int32 page = 2;
-    int32 size = 3;
+    int32 limit = 2;
+    string cursor = 3;
 }
 
-message ListByCategoryResponse {
+message ListCategoryVideosResponse {
     repeated Video videos = 1;
-    int64 total = 2;
+    string next_cursor = 2;
+    bool has_more = 3;
 }
 
 message ListHotVideosRequest {
@@ -90,16 +91,14 @@ message ListHotVideosResponse {
 
 message GetPublishedListRequest {
     int64 user_id = 1;
-    int32 page = 2;
-    int32 size = 3;
-    string cursor = 4;
+    int32 limit = 2;
+    string cursor = 3;
 }
 
 message GetPublishedListResponse {
     repeated Video videos = 1;
-    int64 total = 2;
-    string next_cursor = 3;
-    bool has_more = 4;
+    string next_cursor = 2;
+    bool has_more = 3;
 }
 
 message IncrementViewRequest {

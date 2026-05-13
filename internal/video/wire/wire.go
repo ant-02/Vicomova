@@ -44,9 +44,13 @@ func NewProvider() (*Provider, error) {
 	if err := mysql.GetDB().AutoMigrate(&infraMysql.VideoPO{}); err != nil {
 		return nil, err
 	}
+	if err := mysql.GetDB().AutoMigrate(&infraMysql.CategoryPO{}); err != nil {
+		return nil, err
+	}
 
 	videoCache := redisCache.NewVideoCache(redisClient)
 	hotVideoCache := redisCache.NewHotVideoCache(redisClient)
+	categoryVideoCache := redisCache.NewCategoryVideoCache(redisClient)
 	videoRepo := infraMysql.NewVideoRepository(mysqlClient)
 
 	// User Service 客户端
@@ -104,7 +108,7 @@ func NewProvider() (*Provider, error) {
 	}
 
 	cmdSvc := command.NewVideoCommandService(videoRepo, videoCache, ossClient)
-	querySvc := query.NewVideoQueryService(videoRepo, videoCache, ossClient, viewCountProducer, hotVideoCache, userClient)
+	querySvc := query.NewVideoQueryService(videoRepo, videoCache, ossClient, viewCountProducer, hotVideoCache, categoryVideoCache, userClient)
 
 	// 启动时预热热门视频缓存
 	if err := querySvc.WarmUp(context.Background()); err != nil {

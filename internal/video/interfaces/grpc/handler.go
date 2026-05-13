@@ -95,20 +95,32 @@ func (h *VideoHandler) GetVideoStream(ctx context.Context, req *video.GetVideoSt
 	}, nil
 }
 
-func (h *VideoHandler) ListByCategory(ctx context.Context, req *video.ListByCategoryRequest) (*video.ListByCategoryResponse, error) {
-	result, err := h.qrySvc.ListByCategory(ctx, int(req.CategoryId), int(req.Page), int(req.Size))
+func (h *VideoHandler) ListCategoryVideos(ctx context.Context, req *video.ListCategoryVideosRequest) (*video.ListCategoryVideosResponse, error) {
+	result, err := h.qrySvc.ListCategoryVideos(ctx, &query.CategoryVideosQuery{
+		CategoryID: int(req.CategoryId),
+		Cursor:     req.Cursor,
+		Limit:      int(req.Limit),
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	videos := make([]*video.Video, len(result.Videos))
-	for i, v := range result.Videos {
-		videos[i] = toProtoVideo(v)
+	protoVideos := make([]*video.Video, len(result.Videos))
+	for i, item := range result.Videos {
+		protoVideos[i] = &video.Video{
+			Id:           item.VideoID,
+			Title:        item.Title,
+			CoverUrl:     item.CoverURL,
+			Duration:     int32(item.Duration),
+			ViewCount:    item.ViewCount,
+			CommentCount: item.CommentCount,
+		}
 	}
 
-	return &video.ListByCategoryResponse{
-		Videos: videos,
-		Total:  result.Total,
+	return &video.ListCategoryVideosResponse{
+		Videos:     protoVideos,
+		NextCursor: result.NextCursor,
+		HasMore:    result.HasMore,
 	}, nil
 }
 
@@ -144,7 +156,7 @@ func (h *VideoHandler) ListHotVideos(ctx context.Context, req *video.ListHotVide
 func (h *VideoHandler) GetPublishedList(ctx context.Context, req *video.GetPublishedListRequest) (*video.GetPublishedListResponse, error) {
 	result, err := h.qrySvc.ListPublishedVideos(ctx, req.UserId, &query.PublishedVideosQuery{
 		Cursor: req.Cursor,
-		Limit:  int(req.Size),
+		Limit:  int(req.Limit),
 	})
 	if err != nil {
 		return nil, err
