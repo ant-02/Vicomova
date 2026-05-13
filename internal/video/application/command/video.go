@@ -50,6 +50,7 @@ func (s *VideoCommandService) Save(ctx context.Context, cmd *SaveVideoCommand) (
 		CoverURL:    cmd.CoverURL,
 		VideoURL:    cmd.VideoURL,
 		Duration:    cmd.Duration,
+		HotScore:    0,
 		Status:      videoVO.VideoStatusEditing,
 	}
 	if err := s.repo.Create(ctx, v); err != nil {

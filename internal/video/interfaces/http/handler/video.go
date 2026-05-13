@@ -152,44 +152,42 @@ func (h *VideoHandler) ListByCategory(ctx context.Context, c *app.RequestContext
 }
 
 // @Summary 获取热门视频
-// @Description 获取热门视频列表（基于热度算法）
+// @Description 获取热门视频列表（基于热度算法），支持游标分页
 // @Tags video
 // @Produce json
 // @Param limit query int32 false "返回数量" default(10)
-// @Success 200 {object} VideoListResponse
+// @Param cursor query string false "游标分页（首次不传）" default("")
+// @Success 200 {object} SuccessResponse{data=HotVideoListResponse}
 // @Failure 500 {object} ErrorResponse
 // @Router /video/hot [get]
 func (h *VideoHandler) ListHotVideos(ctx context.Context, c *app.RequestContext) {
 	limit, _ := strconv.ParseInt(c.DefaultQuery("limit", "10"), 10, 32)
+	cursor := c.Query("cursor")
 
-	resp, err := h.videoClient.ListHotVideos(ctx, int32(limit))
+	resp, err := h.videoClient.ListHotVideos(ctx, int32(limit), cursor)
 	if err != nil {
 		hlog.Errorf("ListHotVideos: failed: %v", err)
 		c.JSON(500, hertz.Fail(500, "Failed to get hot videos"))
 		return
 	}
 
-	videos := make([]*VideoItem, 0, len(resp.Videos))
+	videos := make([]*HotVideoItem, 0, len(resp.Videos))
 	for _, v := range resp.Videos {
-		videos = append(videos, &VideoItem{
+		videos = append(videos, &HotVideoItem{
 			ID:           v.Id,
-			UserID:       v.UserId,
 			Title:        v.Title,
-			Description:  v.Description,
 			CoverURL:     v.CoverUrl,
-			VideoURL:     v.VideoUrl,
-			CategoryID:   v.CategoryId,
+			Duration:     int(v.Duration),
 			ViewCount:    v.ViewCount,
-			LikeCount:    v.LikeCount,
 			CommentCount: v.CommentCount,
-			Duration:     v.Duration,
-			CreatedAt:    v.CreatedAt,
+			UserName:     v.UserName,
 		})
 	}
 
-	c.JSON(200, hertz.Success(VideoListResponse{
-		Videos: videos,
-		Total:  int64(len(videos)),
+	c.JSON(200, hertz.Success(HotVideoListResponse{
+		Videos:     videos,
+		NextCursor: resp.NextCursor,
+		HasMore:    resp.HasMore,
 	}))
 }
 
@@ -311,54 +309,49 @@ func (h *VideoHandler) PublishVideo(ctx context.Context, c *app.RequestContext) 
 }
 
 // @Summary 获取发布列表
-// @Description 获取用户发布的视频列表（需要认证）
+// @Description 获取指定用户的发布视频列表，支持游标分页
 // @Tags video
 // @Produce json
-// @Security BearerAuth
-// @Param page query int32 false "页码" default(1)
-// @Param size query int32 false "每页数量" default(10)
-// @Success 200 {object} VideoListResponse
-// @Failure 401 {object} ErrorResponse
+// @Param user_id query int64 true "用户ID"
+// @Param limit query int32 false "返回数量" default(10)
+// @Param cursor query string false "游标分页（首次不传）" default("")
+// @Success 200 {object} SuccessResponse{data=HotVideoListResponse}
+// @Failure 400 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse
 // @Router /video/list/published [get]
 func (h *VideoHandler) GetPublishedList(ctx context.Context, c *app.RequestContext) {
-	userID := c.GetInt64(constants.ContextKeyUserID)
-	if userID == 0 {
-		c.JSON(401, hertz.Fail(401, "Unauthorized"))
+	userID, err := strconv.ParseInt(c.Query("user_id"), 10, 64)
+	if err != nil || userID == 0 {
+		c.JSON(400, hertz.Fail(400, "Invalid user_id"))
 		return
 	}
 
-	page, _ := strconv.ParseInt(c.DefaultQuery("page", "1"), 10, 32)
-	size, _ := strconv.ParseInt(c.DefaultQuery("size", "10"), 10, 32)
+	limit, _ := strconv.ParseInt(c.DefaultQuery("limit", "10"), 10, 32)
+	cursor := c.Query("cursor")
 
-	resp, err := h.videoClient.GetPublishedList(ctx, userID, int32(page), int32(size))
+	resp, err := h.videoClient.GetPublishedList(ctx, userID, int32(limit), cursor)
 	if err != nil {
 		hlog.Errorf("GetPublishedList: userID=%d failed: %v", userID, err)
 		c.JSON(500, hertz.Fail(500, "Failed to get published list"))
 		return
 	}
 
-	videos := make([]*VideoItem, 0, len(resp.Videos))
+	videos := make([]*HotVideoItem, 0, len(resp.Videos))
 	for _, v := range resp.Videos {
-		videos = append(videos, &VideoItem{
+		videos = append(videos, &HotVideoItem{
 			ID:           v.Id,
-			UserID:       v.UserId,
 			Title:        v.Title,
-			Description:  v.Description,
 			CoverURL:     v.CoverUrl,
-			VideoURL:     v.VideoUrl,
-			CategoryID:   v.CategoryId,
+			Duration:     int(v.Duration),
 			ViewCount:    v.ViewCount,
-			LikeCount:    v.LikeCount,
 			CommentCount: v.CommentCount,
-			Duration:     v.Duration,
-			CreatedAt:    v.CreatedAt,
 		})
 	}
 
-	c.JSON(200, hertz.Success(VideoListResponse{
-		Videos: videos,
-		Total:  resp.Total,
+	c.JSON(200, hertz.Success(HotVideoListResponse{
+		Videos:     videos,
+		NextCursor: resp.NextCursor,
+		HasMore:    resp.HasMore,
 	}))
 }
 

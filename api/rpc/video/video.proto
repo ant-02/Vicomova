@@ -79,21 +79,27 @@ message ListByCategoryResponse {
 
 message ListHotVideosRequest {
     int32 limit = 1;
+    string cursor = 2;
 }
 
 message ListHotVideosResponse {
     repeated Video videos = 1;
+    string next_cursor = 2;
+    bool has_more = 3;
 }
 
 message GetPublishedListRequest {
     int64 user_id = 1;
     int32 page = 2;
     int32 size = 3;
+    string cursor = 4;
 }
 
 message GetPublishedListResponse {
     repeated Video videos = 1;
     int64 total = 2;
+    string next_cursor = 3;
+    bool has_more = 4;
 }
 
 message IncrementViewRequest {
@@ -127,4 +133,5 @@ message Video {
     int64 comment_count = 10;
     int32 duration = 11;
     int64 created_at = 12;
+    string user_name = 13;
 }

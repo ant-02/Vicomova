@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"vicomova/internal/video/domain/entity"
-	"vicomova/internal/video/domain/repository"
 	"vicomova/pkg/constants"
 	videoErr "vicomova/pkg/errors"
 	"vicomova/pkg/log"
@@ -75,9 +74,51 @@ func (s *VideoQueryService) ListByUser(ctx context.Context, userID int64, page, 
 	return &ListVideoResult{Videos: videos, Total: total}, nil
 }
 
-// ListHot 列出热门视频
-func (s *VideoQueryService) ListHot(ctx context.Context, limit int) ([]*entity.Video, error) {
-	return s.hotAlgo.GetHotVideos(ctx, limit)
+// ListPublishedVideos 获取用户发布的视频（游标分页）
+func (s *VideoQueryService) ListPublishedVideos(ctx context.Context, userID int64, q *PublishedVideosQuery) (*PublishedVideosResult, error) {
+	limit := q.Limit
+	if limit <= 0 {
+		limit = 10
+	}
+
+	offset := int64(0)
+	if q.Cursor != "" {
+		var err error
+		offset, err = strconv.ParseInt(q.Cursor, 10, 64)
+		if err != nil || offset < 0 {
+			offset = 0
+		}
+	}
+
+	videos, total, err := s.repo.ListByUser(ctx, userID, int(offset/int64(limit))+1, limit)
+	if err != nil {
+		return nil, err
+	}
+
+	items := make([]*HotVideoItem, 0, len(videos))
+	for _, v := range videos {
+		items = append(items, &HotVideoItem{
+			VideoID:      v.ID,
+			Title:        v.Title,
+			CoverURL:     v.CoverURL,
+			Duration:     v.Duration,
+			ViewCount:    v.ViewCount,
+			CommentCount: v.CommentCount,
+		})
+	}
+
+	nextOffset := offset + int64(len(videos))
+	var nextCursor string
+	hasMore := nextOffset < total
+	if hasMore {
+		nextCursor = strconv.FormatInt(nextOffset, 10)
+	}
+
+	return &PublishedVideosResult{
+		Videos:     items,
+		NextCursor: nextCursor,
+		HasMore:    hasMore,
+	}, nil
 }
 
 // GetUploadToken 获取视频封面，供前端直传到 OSS（video_id 生成唯一 key）
@@ -138,30 +179,51 @@ func (s *VideoQueryService) ListHotVideos(ctx context.Context, q *ListHotVideosQ
 	scores, err := s.hotCache.GetHotVideoIDs(ctx, offset, int64(limit))
 	if err != nil {
 		log.Error.Printf("ListHotVideos: GetHotVideoIDs failed: %v", err)
-		return nil, err
 	}
+
+	// 2. 缓存未命中，触发异步回填并降级返回
 	if len(scores) == 0 {
+		// 双重检查锁：只允许一个请求触发回填
+		if s.cacheRebuilding.CompareAndSwap(false, true) {
+			go func() {
+				defer s.cacheRebuilding.Store(false)
+				s.rebuildHotCache(context.Background())
+			}()
+		}
+
+		// 降级：直接用 repo.ListHot 返回
+		fallbackVideos, err := s.repo.ListHot(ctx, limit)
+		if err != nil {
+			log.Error.Printf("ListHotVideos: hotAlgo.GetHotVideos fallback failed: %v", err)
+			return &ListHotVideosResult{
+				Videos:     []*HotVideoItem{},
+				NextCursor: "",
+				HasMore:    false,
+			}, nil
+		}
+
+		items := s.buildHotVideoItems(ctx, fallbackVideos, offset)
 		return &ListHotVideosResult{
-			Videos:     []*HotVideoItem{},
+			Videos:     items,
 			NextCursor: "",
 			HasMore:    false,
 		}, nil
 	}
 
-	// 2. 提取视频 ID
+	// 3. 提取视频 ID
 	videoIDs := make([]int64, len(scores))
 	for i, score := range scores {
 		videoIDs[i] = score.VideoID
 	}
 
-	// 3. 批量获取视频元数据
+	// 4. 批量获取视频元数据
 	metas, missIDs, err := s.getVideoMetas(ctx, videoIDs)
 	if err != nil {
 		log.Error.Printf("ListHotVideos: getVideoMetas failed: %v", err)
 		return nil, err
 	}
 
-	// 4. 缓存未命中时从数据库加载并缓存
+	// 5. 缓存未命中时从数据库加载并缓存
 	if len(missIDs) > 0 {
 		for _, id := range missIDs {
 			v, err := s.repo.GetByID(ctx, id)
@@ -171,17 +233,17 @@ func (s *VideoQueryService) ListHotVideos(ctx context.Context, q *ListHotVideosQ
 			if !v.IsPublished() {
 				continue
 			}
-			meta := &repository.HotVideoMeta{}
+			meta := &entity.HotVideoMeta{}
 			meta.FromVideo(v)
 			metas[id] = meta
 			// 异步缓存
-			go func(videoID int64, m *repository.HotVideoMeta) {
+			go func(videoID int64, m *entity.HotVideoMeta) {
 				s.hotCache.SetVideoMeta(context.Background(), videoID, m)
 			}(id, meta)
 		}
 	}
 
-	// 5. 收集所有需要的用户 ID
+	// 6. 收集所有需要的用户 ID
 	userIDSet := make(map[int64]struct{})
 	for _, meta := range metas {
 		if meta != nil {
@@ -193,7 +255,7 @@ func (s *VideoQueryService) ListHotVideos(ctx context.Context, q *ListHotVideosQ
 		userIDs = append(userIDs, uid)
 	}
 
-	// 6. 批量获取用户信息
+	// 7. 批量获取用户信息
 	var userMap map[int64]*user.User
 	if s.userClient != nil && len(userIDs) > 0 {
 		users, err := s.userClient.BatchGetUsers(ctx, userIDs)
@@ -204,7 +266,7 @@ func (s *VideoQueryService) ListHotVideos(ctx context.Context, q *ListHotVideosQ
 		}
 	}
 
-	// 7. 组装结果
+	// 8. 组装结果
 	items := make([]*HotVideoItem, 0, len(videoIDs))
 	for _, videoID := range videoIDs {
 		meta := metas[videoID]
@@ -227,7 +289,7 @@ func (s *VideoQueryService) ListHotVideos(ctx context.Context, q *ListHotVideosQ
 		items = append(items, item)
 	}
 
-	// 8. 计算下一页游标
+	// 9. 计算下一页游标
 	total, err := s.hotCache.GetHotVideoCount(ctx)
 	if err != nil {
 		log.Error.Printf("ListHotVideos: GetHotVideoCount failed: %v", err)
@@ -248,8 +310,8 @@ func (s *VideoQueryService) ListHotVideos(ctx context.Context, q *ListHotVideosQ
 }
 
 // getVideoMetas 批量获取视频元数据
-func (s *VideoQueryService) getVideoMetas(ctx context.Context, videoIDs []int64) (map[int64]*repository.HotVideoMeta, []int64, error) {
-	metas := make(map[int64]*repository.HotVideoMeta)
+func (s *VideoQueryService) getVideoMetas(ctx context.Context, videoIDs []int64) (map[int64]*entity.HotVideoMeta, []int64, error) {
+	metas := make(map[int64]*entity.HotVideoMeta)
 	var missIDs []int64
 
 	for _, id := range videoIDs {

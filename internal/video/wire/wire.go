@@ -1,6 +1,8 @@
 package wire
 
 import (
+	"context"
+
 	usergrpc "vicomova/internal/user/interfaces/grpc"
 	"vicomova/internal/video/application/command"
 	"vicomova/internal/video/application/query"
@@ -8,7 +10,6 @@ import (
 	infraKafka "vicomova/internal/video/infrastructure/mq/kafka"
 	infraMysql "vicomova/internal/video/infrastructure/persistence/mysql"
 	redisCache "vicomova/internal/video/infrastructure/persistence/redis"
-	infraService "vicomova/internal/video/infrastructure/service"
 	videogrpc "vicomova/internal/video/interfaces/grpc"
 	"vicomova/pkg/config"
 	"vicomova/pkg/constants"
@@ -47,8 +48,6 @@ func NewProvider() (*Provider, error) {
 	videoCache := redisCache.NewVideoCache(redisClient)
 	hotVideoCache := redisCache.NewHotVideoCache(redisClient)
 	videoRepo := infraMysql.NewVideoRepository(mysqlClient)
-
-	hotAlgo := infraService.NewWilsonHotAlgorithm(videoRepo)
 
 	// User Service 客户端
 	var userClient *usergrpc.UserClient
@@ -105,7 +104,12 @@ func NewProvider() (*Provider, error) {
 	}
 
 	cmdSvc := command.NewVideoCommandService(videoRepo, videoCache, ossClient)
-	querySvc := query.NewVideoQueryService(videoRepo, videoCache, hotAlgo, ossClient, viewCountProducer, hotVideoCache, userClient)
+	querySvc := query.NewVideoQueryService(videoRepo, videoCache, ossClient, viewCountProducer, hotVideoCache, userClient)
+
+	// 启动时预热热门视频缓存
+	if err := querySvc.WarmUp(context.Background()); err != nil {
+		log.Warn.Printf("hot cache warm up failed, will fallback on first request: %v", err)
+	}
 
 	videoHandler := videogrpc.NewVideoHandler(cmdSvc, querySvc, viewCountProducer)
 

@@ -43,9 +43,22 @@ func (r *VideoRepository) GetByID(ctx context.Context, id int64) (*entity.Video,
 	return POToVideo(&po), nil
 }
 
+func (r *VideoRepository) GetCounts(ctx context.Context, videoID int64) (int64, int64, error) {
+	var po VideoPO
+	err := r.mysql.WithContext(ctx).Select("like_count", "view_count").First(&po, videoID).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return 0, 0, nil
+		}
+		log.Error.Printf("VideoRepository.GetCounts: failed for id=%d: %v", videoID, err)
+		return 0, 0, err
+	}
+	return po.LikeCount, po.ViewCount, nil
+}
+
 func (r *VideoRepository) Update(ctx context.Context, v *entity.Video) error {
 	po := VideoToPO(v)
-	if err := r.mysql.WithContext(ctx).Select("user_id", "title", "description", "cover_url", "video_url", "category_id", "view_count", "like_count", "comment_count", "duration", "status").Updates(po).Error; err != nil {
+	if err := r.mysql.WithContext(ctx).Select("user_id", "title", "description", "cover_url", "video_url", "category_id", "view_count", "like_count", "comment_count", "duration", "hot_score", "status").Updates(po).Error; err != nil {
 		log.Error.Printf("VideoRepository.Update: failed: %v", err)
 		return err
 	}
@@ -121,6 +134,30 @@ func (r *VideoRepository) ListPublished(ctx context.Context, page, size int) ([]
 		videos[i] = POToVideo(&pos[i])
 	}
 	return videos, total, nil
+}
+
+// ListHot 获取热门视频（按热度分数降序，利用索引）
+func (r *VideoRepository) ListHot(ctx context.Context, limit int) ([]*entity.Video, error) {
+	log.Debug.Printf("VideoRepository.ListHot: started, limit=%d", limit)
+
+	var pos []VideoPO
+	err := r.mysql.WithContext(ctx).Model(&VideoPO{}).
+		Where("status = ? AND hot_score >= 0", videoVO.VideoStatusPublished).
+		Limit(limit).
+		Order("hot_score DESC").
+		Find(&pos).Error
+	if err != nil {
+		log.Error.Printf("VideoRepository.ListHot: failed: %v", err)
+		return nil, err
+	}
+
+	log.Debug.Printf("VideoRepository.ListHot: found %d videos", len(pos))
+
+	videos := make([]*entity.Video, len(pos))
+	for i := range pos {
+		videos[i] = POToVideo(&pos[i])
+	}
+	return videos, nil
 }
 
 func (r *VideoRepository) IncrementView(ctx context.Context, id int64) error {

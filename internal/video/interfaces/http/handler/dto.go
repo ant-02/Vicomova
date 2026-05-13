@@ -57,6 +57,23 @@ type VideoListResponse struct {
 	Total  int64        `json:"total"`
 }
 
+// HotVideoItem 热门视频预览（主页用）
+type HotVideoItem struct {
+	ID           int64  `json:"id"`
+	Title        string `json:"title"`
+	CoverURL     string `json:"cover_url"`
+	Duration     int    `json:"duration"`
+	ViewCount    int64  `json:"view_count"`
+	CommentCount int64  `json:"comment_count"`
+	UserName     string `json:"user_name,omitempty"`
+}
+
+type HotVideoListResponse struct {
+	Videos     []*HotVideoItem `json:"videos"`
+	NextCursor string          `json:"next_cursor,omitempty"`
+	HasMore    bool            `json:"has_more"`
+}
+
 type UploadTokenRequest struct {
 	VideoID    int64 `json:"video_id" form:"video_id"`
 	UploadType int32 `json:"upload_type" form:"upload_type"` // 1=video, 2=cover

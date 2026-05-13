@@ -21,6 +21,7 @@ type VideoPO struct {
 	CommentCount int64          `gorm:"default:0"`
 	Duration     int            `gorm:"default:0"`
 	Status       int8           `gorm:"default:0;index:idx_status"`
+	HotScore     float64        `gorm:"index:idx_hot_score"`
 	CreatedAt    time.Time      `gorm:"autoCreateTime"`
 	UpdatedAt    time.Time      `gorm:"autoUpdateTime"`
 	DeletedAt    gorm.DeletedAt `gorm:"index"`

@@ -6,9 +6,12 @@ import (
 	"sync"
 	"time"
 
+	"vicomova/internal/video/domain/entity"
 	"vicomova/internal/video/domain/repository"
+	"vicomova/pkg/constants"
 	pkgKafka "vicomova/pkg/infrastructure/kafka"
 	"vicomova/pkg/log"
+	"vicomova/pkg/utils"
 )
 
 type ViewCountConsumer struct {
@@ -122,10 +125,33 @@ func (c *ViewCountConsumer) flush() {
 
 	log.Info.Printf("ViewCountConsumer: flushing %d videos to database", len(batch))
 
+	ctx := context.Background()
+
 	// 批量更新数据库
-	for videoID, count := range batch {
-		if err := c.repo.IncrementViewBatch(context.Background(), videoID, count); err != nil {
-			log.Error.Printf("ViewCountConsumer: increment failed videoID=%d: %v", videoID, err)
+	for videoID, delta := range batch {
+		// 获取当前 counts
+		likeCount, viewCount, err := c.repo.GetCounts(ctx, videoID)
+		if err != nil {
+			log.Error.Printf("ViewCountConsumer: GetCounts failed videoID=%d: %v", videoID, err)
+			continue
+		}
+
+		// 内存计算新的 viewCount 和 hotScore
+		newViewCount := viewCount + delta
+		hotScore := utils.WilsonScore(likeCount, newViewCount, constants.WilsonZ)
+		if hotScore < 0 {
+			hotScore = 0 // 防止 WilsonScore 在小样本下返回微小负数
+		}
+
+		// 一次性更新
+		video := &entity.Video{
+			ID:        videoID,
+			LikeCount: likeCount,
+			ViewCount: newViewCount,
+			HotScore:  hotScore,
+		}
+		if err := c.repo.Update(ctx, video); err != nil {
+			log.Error.Printf("ViewCountConsumer: update hot score failed videoID=%d: %v", videoID, err)
 		}
 	}
 

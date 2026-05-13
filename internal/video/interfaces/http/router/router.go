@@ -13,12 +13,12 @@ func RegisterRoutes(h *server.Hertz, videoHandler *handler.VideoHandler) {
 	video.GET("/stream", videoHandler.GetVideoStream)
 	video.GET("/list", videoHandler.ListByCategory)
 	video.GET("/hot", videoHandler.ListHotVideos)
+	video.GET("/list/published", videoHandler.GetPublishedList)
 
 	// Protected routes (auth required)
 	videoAuth := video.Group("/", videoAuthMw()...)
 	videoAuth.POST("/save", videoHandler.SaveVideo)
 	videoAuth.POST("/submit", videoHandler.SubmitVideo)
 	videoAuth.POST("/publish", videoHandler.PublishVideo)
-	videoAuth.GET("/list/published", videoHandler.GetPublishedList)
 	videoAuth.POST("/upload/token", videoHandler.GetUploadToken)
 }

@@ -113,33 +113,59 @@ func (h *VideoHandler) ListByCategory(ctx context.Context, req *video.ListByCate
 }
 
 func (h *VideoHandler) ListHotVideos(ctx context.Context, req *video.ListHotVideosRequest) (*video.ListHotVideosResponse, error) {
-	videos, err := h.qrySvc.ListHot(ctx, int(req.Limit))
+	result, err := h.qrySvc.ListHotVideos(ctx, &query.ListHotVideosQuery{
+		Cursor: req.Cursor,
+		Limit:  int(req.Limit),
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	protoVideos := make([]*video.Video, len(videos))
-	for i, v := range videos {
-		protoVideos[i] = toProtoVideo(v)
+	protoVideos := make([]*video.Video, len(result.Videos))
+	for i, item := range result.Videos {
+		protoVideos[i] = &video.Video{
+			Id:           item.VideoID,
+			Title:        item.Title,
+			CoverUrl:     item.CoverURL,
+			Duration:     int32(item.Duration),
+			ViewCount:    item.ViewCount,
+			CommentCount: item.CommentCount,
+			UserName:     item.UserName,
+		}
 	}
 
-	return &video.ListHotVideosResponse{Videos: protoVideos}, nil
+	return &video.ListHotVideosResponse{
+		Videos:     protoVideos,
+		NextCursor: result.NextCursor,
+		HasMore:    result.HasMore,
+	}, nil
 }
 
 func (h *VideoHandler) GetPublishedList(ctx context.Context, req *video.GetPublishedListRequest) (*video.GetPublishedListResponse, error) {
-	result, err := h.qrySvc.ListByUser(ctx, req.UserId, int(req.Page), int(req.Size))
+	result, err := h.qrySvc.ListPublishedVideos(ctx, req.UserId, &query.PublishedVideosQuery{
+		Cursor: req.Cursor,
+		Limit:  int(req.Size),
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	videos := make([]*video.Video, len(result.Videos))
-	for i, v := range result.Videos {
-		videos[i] = toProtoVideo(v)
+	protoVideos := make([]*video.Video, len(result.Videos))
+	for i, item := range result.Videos {
+		protoVideos[i] = &video.Video{
+			Id:           item.VideoID,
+			Title:        item.Title,
+			CoverUrl:     item.CoverURL,
+			Duration:     int32(item.Duration),
+			ViewCount:    item.ViewCount,
+			CommentCount: item.CommentCount,
+		}
 	}
 
 	return &video.GetPublishedListResponse{
-		Videos: videos,
-		Total:  result.Total,
+		Videos:     protoVideos,
+		NextCursor: result.NextCursor,
+		HasMore:    result.HasMore,
 	}, nil
 }
 

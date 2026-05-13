@@ -21,6 +21,7 @@ func VideoToPO(v *entity.Video) *VideoPO {
 		LikeCount:    v.LikeCount,
 		CommentCount: v.CommentCount,
 		Duration:     v.Duration,
+		HotScore:     v.HotScore,
 		Status:       int8(v.Status),
 	}
 }
@@ -41,6 +42,7 @@ func POToVideo(po *VideoPO) *entity.Video {
 		LikeCount:    po.LikeCount,
 		CommentCount: po.CommentCount,
 		Duration:     po.Duration,
+		HotScore:     po.HotScore,
 		Status:       videoVO.VideoStatus(po.Status),
 		CreatedAt:    po.CreatedAt,
 		UpdatedAt:    po.UpdatedAt,

@@ -101,7 +101,8 @@ const (
 
 // 热门视频相关
 const (
-	DefaultHotVideoLimit = 20
-	MaxHotVideoLimit     = 100
-	WilsonZ              = 1.96 // Wilson 算法置信度参数
+	DefaultHotVideoLimit    = 20
+	MaxHotVideoLimit        = 100
+	WilsonZ                 = 1.96            // Wilson 算法置信度参数
+	HotCacheRefreshInterval = 5 * time.Minute // 热门缓存刷新间隔
 )

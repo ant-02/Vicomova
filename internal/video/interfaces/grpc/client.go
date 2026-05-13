@@ -64,17 +64,18 @@ func (c *VideoClient) ListByCategory(ctx context.Context, categoryID int32, page
 	})
 }
 
-func (c *VideoClient) ListHotVideos(ctx context.Context, limit int32) (*video.ListHotVideosResponse, error) {
+func (c *VideoClient) ListHotVideos(ctx context.Context, limit int32, cursor string) (*video.ListHotVideosResponse, error) {
 	return c.cli.ListHotVideos(ctx, &video.ListHotVideosRequest{
-		Limit: limit,
+		Limit:  limit,
+		Cursor: cursor,
 	})
 }
 
-func (c *VideoClient) GetPublishedList(ctx context.Context, userID int64, page, size int32) (*video.GetPublishedListResponse, error) {
+func (c *VideoClient) GetPublishedList(ctx context.Context, userID int64, size int32, cursor string) (*video.GetPublishedListResponse, error) {
 	return c.cli.GetPublishedList(ctx, &video.GetPublishedListRequest{
 		UserId: userID,
-		Page:   page,
 		Size:   size,
+		Cursor: cursor,
 	})
 }
 
