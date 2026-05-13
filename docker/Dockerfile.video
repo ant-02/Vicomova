@@ -1,0 +1,31 @@
+FROM golang:1.25-alpine AS builder
+
+WORKDIR /app
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY api ./api
+
+# Install kitex and generate proto code
+RUN go install github.com/cloudwego/kitex/tool/cmd/kitex@latest && \
+    go install github.com/cloudwego/thriftgo@latest && \
+    mkdir -p third_party/kitex_gen && \
+    kitex -module vicomova -service video -gen-path third_party/kitex_gen api/rpc/video/video.proto && \
+    rm -f main.go handler.go build.sh script.go 2>/dev/null || true
+
+COPY . .
+
+RUN CGO_ENABLED=0 GOOS=linux go build -o /app/video ./cmd/video
+
+FROM alpine:3.19
+
+RUN apk --no-cache add ca-certificates
+
+WORKDIR /app
+
+COPY --from=builder /app/video .
+
+EXPOSE 8889
+
+CMD ["./video", "-config", "config/base.yaml", "-port", "8889"]

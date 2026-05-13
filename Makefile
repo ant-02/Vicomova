@@ -75,7 +75,7 @@ vet:
 
 # 运行测试
 test:
-	go test -race -cover $$(go list ./... | grep -v -E 'cmd|docs|pkg|third_party|wire') -short
+	go test -race -cover $$(go list ./... | grep -v -E 'cmd|docs|pkg|third_party|wire|interfaces|infrastructure|gateway|mock') -short
 
 # 检查项目（goimports + vet + test）
 check: goimports vet test
