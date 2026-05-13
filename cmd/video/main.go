@@ -59,10 +59,10 @@ func main() {
 
 	// 停止消费者
 	if p.ConsumerManager != nil {
-		p.ConsumerManager.StopAll()
+		_ = p.ConsumerManager.StopAll()
 		log.Info.Printf("Consumer manager stopped")
 	}
 
-	svr.Stop()
+	_ = svr.Stop()
 	config.Close()
 }

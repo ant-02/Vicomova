@@ -44,13 +44,13 @@ func (s *VideoQueryService) GetVideoStream(ctx context.Context, videoID int64) (
 
 		// 写入缓存
 		if s.cache != nil {
-			s.cache.Set(ctx, video)
+			_, _ = s.cache.Set(ctx, video)
 		}
 	}
 
 	// 触发播放量统计
 	if s.viewCountProducer != nil {
-		s.viewCountProducer.Record(ctx, videoID)
+		_, _ = s.viewCountProducer.Record(ctx, videoID)
 	}
 
 	return &GetVideoStreamResult{Video: video}, nil
@@ -174,7 +174,7 @@ func (s *VideoQueryService) ListCategoryVideos(ctx context.Context, q *CategoryV
 			metas[id] = meta
 			// 异步缓存
 			go func(videoID int64, m *entity.HotVideoMeta) {
-				s.categoryCache.SetVideoMeta(context.Background(), videoID, m)
+				_ = s.categoryCache.SetVideoMeta(context.Background(), videoID, m)
 			}(id, meta)
 		}
 	}
@@ -353,7 +353,7 @@ func (s *VideoQueryService) ListHotVideos(ctx context.Context, q *ListHotVideosQ
 			metas[id] = meta
 			// 异步缓存
 			go func(videoID int64, m *entity.HotVideoMeta) {
-				s.hotCache.SetVideoMeta(context.Background(), videoID, m)
+				_ = s.hotCache.SetVideoMeta(context.Background(), videoID, m)
 			}(id, meta)
 		}
 	}
