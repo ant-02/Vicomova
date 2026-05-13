@@ -14,9 +14,9 @@ import (
 )
 
 const (
-	CategoryVideosKeyPrefix  = "category:%d:videos"    // ZSET: 分类视频ID + 分数
-	CategoryVideoMetaPrefix  = "category:meta:%d"       // HASH: 分类视频元数据
-	CategoryVideoMetaTTL     = 30 * time.Minute         // 元数据缓存 30min
+	CategoryVideosKeyPrefix = "category:%d:videos" // ZSET: 分类视频ID + 分数
+	CategoryVideoMetaPrefix = "category:meta:%d"   // HASH: 分类视频元数据
+	CategoryVideoMetaTTL    = 30 * time.Minute     // 元数据缓存 30min
 )
 
 type CategoryVideoCache struct {

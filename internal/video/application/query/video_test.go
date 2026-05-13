@@ -38,10 +38,10 @@ func TestGetVideoStream_CacheHit(t *testing.T) {
 	producer := mock.NewMockViewCountProducer()
 
 	video := &entity.Video{
-		ID:       100,
-		UserID:   1,
-		Title:    "Cached Video",
-		Status:   videoVO.VideoStatusPublished,
+		ID:        100,
+		UserID:    1,
+		Title:     "Cached Video",
+		Status:    videoVO.VideoStatusPublished,
 		ViewCount: 100,
 	}
 	cache.Videos[100] = video

@@ -7,10 +7,10 @@ import (
 )
 
 type MockVideoCache struct {
-	Videos    map[int64]*entity.Video
-	GetErr    error
-	SetErr    error
-	DelErr    error
+	Videos map[int64]*entity.Video
+	GetErr error
+	SetErr error
+	DelErr error
 }
 
 func NewMockVideoCache() *MockVideoCache {
@@ -47,13 +47,13 @@ func (m *MockVideoCache) Del(ctx context.Context, id int64) error {
 }
 
 type MockHotVideoCache struct {
-	Metas        map[int64]*entity.HotVideoMeta
-	HotVideos    []entity.HotVideoScore
-	GetMetaErr   error
-	SetMetaErr   error
-	GetIDsErr    error
-	SetIDsErr    error
-	CountErr     error
+	Metas      map[int64]*entity.HotVideoMeta
+	HotVideos  []entity.HotVideoScore
+	GetMetaErr error
+	SetMetaErr error
+	GetIDsErr  error
+	SetIDsErr  error
+	CountErr   error
 }
 
 func NewMockHotVideoCache() *MockHotVideoCache {
@@ -124,10 +124,10 @@ func (m *MockHotVideoCache) ClearHotVideos(ctx context.Context) error {
 }
 
 type MockCategoryVideoCache struct {
-	Metas    map[int64]*entity.HotVideoMeta
-	Videos   map[int][]entity.HotVideoScore
-	GetErr   error
-	SetErr   error
+	Metas  map[int64]*entity.HotVideoMeta
+	Videos map[int][]entity.HotVideoScore
+	GetErr error
+	SetErr error
 }
 
 func NewMockCategoryVideoCache() *MockCategoryVideoCache {

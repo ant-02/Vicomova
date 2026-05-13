@@ -36,7 +36,7 @@ func (s *VideoCommandService) Save(ctx context.Context, cmd *SaveVideoCommand) (
 		}
 		// 更新后删除缓存
 		if s.cache != nil {
-			_, _ = s.cache.Del(ctx, v.ID)
+			_ = s.cache.Del(ctx, v.ID)
 		}
 		return &SaveVideoResult{VideoID: v.ID}, nil
 	}
@@ -102,7 +102,7 @@ func (s *VideoCommandService) Publish(ctx context.Context, cmd *PublishVideoComm
 	}
 	// 删除缓存
 	if s.cache != nil {
-		_, _ = s.cache.Del(ctx, v.ID)
+		_ = s.cache.Del(ctx, v.ID)
 	}
 	return &PublishVideoResult{VideoID: v.ID}, nil
 }

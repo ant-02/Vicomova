@@ -44,13 +44,13 @@ func (s *VideoQueryService) GetVideoStream(ctx context.Context, videoID int64) (
 
 		// 写入缓存
 		if s.cache != nil {
-			_, _ = s.cache.Set(ctx, video)
+			_ = s.cache.Set(ctx, video)
 		}
 	}
 
 	// 触发播放量统计
 	if s.viewCountProducer != nil {
-		_, _ = s.viewCountProducer.Record(ctx, videoID)
+		_ = s.viewCountProducer.Record(ctx, videoID)
 	}
 
 	return &GetVideoStreamResult{Video: video}, nil
