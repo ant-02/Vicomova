@@ -56,48 +56,56 @@ func (r *CommentRepository) Get(ctx context.Context, id int64) (*entity.Comment,
 	return POToComment(&po), nil
 }
 
-func (r *CommentRepository) ListByVideo(ctx context.Context, videoID int64, page, size int) ([]*entity.Comment, int64, error) {
+func (r *CommentRepository) ListByVideo(ctx context.Context, videoID int64, cursor int64, limit int) ([]*entity.Comment, bool, error) {
 	var pos []CommentPO
-	var total int64
 
 	db := r.mysql.WithContext(ctx).Model(&CommentPO{}).
 		Where("video_id = ? AND parent_id = 0", videoID)
-	if err := db.Count(&total).Error; err != nil {
-		return nil, 0, err
+
+	if cursor > 0 {
+		db = db.Where("created_at < ?", cursor)
 	}
 
-	offset := (page - 1) * size
-	if err := db.Offset(offset).Limit(size).Order("created_at DESC").Find(&pos).Error; err != nil {
-		return nil, 0, err
+	if err := db.Order("created_at DESC").Limit(limit + 1).Find(&pos).Error; err != nil {
+		return nil, false, err
+	}
+
+	hasMore := len(pos) > limit
+	if hasMore {
+		pos = pos[:limit]
 	}
 
 	comments := make([]*entity.Comment, len(pos))
 	for i := range pos {
 		comments[i] = POToComment(&pos[i])
 	}
-	return comments, total, nil
+	return comments, hasMore, nil
 }
 
-func (r *CommentRepository) ListByParent(ctx context.Context, parentID int64, page, size int) ([]*entity.Comment, int64, error) {
+func (r *CommentRepository) ListByParent(ctx context.Context, parentID int64, cursor int64, limit int) ([]*entity.Comment, bool, error) {
 	var pos []CommentPO
-	var total int64
 
 	db := r.mysql.WithContext(ctx).Model(&CommentPO{}).
 		Where("parent_id = ?", parentID)
-	if err := db.Count(&total).Error; err != nil {
-		return nil, 0, err
+
+	if cursor > 0 {
+		db = db.Where("created_at > ?", cursor)
 	}
 
-	offset := (page - 1) * size
-	if err := db.Offset(offset).Limit(size).Order("created_at ASC").Find(&pos).Error; err != nil {
-		return nil, 0, err
+	if err := db.Order("created_at ASC").Limit(limit + 1).Find(&pos).Error; err != nil {
+		return nil, false, err
+	}
+
+	hasMore := len(pos) > limit
+	if hasMore {
+		pos = pos[:limit]
 	}
 
 	comments := make([]*entity.Comment, len(pos))
 	for i := range pos {
 		comments[i] = POToComment(&pos[i])
 	}
-	return comments, total, nil
+	return comments, hasMore, nil
 }
 
 func (r *CommentRepository) IncrementLike(ctx context.Context, id int64) error {

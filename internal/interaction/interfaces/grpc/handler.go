@@ -2,6 +2,7 @@ package grpc
 
 import (
 	"context"
+	"strconv"
 
 	"vicomova/internal/interaction/application/command"
 	"vicomova/internal/interaction/application/query"
@@ -48,7 +49,7 @@ func (h *InteractionHandler) UnlikeVideo(ctx context.Context, req *interaction.U
 }
 
 func (h *InteractionHandler) ListLikes(ctx context.Context, req *interaction.ListLikesRequest) (*interaction.ListLikesResponse, error) {
-	result, err := h.qrySvc.ListLikes(ctx, req.UserId, req.TargetType, int(req.Page), int(req.Size))
+	result, hasMore, err := h.qrySvc.ListLikes(ctx, req.UserId, req.TargetType, req.Cursor, int(req.Limit))
 	if err != nil {
 		return nil, err
 	}
@@ -65,9 +66,16 @@ func (h *InteractionHandler) ListLikes(ctx context.Context, req *interaction.Lis
 		}
 	}
 
+	var nextCursor string
+	if hasMore && len(likes) > 0 {
+		lastLike := likes[len(likes)-1]
+		nextCursor = strconv.FormatInt(lastLike.CreatedAt.UnixMilli(), 10)
+	}
+
 	return &interaction.ListLikesResponse{
-		Likes: protoLikes,
-		Total: result.Total,
+		Likes:      protoLikes,
+		NextCursor: nextCursor,
+		HasMore:    hasMore,
 	}, nil
 }
 
@@ -96,7 +104,7 @@ func (h *InteractionHandler) RemoveFavorite(ctx context.Context, req *interactio
 }
 
 func (h *InteractionHandler) ListFavorites(ctx context.Context, req *interaction.ListFavoritesRequest) (*interaction.ListFavoritesResponse, error) {
-	result, err := h.qrySvc.ListFavorites(ctx, req.UserId, int(req.Page), int(req.Size))
+	result, hasMore, err := h.qrySvc.ListFavorites(ctx, req.UserId, req.Cursor, int(req.Limit))
 	if err != nil {
 		return nil, err
 	}
@@ -112,9 +120,16 @@ func (h *InteractionHandler) ListFavorites(ctx context.Context, req *interaction
 		}
 	}
 
+	var nextCursor string
+	if hasMore && len(favs) > 0 {
+		lastFav := favs[len(favs)-1]
+		nextCursor = strconv.FormatInt(lastFav.CreatedAt.UnixMilli(), 10)
+	}
+
 	return &interaction.ListFavoritesResponse{
-		Favorites: protoFavs,
-		Total:     result.Total,
+		Favorites:  protoFavs,
+		NextCursor: nextCursor,
+		HasMore:    hasMore,
 	}, nil
 }
 
@@ -141,7 +156,7 @@ func (h *InteractionHandler) DeleteComment(ctx context.Context, req *interaction
 }
 
 func (h *InteractionHandler) ListComments(ctx context.Context, req *interaction.ListCommentsRequest) (*interaction.ListCommentsResponse, error) {
-	result, err := h.qrySvc.ListComments(ctx, req.VideoId, req.ParentId, int(req.Page), int(req.Size))
+	result, hasMore, err := h.qrySvc.ListComments(ctx, req.VideoId, req.ParentId, req.Cursor, int(req.Limit))
 	if err != nil {
 		return nil, err
 	}
@@ -160,9 +175,16 @@ func (h *InteractionHandler) ListComments(ctx context.Context, req *interaction.
 		}
 	}
 
+	var nextCursor string
+	if hasMore && len(comments) > 0 {
+		lastComment := comments[len(comments)-1]
+		nextCursor = strconv.FormatInt(lastComment.CreatedAt.UnixMilli(), 10)
+	}
+
 	return &interaction.ListCommentsResponse{
-		Comments: protoComments,
-		Total:    result.Total,
+		Comments:   protoComments,
+		NextCursor: nextCursor,
+		HasMore:    hasMore,
 	}, nil
 }
 

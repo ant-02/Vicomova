@@ -6,36 +6,36 @@ import (
 	"vicomova/internal/interaction/domain/entity"
 )
 
-func (s *InteractionQueryService) ListLikes(ctx context.Context, userID int64, targetType string, page, size int) (*ListResult, error) {
-	likes, total, err := s.likeRepo.ListByUser(ctx, userID, targetType, page, size)
+func (s *InteractionQueryService) ListLikes(ctx context.Context, userID int64, targetType string, cursor int64, limit int) (*ListResult, bool, error) {
+	likes, hasMore, err := s.likeRepo.ListByUser(ctx, userID, targetType, cursor, limit)
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
-	return &ListResult{Items: likes, Total: total}, nil
+	return &ListResult{Items: likes}, hasMore, nil
 }
 
-func (s *InteractionQueryService) ListFavorites(ctx context.Context, userID int64, page, size int) (*ListResult, error) {
-	favs, total, err := s.favoriteRepo.ListByUser(ctx, userID, page, size)
+func (s *InteractionQueryService) ListFavorites(ctx context.Context, userID int64, cursor int64, limit int) (*ListResult, bool, error) {
+	favs, hasMore, err := s.favoriteRepo.ListByUser(ctx, userID, cursor, limit)
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
-	return &ListResult{Items: favs, Total: total}, nil
+	return &ListResult{Items: favs}, hasMore, nil
 }
 
-func (s *InteractionQueryService) ListComments(ctx context.Context, videoID int64, parentID int64, page, size int) (*ListResult, error) {
+func (s *InteractionQueryService) ListComments(ctx context.Context, videoID int64, parentID int64, cursor int64, limit int) (*ListResult, bool, error) {
 	var comments []*entity.Comment
-	var total int64
+	var hasMore bool
 	var err error
 
 	if parentID == 0 {
-		comments, total, err = s.commentRepo.ListByVideo(ctx, videoID, page, size)
+		comments, hasMore, err = s.commentRepo.ListByVideo(ctx, videoID, cursor, limit)
 	} else {
-		comments, total, err = s.commentRepo.ListByParent(ctx, parentID, page, size)
+		comments, hasMore, err = s.commentRepo.ListByParent(ctx, parentID, cursor, limit)
 	}
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
-	return &ListResult{Items: comments, Total: total}, nil
+	return &ListResult{Items: comments}, hasMore, nil
 }
 
 func (s *InteractionQueryService) IsLiked(ctx context.Context, userID int64, targetType string, targetID int64) (bool, error) {

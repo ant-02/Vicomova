@@ -98,8 +98,8 @@ func (h *InteractionHandler) UnlikeVideo(ctx context.Context, c *app.RequestCont
 // @Produce json
 // @Security BearerAuth
 // @Param target_type query string false "目标类型 (video/comment)" default(video)
-// @Param page query int32 false "页码" default(1)
-// @Param size query int32 false "每页数量" default(10)
+// @Param cursor query int64 false "cursor时间戳(毫秒)" default(0)
+// @Param limit query int32 false "每页数量" default(10)
 // @Success 200 {object} LikeListResponse
 // @Failure 401 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse
@@ -112,10 +112,10 @@ func (h *InteractionHandler) ListLikes(ctx context.Context, c *app.RequestContex
 	}
 
 	targetType := c.DefaultQuery("target_type", "video")
-	page, _ := strconv.ParseInt(c.DefaultQuery("page", "1"), 10, 32)
-	size, _ := strconv.ParseInt(c.DefaultQuery("size", "10"), 10, 32)
+	cursor, _ := strconv.ParseInt(c.DefaultQuery("cursor", "0"), 10, 64)
+	limit, _ := strconv.ParseInt(c.DefaultQuery("limit", "10"), 10, 32)
 
-	resp, err := h.interactionClient.ListLikes(ctx, userID, targetType, int32(page), int32(size))
+	resp, err := h.interactionClient.ListLikes(ctx, userID, targetType, cursor, int32(limit))
 	if err != nil {
 		hlog.Errorf("ListLikes: userID=%d failed: %v", userID, err)
 		c.JSON(500, hertz.Fail(500, "Failed to get like list"))
@@ -134,8 +134,9 @@ func (h *InteractionHandler) ListLikes(ctx context.Context, c *app.RequestContex
 	}
 
 	c.JSON(200, hertz.Success(LikeListResponse{
-		Likes: likes,
-		Total: resp.Total,
+		Likes:      likes,
+		NextCursor: resp.NextCursor,
+		HasMore:    resp.HasMore,
 	}))
 }
 
@@ -216,8 +217,8 @@ func (h *InteractionHandler) RemoveFavorite(ctx context.Context, c *app.RequestC
 // @Tags interaction
 // @Produce json
 // @Security BearerAuth
-// @Param page query int32 false "页码" default(1)
-// @Param size query int32 false "每页数量" default(10)
+// @Param cursor query int64 false "cursor时间戳(毫秒)" default(0)
+// @Param limit query int32 false "每页数量" default(10)
 // @Success 200 {object} FavoriteListResponse
 // @Failure 401 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse
@@ -229,10 +230,10 @@ func (h *InteractionHandler) ListFavorites(ctx context.Context, c *app.RequestCo
 		return
 	}
 
-	page, _ := strconv.ParseInt(c.DefaultQuery("page", "1"), 10, 32)
-	size, _ := strconv.ParseInt(c.DefaultQuery("size", "10"), 10, 32)
+	cursor, _ := strconv.ParseInt(c.DefaultQuery("cursor", "0"), 10, 64)
+	limit, _ := strconv.ParseInt(c.DefaultQuery("limit", "10"), 10, 32)
 
-	resp, err := h.interactionClient.ListFavorites(ctx, userID, int32(page), int32(size))
+	resp, err := h.interactionClient.ListFavorites(ctx, userID, cursor, int32(limit))
 	if err != nil {
 		hlog.Errorf("ListFavorites: userID=%d failed: %v", userID, err)
 		c.JSON(500, hertz.Fail(500, "Failed to get favorite list"))
@@ -250,8 +251,9 @@ func (h *InteractionHandler) ListFavorites(ctx context.Context, c *app.RequestCo
 	}
 
 	c.JSON(200, hertz.Success(FavoriteListResponse{
-		Favorites: favorites,
-		Total:     resp.Total,
+		Favorites:  favorites,
+		NextCursor: resp.NextCursor,
+		HasMore:    resp.HasMore,
 	}))
 }
 
@@ -336,8 +338,8 @@ func (h *InteractionHandler) DeleteComment(ctx context.Context, c *app.RequestCo
 // @Produce json
 // @Param video_id query int64 true "视频ID"
 // @Param parent_id query int64 false "父评论ID (0表示根评论)" default(0)
-// @Param page query int32 false "页码" default(1)
-// @Param size query int32 false "每页数量" default(10)
+// @Param cursor query int64 false "cursor时间戳(毫秒)" default(0)
+// @Param limit query int32 false "每页数量" default(10)
 // @Success 200 {object} CommentListResponse
 // @Failure 400 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse
@@ -350,10 +352,10 @@ func (h *InteractionHandler) ListComments(ctx context.Context, c *app.RequestCon
 	}
 
 	parentID, _ := strconv.ParseInt(c.DefaultQuery("parent_id", "0"), 10, 64)
-	page, _ := strconv.ParseInt(c.DefaultQuery("page", "1"), 10, 32)
-	size, _ := strconv.ParseInt(c.DefaultQuery("size", "10"), 10, 32)
+	cursor, _ := strconv.ParseInt(c.DefaultQuery("cursor", "0"), 10, 64)
+	limit, _ := strconv.ParseInt(c.DefaultQuery("limit", "10"), 10, 32)
 
-	resp, err := h.interactionClient.ListComments(ctx, videoID, parentID, int32(page), int32(size))
+	resp, err := h.interactionClient.ListComments(ctx, videoID, parentID, cursor, int32(limit))
 	if err != nil {
 		hlog.Errorf("ListComments: videoID=%d failed: %v", videoID, err)
 		c.JSON(500, hertz.Fail(500, "Failed to get comment list"))
@@ -374,8 +376,9 @@ func (h *InteractionHandler) ListComments(ctx context.Context, c *app.RequestCon
 	}
 
 	c.JSON(200, hertz.Success(CommentListResponse{
-		Comments: comments,
-		Total:    resp.Total,
+		Comments:   comments,
+		NextCursor: resp.NextCursor,
+		HasMore:    resp.HasMore,
 	}))
 }
 

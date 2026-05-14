@@ -44,8 +44,9 @@ type LikeItem struct {
 }
 
 type LikeListResponse struct {
-	Likes []*LikeItem `json:"likes"`
-	Total int64       `json:"total"`
+	Likes      []*LikeItem `json:"likes"`
+	NextCursor string      `json:"next_cursor"`
+	HasMore    bool        `json:"has_more"`
 }
 
 type FavoriteItem struct {
@@ -56,8 +57,9 @@ type FavoriteItem struct {
 }
 
 type FavoriteListResponse struct {
-	Favorites []*FavoriteItem `json:"favorites"`
-	Total     int64           `json:"total"`
+	Favorites  []*FavoriteItem `json:"favorites"`
+	NextCursor string          `json:"next_cursor"`
+	HasMore    bool            `json:"has_more"`
 }
 
 type CommentItem struct {
@@ -71,8 +73,9 @@ type CommentItem struct {
 }
 
 type CommentListResponse struct {
-	Comments []*CommentItem `json:"comments"`
-	Total    int64          `json:"total"`
+	Comments   []*CommentItem `json:"comments"`
+	NextCursor string         `json:"next_cursor"`
+	HasMore    bool           `json:"has_more"`
 }
 
 type SuccessResponse struct {

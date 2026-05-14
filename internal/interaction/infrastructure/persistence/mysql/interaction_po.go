@@ -14,6 +14,7 @@ type LikePO struct {
 	TargetType string         `gorm:"size:32;not null;uniqueIndex:uk_like"`
 	TargetID   int64          `gorm:"not null;uniqueIndex:uk_like;index:idx_target"`
 	CreatedAt  time.Time      `gorm:"autoCreateTime"`
+	UpdatedAt  time.Time      `gorm:"autoUpdateTime"`
 	DeletedAt  gorm.DeletedAt `gorm:"index"`
 }
 
@@ -42,6 +43,7 @@ type FavoritePO struct {
 	UserID    int64          `gorm:"not null;uniqueIndex:uk_favorite"`
 	VideoID   int64          `gorm:"not null;uniqueIndex:uk_favorite;index:idx_video"`
 	CreatedAt time.Time      `gorm:"autoCreateTime"`
+	UpdatedAt time.Time      `gorm:"autoUpdateTime"`
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 }
 

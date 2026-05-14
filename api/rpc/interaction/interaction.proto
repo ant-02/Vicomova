@@ -34,13 +34,14 @@ message UnlikeVideoResponse {}
 message ListLikesRequest {
     int64 user_id = 1;
     string target_type = 2; // "video" or "comment"
-    int32 page = 3;
-    int32 size = 4;
+    int64 cursor = 3; // timestamp in milliseconds, 0 for first page
+    int32 limit = 4;
 }
 
 message ListLikesResponse {
     repeated Like likes = 1;
-    int64 total = 2;
+    string next_cursor = 2;
+    bool has_more = 3;
 }
 
 message AddFavoriteRequest {
@@ -59,13 +60,14 @@ message RemoveFavoriteResponse {}
 
 message ListFavoritesRequest {
     int64 user_id = 1;
-    int32 page = 2;
-    int32 size = 3;
+    int64 cursor = 2; // timestamp in milliseconds, 0 for first page
+    int32 limit = 3;
 }
 
 message ListFavoritesResponse {
     repeated Favorite favorites = 1;
-    int64 total = 2;
+    string next_cursor = 2;
+    bool has_more = 3;
 }
 
 message CommentRequest {
@@ -89,13 +91,14 @@ message DeleteCommentResponse {}
 message ListCommentsRequest {
     int64 video_id = 1;
     int64 parent_id = 2; // 0 for root comments
-    int32 page = 3;
-    int32 size = 4;
+    int64 cursor = 3;   // timestamp in milliseconds, 0 for first page
+    int32 limit = 4;
 }
 
 message ListCommentsResponse {
     repeated Comment comments = 1;
-    int64 total = 2;
+    string next_cursor = 2;
+    bool has_more = 3;
 }
 
 message LikeCommentRequest {

@@ -38,12 +38,12 @@ func (c *InteractionClient) UnlikeVideo(ctx context.Context, userID, videoID int
 	})
 }
 
-func (c *InteractionClient) ListLikes(ctx context.Context, userID int64, targetType string, page, size int32) (*interaction.ListLikesResponse, error) {
+func (c *InteractionClient) ListLikes(ctx context.Context, userID int64, targetType string, cursor int64, limit int32) (*interaction.ListLikesResponse, error) {
 	return c.cli.ListLikes(ctx, &interaction.ListLikesRequest{
 		UserId:     userID,
 		TargetType: targetType,
-		Page:       page,
-		Size:       size,
+		Cursor:     cursor,
+		Limit:      limit,
 	})
 }
 
@@ -61,11 +61,11 @@ func (c *InteractionClient) RemoveFavorite(ctx context.Context, userID, videoID 
 	})
 }
 
-func (c *InteractionClient) ListFavorites(ctx context.Context, userID int64, page, size int32) (*interaction.ListFavoritesResponse, error) {
+func (c *InteractionClient) ListFavorites(ctx context.Context, userID int64, cursor int64, limit int32) (*interaction.ListFavoritesResponse, error) {
 	return c.cli.ListFavorites(ctx, &interaction.ListFavoritesRequest{
 		UserId: userID,
-		Page:   page,
-		Size:   size,
+		Cursor: cursor,
+		Limit:  limit,
 	})
 }
 
@@ -85,12 +85,12 @@ func (c *InteractionClient) DeleteComment(ctx context.Context, userID, commentID
 	})
 }
 
-func (c *InteractionClient) ListComments(ctx context.Context, videoID int64, parentID int64, page, size int32) (*interaction.ListCommentsResponse, error) {
+func (c *InteractionClient) ListComments(ctx context.Context, videoID int64, parentID int64, cursor int64, limit int32) (*interaction.ListCommentsResponse, error) {
 	return c.cli.ListComments(ctx, &interaction.ListCommentsRequest{
 		VideoId:  videoID,
 		ParentId: parentID,
-		Page:     page,
-		Size:     size,
+		Cursor:   cursor,
+		Limit:    limit,
 	})
 }
 
