@@ -11,12 +11,14 @@ COPY api ./api
 RUN go install github.com/cloudwego/kitex/tool/cmd/kitex@latest && \
     go install github.com/cloudwego/thriftgo@latest && \
     mkdir -p third_party/kitex_gen && \
+    kitex -module vicomova -service commerce -gen-path third_party/kitex_gen api/rpc/commerce/commerce.proto && \
     kitex -module vicomova -service user -gen-path third_party/kitex_gen api/rpc/user/user.proto && \
+    kitex -module vicomova -service video -gen-path third_party/kitex_gen api/rpc/video/video.proto && \
     rm -f main.go handler.go build.sh script.go 2>/dev/null || true
 
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o /app/user ./cmd/user
+RUN CGO_ENABLED=0 GOOS=linux go build -o /app/commerce ./cmd/commerce
 
 FROM alpine:3.19
 
@@ -24,8 +26,8 @@ RUN apk --no-cache add ca-certificates
 
 WORKDIR /app
 
-COPY --from=builder /app/user .
+COPY --from=builder /app/commerce .
 
-EXPOSE 8888
+EXPOSE 8892
 
-CMD ["./user"]
+CMD ["./commerce"]

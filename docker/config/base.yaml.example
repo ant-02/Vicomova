@@ -16,7 +16,16 @@ redis:
 kafka:
   brokers:
     - "127.0.0.1:9092"
-  topic: "vicomova"
+  sasl:
+    username: "admin"
+    password: "xxx"
+  topics:
+    video-view:
+      name: "vicomova.video.view"
+      group: "video-service"
+      partitions: 3
+      replication: 1
+      retention_hours: 168  # 7天
 
 jwt:
   secret: "xxx"
@@ -39,9 +48,6 @@ oss:
     upload-host: "https://up-z2.qiniup.com"
 
 services:
-  gateway:
-    name: "gateway"
-    addr: "127.0.0.1:8080"
   user:
     name: "user"
     addr: "127.0.0.1:8888"
@@ -51,3 +57,12 @@ services:
   interaction:
     name: "interaction"
     addr: "127.0.0.1:8890"
+  chat:
+    name: "chat"
+    addr: "127.0.0.1:8891"
+  commerce:
+    name: "commerce"
+    addr: "127.0.0.1:8892"
+  gateway:
+    name: "gateway"
+    addr: "127.0.0.1:8080"

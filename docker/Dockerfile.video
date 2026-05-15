@@ -13,7 +13,6 @@ RUN go install github.com/cloudwego/kitex/tool/cmd/kitex@latest && \
     mkdir -p third_party/kitex_gen && \
     kitex -module vicomova -service video -gen-path third_party/kitex_gen api/rpc/video/video.proto && \
     kitex -module vicomova -service user -gen-path third_party/kitex_gen api/rpc/user/user.proto && \
-    kitex -module vicomova -service interaction -gen-path third_party/kitex_gen api/rpc/interaction/interaction.proto && \
     rm -f main.go handler.go build.sh script.go 2>/dev/null || true
 
 COPY . .
@@ -30,4 +29,4 @@ COPY --from=builder /app/video .
 
 EXPOSE 8889
 
-CMD ["./video", "-config", "config/base.yaml", "-port", "8889"]
+CMD ["./video"]
