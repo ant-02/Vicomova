@@ -65,6 +65,7 @@ func NewProvider() (*Provider, error) {
 
 	// Kafka 播放量组件
 	var viewCountProducer repository.ViewCountProducer
+	var videoIndexProducer *infraKafka.VideoIndexProducer
 	var consumerManager *infraKafka.ConsumerManager
 
 	if len(cfg.Kafka.Brokers) > 0 && len(cfg.Kafka.Topics) > 0 {
@@ -82,6 +83,12 @@ func NewProvider() (*Provider, error) {
 
 			consumer := infraKafka.NewViewCountConsumer(topicCfg.Name, topicCfg.Group, videoRepo)
 			consumers = append(consumers, consumer)
+		}
+
+		// video-index topic 用于 Search 服务索引视频
+		if topicCfg, ok := cfg.Kafka.Topics[constants.KafkaTopicVideoIndex]; ok {
+			sender := kafka.GetSender()
+			videoIndexProducer = infraKafka.NewVideoIndexProducer(sender, topicCfg.Name)
 		}
 
 		consumerManager = infraKafka.NewConsumerManager(consumers...)
@@ -109,6 +116,11 @@ func NewProvider() (*Provider, error) {
 
 	cmdSvc := command.NewVideoCommandService(videoRepo, videoCache, ossClient)
 	querySvc := query.NewVideoQueryService(videoRepo, videoCache, ossClient, viewCountProducer, hotVideoCache, categoryVideoCache, userClient)
+
+	// 设置视频索引 Producer
+	if videoIndexProducer != nil {
+		cmdSvc.SetIndexProducer(videoIndexProducer)
+	}
 
 	// 启动时预热热门视频缓存
 	if err := querySvc.WarmUp(context.Background()); err != nil {

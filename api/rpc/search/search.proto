@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package search;
+
+option go_package = "vicomova/api/rpc/search";
+
+service SearchService {
+    rpc SearchVideos(SearchVideosRequest) returns (SearchVideosResponse);
+    rpc IndexVideo(IndexVideoRequest) returns (IndexVideoResponse);
+    rpc DeleteVideoIndex(DeleteVideoIndexRequest) returns (DeleteVideoIndexResponse);
+}
+
+message SearchVideosRequest {
+    string query = 1;
+    int32 limit = 2;
+    string cursor = 3;
+}
+
+message SearchVideosResponse {
+    repeated Video videos = 1;
+    string next_cursor = 2;
+    bool has_more = 3;
+}
+
+message Video {
+    int64 id = 1;
+    string title = 2;
+    string description = 3;
+    string cover_url = 4;
+    int64 view_count = 5;
+    int64 like_count = 6;
+    int64 comment_count = 7;
+    float score = 8;
+}
+
+message IndexVideoRequest {
+    int64 video_id = 1;
+    string title = 2;
+    string description = 3;
+}
+
+message IndexVideoResponse {}
+
+message DeleteVideoIndexRequest {
+    int64 video_id = 1;
+}
+
+message DeleteVideoIndexResponse {}

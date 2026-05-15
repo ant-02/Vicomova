@@ -67,6 +67,16 @@ type OSS struct {
 	Qiniu QiniuOSS `yaml:"qiniu"`
 }
 
+type OpenAI struct {
+	APIKey string `yaml:"api_key"`
+	APIURL string `yaml:"api_url"` // Embedding API 地址，不填则用默认 OpenAI
+	Model  string `yaml:"model"`   // Embedding 模型，不填则用默认 text-embedding-3-small
+}
+
+type Qdrant struct {
+	Addr string `yaml:"addr"`
+}
+
 type Service struct {
 	Name          string `yaml:"name"`
 	Addr          string `yaml:"addr"`
@@ -81,5 +91,7 @@ type Config struct {
 	Email    Email              `yaml:"email"`
 	OSS      OSS                `yaml:"oss"`
 	Services map[string]Service `yaml:"services"`
-	Service  Service
+	Service  Service            `yaml:"service"`
+	OpenAI   OpenAI             `yaml:"openai"`
+	Qdrant   Qdrant             `yaml:"qdrant"`
 }

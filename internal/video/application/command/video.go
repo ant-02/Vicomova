@@ -104,5 +104,7 @@ func (s *VideoCommandService) Publish(ctx context.Context, cmd *PublishVideoComm
 	if s.cache != nil {
 		_ = s.cache.Del(ctx, v.ID)
 	}
+	// 发送索引事件到 Kafka，Search 服务会消费并索引到 Qdrant
+	s.sendIndexEventAsync(ctx, v.ID, v.Title, v.Description)
 	return &PublishVideoResult{VideoID: v.ID}, nil
 }

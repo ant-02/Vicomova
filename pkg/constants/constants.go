@@ -38,6 +38,10 @@ const (
 const (
 	// KafkaTopicVideoView 视频播放量 topic
 	KafkaTopicVideoView = "video-view"
+	// KafkaTopicVideoIndex 视频索引 topic (用于 Search 服务)
+	KafkaTopicVideoIndex = "video-index"
+	// KafkaSendTimeout Kafka 消息发送超时
+	KafkaSendTimeout = 5 * time.Second
 	// KafkaTopicUserSignIn 用户签到 topic
 	KafkaTopicUserSignIn = "user-sign-in"
 	// KafkaTopicCommerceSignIn Commerce 签到 topic
@@ -66,6 +70,7 @@ const (
 	ServiceChat        = "chat"
 	ServiceGateway     = "gateway"
 	ServiceCommerce    = "commerce"
+	ServiceSearch      = "search"
 )
 
 // Etcd config key
