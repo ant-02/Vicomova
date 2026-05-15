@@ -98,3 +98,23 @@ jobs:
           tags: vicomova-video:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Build chat service
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile.chat
+          push: false
+          tags: vicomova-chat:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build commerce service
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile.commerce
+          push: false
+          tags: vicomova-commerce:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
