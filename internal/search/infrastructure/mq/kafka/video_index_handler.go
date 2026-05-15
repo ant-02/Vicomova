@@ -51,7 +51,7 @@ func (h *VideoIndexHandler) Start(ctx context.Context, brokers []string, topic, 
 		for {
 			select {
 			case <-ctx.Done():
-				h.consumer.Close()
+				_ = h.consumer.Close()
 				return
 			case msg, ok := <-ch:
 				if !ok {
