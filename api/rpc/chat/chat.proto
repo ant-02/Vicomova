@@ -1,0 +1,230 @@
+syntax = "proto3";
+
+package chat;
+
+option go_package = "vicomova/third_party/kitex_gen/chat";
+
+// ========== 关注相关 ==========
+
+message FollowRequest {
+    int64 user_id = 1;
+    int64 target_id = 2;
+}
+
+message FollowResponse {}
+
+message UnfollowRequest {
+    int64 user_id = 1;
+    int64 target_id = 2;
+}
+
+message UnfollowResponse {}
+
+message ListFollowersRequest {
+    int64 user_id = 1;
+}
+
+message ListFollowersResponse {
+    repeated User followers = 1;
+}
+
+message ListFollowingRequest {
+    int64 user_id = 1;
+}
+
+message ListFollowingResponse {
+    repeated User following = 1;
+}
+
+message ListFriendsRequest {
+    int64 user_id = 1;
+    int64 cursor = 2;
+    int32 limit = 3;
+}
+
+message ListFriendsResponse {
+    repeated User friends = 1;
+    string next_cursor = 2;
+    bool has_more = 3;
+}
+
+// 检查两人是否为好友（双向关注）
+message IsFriendsRequest {
+    int64 user_id = 1;
+    int64 target_id = 2;
+}
+
+message IsFriendsResponse {
+    bool is_friends = 1;
+}
+
+// 检查用户是否为群成员
+message IsGroupMemberRequest {
+    int64 user_id = 1;
+    int64 group_id = 2;
+}
+
+message IsGroupMemberResponse {
+    bool is_member = 1;
+}
+
+// ========== 1v1 聊天 ==========
+
+message SendMessageRequest {
+    int64 sender_id = 1;
+    int64 receiver_id = 2;
+    string content = 3;
+}
+
+message SendMessageResponse {
+    int64 message_id = 1;
+    int64 conversation_id = 2;
+}
+
+message ListMessagesRequest {
+    int64 user_id = 1;
+    int64 peer_id = 2;
+    int64 cursor = 3;
+    int32 limit = 4;
+}
+
+message ListMessagesResponse {
+    repeated Message messages = 1;
+    string next_cursor = 2;
+    bool has_more = 3;
+}
+
+// ========== 群聊 ==========
+
+message CreateGroupRequest {
+    int64 creator_id = 1;
+    string name = 2;
+}
+
+message CreateGroupResponse {
+    int64 group_id = 1;
+    int64 conversation_id = 2;
+}
+
+message AddGroupMemberRequest {
+    int64 group_id = 1;
+    int64 user_id = 2;
+    int64 admin_id = 3;
+}
+
+message AddGroupMemberResponse {}
+
+message RemoveGroupMemberRequest {
+    int64 group_id = 1;
+    int64 user_id = 2;
+    int64 admin_id = 3;
+}
+
+message RemoveGroupMemberResponse {}
+
+message ListGroupMembersRequest {
+    int64 group_id = 1;
+}
+
+message ListGroupMembersResponse {
+    repeated GroupMember members = 1;
+}
+
+message ListUserGroupsRequest {
+    int64 user_id = 1;
+}
+
+message ListUserGroupsResponse {
+    repeated Group groups = 1;
+}
+
+message SendGroupMessageRequest {
+    int64 sender_id = 1;
+    int64 group_id = 2;
+    string content = 3;
+}
+
+message SendGroupMessageResponse {
+    int64 message_id = 1;
+    int64 conversation_id = 2;
+}
+
+message ListGroupMessagesRequest {
+    int64 group_id = 1;
+    int64 cursor = 2;
+    int32 limit = 3;
+}
+
+message ListGroupMessagesResponse {
+    repeated Message messages = 1;
+    string next_cursor = 2;
+    bool has_more = 3;
+}
+
+// ========== 通用数据结构 ==========
+
+message UserFollow {
+    int64 user_id = 1;
+    int64 following_id = 2;
+    int64 created_at = 3;
+}
+
+message User {
+    int64 id = 1;
+    string username = 2;
+    string avatar = 3;
+}
+
+message Conversation {
+    int64 id = 1;
+    int32 type = 2; // 1=1v1, 2=group
+    string name = 3;
+    string avatar = 4;
+    int64 created_at = 5;
+}
+
+message Group {
+    int64 id = 1;
+    int64 conversation_id = 2;
+    string name = 3;
+    string avatar = 4;
+    int64 member_count = 5;
+}
+
+message GroupMember {
+    int64 user_id = 1;
+    int64 role = 2; // 0=member, 1=admin
+    int64 joined_at = 3;
+}
+
+message Message {
+    int64 id = 1;
+    int64 conversation_id = 2;
+    int64 sender_id = 3;
+    string content = 4;
+    int64 created_at = 5;
+}
+
+service ChatService {
+    // 关注相关
+    rpc Follow(FollowRequest) returns (FollowResponse);
+    rpc Unfollow(UnfollowRequest) returns (UnfollowResponse);
+    rpc ListFollowers(ListFollowersRequest) returns (ListFollowersResponse);
+    rpc ListFollowing(ListFollowingRequest) returns (ListFollowingResponse);
+    rpc ListFriends(ListFriendsRequest) returns (ListFriendsResponse);
+    rpc IsFriends(IsFriendsRequest) returns (IsFriendsResponse);
+    rpc IsGroupMember(IsGroupMemberRequest) returns (IsGroupMemberResponse);
+
+    // 1v1 聊天
+    rpc SendMessage(SendMessageRequest) returns (SendMessageResponse);
+    rpc ListMessages(ListMessagesRequest) returns (ListMessagesResponse);
+
+    // 群聊
+    rpc CreateGroup(CreateGroupRequest) returns (CreateGroupResponse);
+    rpc AddGroupMember(AddGroupMemberRequest) returns (AddGroupMemberResponse);
+    rpc RemoveGroupMember(RemoveGroupMemberRequest) returns (RemoveGroupMemberResponse);
+    rpc ListGroupMembers(ListGroupMembersRequest) returns (ListGroupMembersResponse);
+    rpc ListUserGroups(ListUserGroupsRequest) returns (ListUserGroupsResponse);
+    rpc SendGroupMessage(SendGroupMessageRequest) returns (SendGroupMessageResponse);
+    rpc ListGroupMessages(ListGroupMessagesRequest) returns (ListGroupMessagesResponse);
+}

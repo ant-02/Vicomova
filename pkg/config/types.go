@@ -68,8 +68,9 @@ type OSS struct {
 }
 
 type Service struct {
-	Name string `yaml:"name"`
-	Addr string `yaml:"addr"`
+	Name          string `yaml:"name"`
+	Addr          string `yaml:"addr"`
+	WebSocketAddr string `yaml:"websocket_addr"`
 }
 
 type Config struct {

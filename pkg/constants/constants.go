@@ -38,12 +38,24 @@ const (
 const (
 	// KafkaTopicVideoView 视频播放量 topic
 	KafkaTopicVideoView = "video-view"
+	// KafkaTopicUserSignIn 用户签到 topic
+	KafkaTopicUserSignIn = "user-sign-in"
+	// KafkaTopicCommerceSignIn Commerce 签到 topic
+	KafkaTopicCommerceSignIn = "commerce-sign-in"
+	// KafkaTopicCommerceTransaction 交易 topic
+	KafkaTopicCommerceTransaction = "commerce-transaction"
+	// KafkaTopicCommerceFlashSale 秒杀 topic
+	KafkaTopicCommerceFlashSale = "commerce-flash-sale"
+	// KafkaTopicCommerceLottery 抽奖 topic
+	KafkaTopicCommerceLottery = "commerce-lottery"
 )
 
 // 服务配置 key
 const (
 	// ServiceKeyUser 用户服务配置 key
 	ServiceKeyUser = "user"
+	// ServiceKeyCommerce Commerce 服务配置 key
+	ServiceKeyCommerce = "commerce"
 )
 
 // 服务名称
@@ -51,7 +63,9 @@ const (
 	ServiceUser        = "user"
 	ServiceVideo       = "video"
 	ServiceInteraction = "interaction"
+	ServiceChat        = "chat"
 	ServiceGateway     = "gateway"
+	ServiceCommerce    = "commerce"
 )
 
 // Etcd config key
@@ -97,6 +111,21 @@ const (
 	TableLikes     = "likes"
 	TableComments  = "comments"
 	TableFavorites = "favorites"
+)
+
+// Commerce 数据库表名
+const (
+	TablePointsWallets    = "point_wallets"
+	TableSignInRecords    = "sign_in_records"
+	TableTransactions     = "transactions"
+	TableProducts         = "products"
+	TableOrders           = "orders"
+	TableMemberships      = "memberships"
+	TableVideoPermissions = "video_permissions"
+	TableFlashSales       = "flash_sales"
+	TableFlashSaleStocks  = "flash_sale_stocks"
+	TableLotteryDraws     = "lottery_draws"
+	TableLotteryRecords   = "lottery_records"
 )
 
 // 热门视频相关

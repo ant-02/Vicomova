@@ -1,0 +1,20 @@
+filebeat.inputs:
+  - type: log
+    enabled: true
+    paths:
+      - /usr/share/filebeat/logs/*.log
+    json.keys_under_root: true
+    json.add_error_key: true
+    fields:
+      service: vicomova
+    fields_under_root: true
+
+output.elasticsearch:
+  hosts: ["elasticsearch:9200"]
+  index: "vicomova-logs-%{+yyyy.MM.dd}"
+
+setup.template.name: "vicomova-logs"
+setup.template.pattern: "vicomova-logs-*"
+
+logging.level: info
+logging.to_files: false

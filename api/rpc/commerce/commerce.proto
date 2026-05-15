@@ -1,0 +1,222 @@
+syntax = "proto3";
+package commerce;
+
+option go_package = "vicomova/third_party/kitex_gen/commerce";
+
+service CommerceService {
+    // Points Wallet
+    rpc GetWallet(GetWalletRequest) returns (GetWalletResponse);
+    rpc RechargePoints(RechargePointsRequest) returns (RechargePointsResponse);
+
+    // Sign-in
+    rpc DailySignIn(DailySignInRequest) returns (DailySignInResponse);
+    rpc GetSignInInfo(GetSignInInfoRequest) returns (GetSignInInfoResponse);
+
+    // Products & Orders
+    rpc ListProducts(ListProductsRequest) returns (ListProductsResponse);
+    rpc GetProduct(GetProductRequest) returns (GetProductResponse);
+    rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse);
+    rpc PayOrder(PayOrderRequest) returns (PayOrderResponse);
+    rpc ListOrders(ListOrdersRequest) returns (ListOrdersResponse);
+
+    // Membership
+    rpc BuyMembership(BuyMembershipRequest) returns (BuyMembershipResponse);
+    rpc GetMembership(GetMembershipRequest) returns (GetMembershipResponse);
+
+    // Video Permission
+    rpc BuyVideoAccess(BuyVideoAccessRequest) returns (BuyVideoAccessResponse);
+    rpc CheckVideoAccess(CheckVideoAccessRequest) returns (CheckVideoAccessResponse);
+
+    // Flash Sale
+    rpc ListFlashSales(ListFlashSalesRequest) returns (ListFlashSalesResponse);
+    rpc FlashSalePurchase(FlashSalePurchaseRequest) returns (FlashSalePurchaseResponse);
+
+    // Lottery
+    rpc ListLotteries(ListLotteriesRequest) returns (ListLotteriesResponse);
+    rpc ParticipateLottery(ParticipateLotteryRequest) returns (ParticipateLotteryResponse);
+}
+
+// === Messages ===
+
+message PointsWallet {
+    int64 user_id = 1;
+    int64 balance = 2;
+    int64 version = 3;
+}
+
+message SignInInfo {
+    int64 user_id = 1;
+    int32 consecutive_days = 2;
+    int64 last_sign_in_at = 3;
+    int64 today_bonus = 4;
+    bool signed_in_today = 5;
+}
+
+message Product {
+    int64 id = 1;
+    string name = 2;
+    string description = 3;
+    int32 product_type = 4;
+    int64 price = 5;
+    int64 stock = 6;
+    int64 video_id = 7;
+    int32 membership_level = 8;
+    bool is_active = 9;
+}
+
+message Order {
+    int64 id = 1;
+    int64 user_id = 2;
+    int64 product_id = 3;
+    int64 price_paid = 4;
+    int32 pay_type = 5;
+    int32 status = 6;
+    int64 created_at = 7;
+    int64 paid_at = 8;
+}
+
+message Membership {
+    int64 id = 1;
+    int64 user_id = 2;
+    int32 level = 3;
+    int64 start_at = 4;
+    int64 expire_at = 5;
+    bool is_active = 6;
+}
+
+message FlashSale {
+    int64 id = 1;
+    string name = 2;
+    int64 product_id = 3;
+    int64 flash_price = 4;
+    int64 stock = 5;
+    int64 remain_stock = 6;
+    int64 start_at = 7;
+    int64 end_at = 8;
+}
+
+message LotteryDraw {
+    int64 id = 1;
+    string name = 2;
+    string description = 3;
+    int64 entry_points = 4;
+    int64 start_at = 5;
+    int64 end_at = 6;
+    int32 remain_tickets = 7;
+}
+
+// === Request/Response ===
+
+message GetWalletRequest { int64 user_id = 1; }
+message GetWalletResponse { PointsWallet wallet = 1; }
+
+message RechargePointsRequest {
+    int64 user_id = 1;
+    int64 amount = 2;
+    string payment_id = 3;
+}
+message RechargePointsResponse { PointsWallet wallet = 1; }
+
+message DailySignInRequest { int64 user_id = 1; }
+message DailySignInResponse {
+    bool success = 1;
+    int64 points_earned = 2;
+    int32 consecutive_days = 3;
+    string message = 4;
+}
+
+message GetSignInInfoRequest { int64 user_id = 1; }
+message GetSignInInfoResponse { SignInInfo info = 1; }
+
+message ListProductsRequest {
+    int32 product_type = 1;
+    int32 limit = 2;
+    string cursor = 3;
+}
+message ListProductsResponse {
+    repeated Product products = 1;
+    string next_cursor = 2;
+    bool has_more = 3;
+}
+
+message GetProductRequest { int64 product_id = 1; }
+message GetProductResponse { Product product = 1; }
+
+message CreateOrderRequest {
+    int64 user_id = 1;
+    int64 product_id = 2;
+    int32 pay_type = 3;
+}
+message CreateOrderResponse { Order order = 1; }
+
+message PayOrderRequest {
+    int64 order_id = 1;
+    int64 user_id = 2;
+}
+message PayOrderResponse { bool success = 1; }
+
+message ListOrdersRequest {
+    int64 user_id = 1;
+    int32 limit = 2;
+    string cursor = 3;
+}
+message ListOrdersResponse {
+    repeated Order orders = 1;
+    bool has_more = 2;
+    string next_cursor = 3;
+}
+
+message BuyMembershipRequest {
+    int64 user_id = 1;
+    int32 level = 2;
+    int32 pay_type = 3;
+}
+message BuyMembershipResponse { Membership membership = 1; }
+
+message GetMembershipRequest { int64 user_id = 1; }
+message GetMembershipResponse { Membership membership = 1; }
+
+message BuyVideoAccessRequest {
+    int64 user_id = 1;
+    int64 video_id = 2;
+    int32 pay_type = 3;
+}
+message BuyVideoAccessResponse { bool success = 1; }
+
+message CheckVideoAccessRequest {
+    int64 user_id = 1;
+    int64 video_id = 2;
+}
+message CheckVideoAccessResponse {
+    bool has_access = 1;
+    int32 access_level = 2;
+}
+
+message ListFlashSalesRequest {}
+message ListFlashSalesResponse { repeated FlashSale flash_sales = 1; }
+
+message FlashSalePurchaseRequest {
+    int64 user_id = 1;
+    int64 flash_sale_id = 2;
+    int64 product_id = 3;
+    int32 pay_type = 4;
+}
+message FlashSalePurchaseResponse {
+    bool success = 1;
+    int64 order_id = 2;
+    string message = 3;
+}
+
+message ListLotteriesRequest {}
+message ListLotteriesResponse { repeated LotteryDraw lotteries = 1; }
+
+message ParticipateLotteryRequest {
+    int64 user_id = 1;
+    int64 lottery_id = 2;
+}
+message ParticipateLotteryResponse {
+    bool success = 1;
+    bool won = 2;
+    string prize = 3;
+    string message = 4;
+}

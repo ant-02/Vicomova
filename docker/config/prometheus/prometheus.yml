@@ -1,0 +1,33 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+# 抓取目标配置
+scrape_configs:
+  # Prometheus 自身
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Gateway (HTTP 指标)
+  - job_name: 'gateway'
+    static_configs:
+      - targets: ['host.docker.internal:8080']
+    metrics_path: '/metrics'
+
+  # 各 RPC 服务（通过 HTTP 暴露指标）
+  - job_name: 'user-service'
+    static_configs:
+      - targets: ['host.docker.internal:8888']
+
+  - job_name: 'video-service'
+    static_configs:
+      - targets: ['host.docker.internal:8889']
+
+  - job_name: 'interaction-service'
+    static_configs:
+      - targets: ['host.docker.internal:8890']
+
+  - job_name: 'chat-service'
+    static_configs:
+      - targets: ['host.docker.internal:8891']

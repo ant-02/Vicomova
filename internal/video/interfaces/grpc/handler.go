@@ -200,3 +200,12 @@ func (h *VideoHandler) GetUploadToken(ctx context.Context, req *video.GetUploadT
 		Host:   result.Host,
 	}, nil
 }
+
+func (h *VideoHandler) CheckVideoAccess(ctx context.Context, req *video.CheckVideoAccessRequest) (*video.CheckVideoAccessResponse, error) {
+	// TODO: 实现视频权限检查，需要调用 Commerce 服务
+	// 暂时返回默认值，后续通过 RPC 调用 Commerce 服务检查
+	return &video.CheckVideoAccessResponse{
+		HasAccess:   false,
+		AccessLevel: 0,
+	}, nil
+}

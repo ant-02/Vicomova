@@ -95,6 +95,166 @@ services:
     networks:
       - vicomova
 
+  prometheus:
+    image: docker.io/prom/prometheus:v2.54.0
+    container_name: vicomova-prometheus
+    restart: unless-stopped
+    env_file:
+      - ./env/prometheus.env
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./data/prometheus:/prometheus
+      - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.enable-lifecycle'
+    networks:
+      - vicomova
+
+  grafana:
+    image: docker.io/grafana/grafana:11.4.0
+    container_name: vicomova-grafana
+    restart: unless-stopped
+    env_file:
+      - ./env/grafana.env
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data/grafana:/var/lib/grafana
+    networks:
+      - vicomova
+    depends_on:
+      - prometheus
+
+  node-exporter:
+    image: docker.io/prom/node-exporter:v1.8.2
+    container_name: vicomova-node-exporter
+    restart: unless-stopped
+    ports:
+      - "9100:9100"
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/host'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/host:ro
+    networks:
+      - vicomova
+
+  redis-exporter:
+    image: docker.io/oliver006/redis_exporter:v1.61.0
+    container_name: vicomova-redis-exporter
+    restart: unless-stopped
+    env_file:
+      - ./env/redis.env
+    ports:
+      - "9121:9121"
+    networks:
+      - vicomova
+    depends_on:
+      - redis
+
+  mysql-exporter:
+    image: docker.io/prom/mysqld-exporter:v0.16.0
+    container_name: vicomova-mysql-exporter
+    restart: unless-stopped
+    ports:
+      - "9104:9104"
+    volumes:
+      - ./config/exporter/my.cnf:/etc/my.cnf:ro
+    command:
+      - '--config.my-cnf=/etc/my.cnf'
+    environment:
+      DATA_SOURCE_NAME: "root:141363@tcp(mysql:3306)/"
+    networks:
+      - vicomova
+    depends_on:
+      - mysql
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: vicomova-jaeger
+    restart: unless-stopped
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    ports:
+      - "16686:16686"
+      - "6831:6831"
+      - "4317:4317"
+    networks:
+      - vicomova
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: vicomova-otel-collector
+    restart: unless-stopped
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./config/otel-collector/otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
+    ports:
+      - "1888:1888"
+      - "8888:8888"
+      - "8889:8889"
+      - "13133:13133"
+      - "55679:55679"
+    depends_on:
+      - jaeger
+    networks:
+      - vicomova
+
+  elasticsearch:
+    image: docker.io/elasticsearch:8.4.2
+    container_name: vicomova-elasticsearch
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - xpack.security.enabled=false
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - ./data/elasticsearch:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+    networks:
+      - vicomova
+    mem_limit: 750m
+
+  kibana:
+    image: docker.io/kibana:8.4.2
+    container_name: vicomova-kibana
+    restart: unless-stopped
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+    ports:
+      - "5601:5601"
+    networks:
+      - vicomova
+    mem_limit: 350m
+
+  filebeat:
+    image: docker.io/elastic/filebeat:8.4.2
+    container_name: vicomova-filebeat
+    user: root
+    restart: unless-stopped
+    volumes:
+      - ./config/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - ./data/filebeat:/usr/share/filebeat/data
+      - ../log:/usr/share/filebeat/logs:ro
+    depends_on:
+      - elasticsearch
+    networks:
+      - vicomova
+
 networks:
   vicomova:
     driver: bridge
