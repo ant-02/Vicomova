@@ -105,10 +105,16 @@ func ValidateWSToken(token, secret string) (*WSToken, error) {
 	var userID, targetID, expiresAt int64
 	var tokenType string
 
-	fmt.Sscanf(parts[0], "%d", &userID)
-	fmt.Sscanf(parts[1], "%d", &targetID)
+	if _, err := fmt.Sscanf(parts[0], "%d", &userID); err != nil {
+		return nil, fmt.Errorf("invalid userID: %w", err)
+	}
+	if _, err := fmt.Sscanf(parts[1], "%d", &targetID); err != nil {
+		return nil, fmt.Errorf("invalid targetID: %w", err)
+	}
 	tokenType = parts[2]
-	fmt.Sscanf(parts[3], "%d", &expiresAt)
+	if _, err := fmt.Sscanf(parts[3], "%d", &expiresAt); err != nil {
+		return nil, fmt.Errorf("invalid expiresAt: %w", err)
+	}
 	signature := parts[4]
 
 	// 检查是否过期

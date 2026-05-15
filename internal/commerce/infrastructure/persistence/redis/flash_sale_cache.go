@@ -45,7 +45,9 @@ func (c *FlashSaleCache) DecrementStock(ctx context.Context, flashSaleID, produc
 	}
 	// 如果值小于0，说明库存已空，恢复并返回false
 	if result < 0 {
-		c.RestoreStock(ctx, flashSaleID, productID)
+		if rstErr := c.RestoreStock(ctx, flashSaleID, productID); rstErr != nil {
+			log.Error.Printf("FlashSaleCache.DecrementStock: restore stock failed: %v", rstErr)
+		}
 		return false, nil
 	}
 	return true, nil

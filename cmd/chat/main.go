@@ -76,6 +76,8 @@ func main() {
 	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
 	<-sigCh
 	_ = svr.Stop()
-	wsServer.Stop()
+	if err := wsServer.Stop(); err != nil {
+		log.Error.Printf("wsServer.Stop failed: %v", err)
+	}
 	config.Close()
 }

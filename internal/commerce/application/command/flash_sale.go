@@ -74,7 +74,9 @@ func (s *FlashSaleCommandService) Purchase(ctx context.Context, cmd *FlashSalePu
 	order := commerceEntity.NewOrder(cmd.UserID, cmd.ProductID, commerceEntity.PayType(cmd.PayType), stock.FlashPrice)
 	if err := s.orderRepo.Create(ctx, order); err != nil {
 		// 回滚库存
-		s.flashSaleCache.RestoreStock(ctx, cmd.FlashSaleID, cmd.ProductID)
+		if rstErr := s.flashSaleCache.RestoreStock(ctx, cmd.FlashSaleID, cmd.ProductID); rstErr != nil {
+			log.Error.Printf("FlashSaleCommandService.Purchase: restore stock failed: %v", rstErr)
+		}
 		log.Error.Printf("FlashSaleCommandService.Purchase: create order failed: %v", err)
 		return nil, err
 	}

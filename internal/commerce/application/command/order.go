@@ -126,7 +126,9 @@ func (s *OrderCommandService) PayOrder(ctx context.Context, cmd *PayOrderCommand
 	if err := s.deliverProduct(ctx, cmd.UserID, product); err != nil {
 		log.Error.Printf("OrderCommandService.PayOrder: deliver product failed: %v", err)
 		// 回滚订单状态
-		s.orderRepo.UpdateStatus(ctx, order.ID, commerceEntity.OrderStatusPending)
+		if upErr := s.orderRepo.UpdateStatus(ctx, order.ID, commerceEntity.OrderStatusPending); upErr != nil {
+			log.Error.Printf("OrderCommandService.PayOrder: rollback status failed: %v", upErr)
+		}
 		return err
 	}
 
